@@ -325,7 +325,14 @@
             <div class="container-fluid">
               <div class="row">
                 <div class="col">
-                  <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
+                  </div>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter Emp Name" v-model="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
@@ -378,8 +385,15 @@
                       {{ emailError }}
                     </p>
                   </div>
+                  <div class="d-flex justify-content-between">
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                        class="form-check-input mt-1 input-border border-1" />
+                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                  </div>
 
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"  @update:modelValue="onDepartmentChange"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="false"
@@ -390,10 +404,6 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                   <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
-                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                  </div>
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -439,7 +449,14 @@
 
                     </div>
                   </div>
-                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                    </div>
+                  </div>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
@@ -615,6 +632,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
+import { showError, showSuccess, showWarning,showDefault } from "../../shared/services/toast";
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -743,7 +761,7 @@ const exportEmployeesToExcel = async () => {
   }
   try {
     const response = await axiosInstance.get(
-      apis.resource + doctypes.EzyEmployeeList,
+      apis.resource + doctypes.SignUpEmployee,
       { params: queryParams }
     )
 
@@ -754,7 +772,7 @@ const exportEmployeesToExcel = async () => {
           document.getElementById("ExportEmployeeModal")
         );
         modal.hide();
-        toast.success("Successfully Completed")
+       showSuccess("Successfully Completed")
 
         const worksheet = XLSX.utils.json_to_sheet(employees)
         const workbook = XLSX.utils.book_new()
@@ -762,7 +780,7 @@ const exportEmployeesToExcel = async () => {
         XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
       }
       else {
-        toast.error("No Employee Details")
+        showError("No Employee Details")
       }
     }
   } catch (error) {
@@ -797,18 +815,18 @@ const uploadbulkFile = (file) => {
       if (res.message && res.message.file_url) {
         bulkfileUrl.value = res.message.file_url;
 
-        // toast.success("File uploaded successfully! Processing import...");
+        //showSuccess("File uploaded successfully! Processing import...");
 
         if (res.message.file_url && bulkfileUrl.value) {
           buluploding();
         }
       } else {
-        toast.error("File upload failed: file_url not found in response.");
+        showError("File upload failed: file_url not found in response.");
       }
     })
     .catch((error) => {
       console.error("Upload error:", error);
-      toast.error("File upload failed. Please try again.");
+      showError("File upload failed. Please try again.");
     })
     .finally(() => {
       setTimeout(() => {
@@ -820,14 +838,14 @@ const uploadbulkFile = (file) => {
 const buluploding = () => {
   const data = {
     file: bulkfileUrl.value,
-    doctype: doctypes.EzyEmployeeList,
+    doctype: doctypes.SignUpEmployee,
   };
 
   axiosInstance
     .post(apis.uploadbulkEmployeefile, data)
     .then((res) => {
       if (!res?.data) {
-        toast.error("Import response not found.");
+        showError("Import response not found.");
         return;
       }
 
@@ -840,7 +858,7 @@ const buluploding = () => {
         // Remove anything inside parentheses (including the parentheses)
         errorMessage = errorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
 
-        toast.error(errorMessage);
+        showError(errorMessage);
 
         // Parse and display _server_messages if available
         if (res.data._server_messages) {
@@ -854,7 +872,7 @@ const buluploding = () => {
                 // Remove anything inside parentheses
                 parsedErrorMessage = parsedErrorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
 
-                toast.error(parsedErrorMessage);
+                showError(parsedErrorMessage);
               });
             }
           } catch (err) {
@@ -867,7 +885,7 @@ const buluploding = () => {
       // Show warnings if present
       if (bulkdata.value.template_warnings?.length) {
         bulkdata.value.template_warnings.forEach((warning) => {
-          toast.warning(`Warning: ${warning}`);
+         showWarning(`Warning: ${warning}`);
         });
       }
 
@@ -880,16 +898,16 @@ const buluploding = () => {
       }
       // Handle different statuses
       if (bulkdata.value.template_status === "success") {
-        toast.success("Bulk data imported successfully!");
+       showSuccess("Bulk data imported successfully!");
       } else if (bulkdata.value.template_status === "failed") {
-        toast.error(`Import Failed: ${bulkdata.value.message}`);
+        showError(`Import Failed: ${bulkdata.value.message}`);
       } else if (bulkdata.value.status === "Partial Success") {
-        toast.warning("Partial Success: Some records failed.");
+       showWarning("Partial Success: Some records failed.");
       }
     })
     .catch((error) => {
       console.error("Upload error:", error);
-      toast.error("Upload failed. Please try again.");
+      showError("Upload failed. Please try again.");
     });
 };
 
@@ -1583,7 +1601,7 @@ function deleteEmployee() {
     .post(apis.deleteEmployee, payload)
     .then((res) => {
       if (res) {
-        toast.success(res.message)
+       showSuccess(res.message)
         employeeData()
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("DeleteEmployeeModal")
@@ -1650,8 +1668,12 @@ function toggleFunction(rowData) {
   document.getElementById('empActionText').innerText = empActionText.value;
   document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-  modal.show();
+  if ((selectedEmpRow.value.reporting_to !== '' && selectedEmpRow.value.reporting_to !== null) || selectedEmpRow.value.is_high_level === 1) {
+      const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      modal.show();
+  } else {
+    showDefault('Please Add the Reports To before Enable employee.');
+  }
 }
 
 function confirmEmployeeToggle() {
@@ -1669,7 +1691,7 @@ function confirmEmployeeToggle() {
                     document.getElementById("EmployeeToggleModal")
                 );
                 modal.hide();
-                toast.success(res.message, { autoClose: 700 });
+               showSuccess(res.message);
                 // isSubmitBtn.value = false;
                 employeeData()()
             }
@@ -1681,13 +1703,13 @@ function confirmEmployeeToggle() {
             saveloading.value = false;
         });
   // axiosInstance
-  //   .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+  //   .put(`${apis.resource}${doctypes.SignUpEmployee}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
   //   .then(() => {
   //     const userData = { enabled: selectedEmpRow.value.enable };
   //     return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
   //   })
   //   .then(() => {
-  //     toast.success(`Employee ${empActionText.value}d successfully`);
+  //    showSuccess(`Employee ${empActionText.value}d successfully`);
   //     const modal = bootstrap.Modal.getInstance(
   //       document.getElementById("EmployeeToggleModal")
   //     );
@@ -1923,12 +1945,12 @@ function employeeData(data) {
 
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    doctype:doctypes.EzyEmployeeList,
-    order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
+    doctype:doctypes.SignUpEmployee,
+    order_by: "`tabSignup Employee`.`enable` DESC, `tabSignup Employee`.`modified` DESC",
   };
 
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
@@ -1969,9 +1991,9 @@ const employeeEmails = ref([]);
 function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
-    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`],["enable","=",1]]),
     doctype:doctypes.EzyEmployeeList,
     order_by: "`tabEzy Employee`.`modified` desc",
   };
@@ -2048,14 +2070,15 @@ watch(
 );
 function createEmpl() {
   if (!isFormFilled.value) {
-    toast.error("Please fill all required fields", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Please fill all required fields");
     return;
   }
   if (emailError.value) {
-    toast.error("Employee Email Id already exists", {
+    showError("Employee Email Id already exists");
+    return;
+  }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     showError("Please Add the Reports To before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
@@ -2067,18 +2090,15 @@ function createEmpl() {
   const dataObj = {
     ...createEmployee.value,
     department: createEmployee.value.department?.name || "", // ✅ only send name
-    doctype: doctypes.EzyEmployeeList,
+    doctype: doctypes.SignUpEmployee,
   };
   loading.value = true;
 
   axiosInstance
-    .post(apis.resource + doctypes.EzyEmployeeList, dataObj)
+    .post(apis.resource + doctypes.SignUpEmployee, dataObj)
     .then((res) => {
       if (res.data) {
-        toast.success("Employee Created", {
-          autoClose: 500,
-          transition: "zoom",
-        });
+       showSuccess("Employee Created");
 
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("createDepartments")
@@ -2104,28 +2124,23 @@ function createEmpl() {
 
 function SaveEditEmp() {
    if (!isFormFilled.value) {
-    toast.error("Please fill all required fields", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Please fill all required fields");
     return;
   }
     if(phoneError.value) {
-    toast.error("Invalid phone number", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Invalid phone number");
     return;
   }
       if(!searchText.value){
-      toast.error("Please select or enter a designation", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+      showError("Please select or enter a designation");
     return;
   }
   if(createEmployee.value.designation !== searchText.value) {
-     toast.error("Please Add the designation before updating employee.", {
+     showError("Please Add the designation before updating employee.");
+    return;
+  }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     showError("Please Add the Reports To before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
@@ -2150,14 +2165,14 @@ function SaveEditEmp() {
   const payload = {
     ...createEmployee.value,
     department: createEmployee.value.department?.name || "",
-    doctype:doctypes.EzyEmployeeList,
+    doctype:doctypes.SignUpEmployee,
   };
 
   axiosInstance
     .put(`${apis.DataUpdate}/${createEmployee.value.name}`,payload)
     .then((response) => {
       if (response.message.success==true) {
-        toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
+       showSuccess("Changes Saved");
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("exampleModal")
         );
@@ -2165,7 +2180,7 @@ function SaveEditEmp() {
         employeeData(); // refresh list
       }
       else{
-          toast.error(response.message.message)
+          showError(response.message.message)
       }
     })
     .catch((error) => {

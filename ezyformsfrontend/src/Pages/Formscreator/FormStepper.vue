@@ -56,7 +56,7 @@
                         </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <div>
-                          <button v-if="!$route.query.id" class=" btn btn-light font-12 mx-2" type="button"
+                          <button v-if="!$route.query.id && !$route.query.preId" class=" btn btn-light font-12 mx-2" type="button"
                             @click="clearForm">Clear
                             Form</button>
 
@@ -70,182 +70,217 @@
                     <div class="container-fluid aboutFields p-0">
                       <div class="row">
                         <div class="col-sm-none col-md-4"></div>
-                        <div class="col-sm-12 col-md-4">
-                          <div class="">
-                            <div class="mt-3">
-                              <div class=" position-relative">
-                                <span v-if="route.query.preId"
-                                  class=" font-12 position-absolute PredefinedLabel">Predefined<i
-                                    class="bi bi-check2-circle"></i></span>
+                        <div class="col-sm-12 col-md-12 mt-lg-3 p-lg-4">
+  <div class="container-fluid">
+    <div class="row g-3"> 
+      <!-- Form Name -->
+      <div class="col-md-6">
+        <div class=" position-relative">
+            <span v-if="route.query.preId" class=" font-12 position-absolute PredefinedLabel">Predefined
+              <i class="bi bi-check2-circle"></i></span>
+                <FormFields
+                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
+                  id="formName" validationStar="true" placeholder="Untitled Form"
+                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
+                  <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
+                  {{ formNameError }}</span>
+                  </div>
+      </div>
 
-                                <!-- || route.query.form_name -->
-                                <!-- || route.query.form_name   -->
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
-                                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formName" validationStar="true" placeholder="Untitled Form" 
-                                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
-                                <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
-                                  {{ formNameError }}</span>
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
-                                  labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
-                                    (event) => handleInputChange(event, 'form_short_name')
-                                  " v-model="filterObj.form_short_name" />
-                                <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">
-                                  {{ formShortNameError }}</span>
-                                <!-- <label for="">Form Short Code</label>
+      <!-- Form Short Code -->
+      <div class="col-md-6">
+        <FormFields
+          :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+          labeltext="Form Short Code"
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formShortCode"
+          validationStar="true"
+          placeholder="Untitled Form"
+          @change="(event) => handleInputChange(event, 'form_short_name')"
+          v-model="filterObj.form_short_name"
+        />
+        <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">{{ formShortNameError }}</span>
+      </div>
 
-                                                        <Multiselect :options=formOptions
-                                                            v-model="filterObj.form_short_name"
-                                                            placeholder="Untitle Form" :multiple="true"
-                                                            :searchable="true" /> -->
-                              </div>
-                              <div>
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                  labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
-                                  name="Value" id="formNameSeries" placeholder="Form Naming series"
-                                  v-model="filterObj.series" />
-                                <small class="text-muted" style="font-size:12px">
-                                  Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system
-                                  will
-                                  default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or
-                                  <code> ABC-0001</code> respectively.
-                                </small>
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
-                                                            tag="select" name="dept" id="dept"
-                                                            placeholder="Select Department" :options=formOptions
-                                                            v-model="filterObj.owner_of_the_form" /> -->
-                                <label for="">Owner Of The Form
-                                  <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
+      <!-- Form Naming Series -->
+      <div class="col-md-6">
+        <FormFields
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          labeltext="Form Naming series"
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Naming series"
+          v-model="filterObj.series"
+        />
+        <small class="text-muted" style="font-size:12px"> Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or <code> ABC-0001</code> respectively. </small>
+      </div>
+      
+      <!-- Owner Of The Form -->
+      <div class="col-md-6">
+        <label>Owner Of The Form
+          <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span>
+        </label>
+        <Multiselect
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          @open="deptData"
+          :options="OwnerOfTheFormData"
+          @change="OwnerOftheForm"
+          v-model="filterObj.owner_of_the_form"
+          placeholder="Select Department"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+          openDirection="bottom"
+        />
+      </div>
 
-                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0" @open="deptData"
-                                  :options="OwnerOfTheFormData" @change="OwnerOftheForm"
-                                  v-model="filterObj.owner_of_the_form" placeholder="Select Department"
-                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
-                                                            name="desgination" id="desgination"
-                                                            placeholder="Select Cateogry" :options=departments
-                                                            v-model="filterObj.form_category" /> -->
+      <!-- Form Category -->
+      <div class="col-md-6">
+        <label>Form Category
+          <span v-if="!filterObj.form_category" class="text-danger">*</span>
+        </label>
+        <Multiselect
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :options="departments"
+          v-model="filterObj.form_category"
+          placeholder="Select Category"
+          :multiple="false"
+          :searchable="true"
+          class="font-11 multiselect"
+        />
+      </div>
 
-                                <label for="">Form Cateogry
-                                  <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
+      <!-- Accessible to department -->
+      <div class="col-md-6">
+        <label>Accessible to Department
+          <span v-if="!filterObj.accessible_departments.length" class="text-danger">*</span>
+        </label>
+        <VueMultiselect
+          v-model="filterObj.accessible_departments"
+          :options="filteredOptions"
+          :multiple="true"
+          :close-on-select="false"
+          :clear-on-select="false"
+          :preserve-search="true"
+          placeholder="Select Department"
+          class="font-11"
+          @select="handleSelect"
+          @remove="handleRemove"
+          openDirection="bottom"
+        >
+          <template #option="{ option }">
+            <div class="custom-option">
+              <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
+                     @change="toggleOption(option, $event)" @click.stop />
+              <span>{{ option }}</span>
+            </div>
+          </template>
+          <template #selection="{ values, isOpen }">
+            <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+              {{ formattedSelection }}
+            </span>
+          </template>
+        </VueMultiselect>
+      </div>
 
-                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                  :options="departments" v-model="filterObj.form_category" placeholder="Select Cateogry"
-                                  :multiple="false" :searchable="true" class="font-11 multiselect" />
-                              </div>
-                            </div>
+      <!-- Form Type -->
+      <div class="col-md-6">
+        <label>Form Type</label>
+        <Multiselect
+          :options="formTypeOptions"
+          v-model="selectedFormType"
+          placeholder="Select Form Type"
+          :multiple="false"
+          :searchable="true"
+          label="label"
+          track-by="value"
+          :reduce="option => option.value"
+          class="font-11 multiselect"
+          openDirection="top"
+        />
+        <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
 
+        <FormFields
+          v-if="filterObj.as_web_view===1"
+          labeltext="Form Submit Response"
+          class="formHeight mt-2"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Submit Response"
+          v-model="filterObj.public_form_response"
+        />
+      </div>
 
+      <!-- Has Workflow -->
+      <div class="col-md-6">
+        <label>Has Workflow <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <Multiselect
+          :options="['Yes', 'No']"
+          v-model="filterObj.has_workflow"
+          placeholder="Select"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+        />
+      </div>
 
-                            <div class="mt-3">
-                              <label class="typo__label">
-                                <label for="">Accessible to department
-                                  <span v-if="!filterObj.accessible_departments.length"
-                                    class="text-danger">*</span></label>
-                              </label>
-                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
-                                :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                :preserve-search="true" placeholder="Select Department" class="font-11"
-                                @select="handleSelect" @remove="handleRemove">
-                                <template #option="{ option }">
-                                  <div class="custom-option">
-                                    <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
-                                      @change="toggleOption(option, $event)" @click.stop />
-                                    <span>{{ option }}</span>
-                                  </div>
-                                </template>
+      <!-- Linked Checkbox and Linked Form -->
+      <div class="col-md-6">
+        <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
+          <input
+            class="form-check-input linketoCheck p-1"
+            :disabled="filterObj.is_predefined_doctype == 1"
+            type="checkbox"
+            id="is_linked"
+            v-model="filterObj.is_linked"
+            :true-value="1"
+            :false-value="0"
+          />
+          <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
+            Link
+          </label>
+        </div>
+      </div>
 
-                                <template #selection="{ values, isOpen }">
-                                  <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                                    {{ formattedSelection }}
-                                  </span>
-                                </template>
-                              </VueMultiselect>
-
-
-
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-
-                                <label for="">Has Workflow <span
-                                    class="fw-normal font-11 text-secondary">(optional)</span>
-                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
-                                </label>
-                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                <Multiselect :options="['Yes', 'No']" v-model="filterObj.has_workflow"
-                                  placeholder="Select" :multiple="false" class="font-11 multiselect"
-                                  :searchable="true" />
-                              </div>
-                            </div>
-                            <div class="my-2 mb-5">
-                              <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
-                                <input class="form-check-input linketoCheck p-1"
-                                  :disabled="filterObj.is_predefined_doctype == 1" type="checkbox" id="is_linked"
-                                  v-model="filterObj.is_linked" :true-value="1" :false-value="0" />
-                                <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
-                                  Link
-                                </label>
-                              </div>
-                              <div>
-
-                                <!-- <div class="form-check d-flex align-items-center p-0 pe-3">
-                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_predefined_doctype"
-                                    v-model="filterObj.is_predefined_doctype"   :true-value="1" :false-value="0"/>
-                                  <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_predefined_doctype">
-                                    is_predefined_doctype
-                                  </label>
-                                </div> -->
-
-                              </div>
-
-                              <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
-                                <label for="standardFormInput">Form</label>
-                                <input type="text" class="form-control standardFormInput" id="standardFormInput"
-                                  :disabled="filterObj.is_predefined_doctype == 1" v-model="filterObj.is_linked_form"
-                                  placeholder="Type to search Form Name..." @input="searchForm"
-                                  @focus="showSuggestions = true" @blur="hideSuggestions" />
-
-
-                                <!-- Suggestions Dropdown -->
-                                <ul v-if="showSuggestions && filteredForms.length"
-                                  class="list-group position-absolute w-100 z-3 formslist">
-                                  <li class="list-group-item formlistitem" v-for="(item, index) in filteredForms"
-                                    :key="index" @mousedown.prevent="selectForm(item.name)">
-                                    {{ item.name }}
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-
-                            <!-- <div class="mt-3">
-                              <div class="">
-
-                                <label for="">Reverse Workflow
-                                 
-                                </label>
-                               
-                                <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
-                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
-                              </div>
-                               </div> -->
-
-                          </div>
-                        </div>
+      <div class="col-md-6" v-if="filterObj.is_linked">
+        <label for="standardFormInput">Form</label>
+        <input
+          type="text"
+          class="form-control standardFormInput"
+          id="standardFormInput"
+          :disabled="filterObj.is_predefined_doctype == 1"
+          v-model="filterObj.is_linked_form"
+          placeholder="Type to search Form Name..."
+          @input="searchForm"
+          @focus="showSuggestions = true"
+          @blur="hideSuggestions"
+        />
+        <ul
+          v-if="showSuggestions && filteredForms.length"
+          class="list-group position-absolute w-100 z-3 formslist"
+        >
+          <li
+            class="list-group-item formlistitem"
+            v-for="(item, index) in filteredForms"
+            :key="index"
+            @mousedown.prevent="selectForm(item.name)"
+          >
+            {{ item.name }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
                         <div class="col-sm-none col-md-4"></div>
                       </div>
@@ -300,9 +335,9 @@
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                           <div class="requestandAppHeader">
-                            <div class="d-flex justify-content-between">
-                              <div>
-                                <h6 class="ps-2 pt-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <div class=" ">
+                                <h6 class="ps-2 mb-0 fw-bolder font-14 blockTitle">
                                   {{
                                     blockIndex === 0
                                       ? "Requestor Block"
@@ -312,24 +347,46 @@
                                   }}
                                   <!-- ${blockIndex++} -->
                                 </h6>
-                              </div>
-                              <div class="d-flex align-items-center">
-                                  <!-- <div class="text-center me-2 mt-1">
-                                    <div class="font-12 d-flex align-items-center">
-                                      <input type="checkbox" class="me-1 mt-1 mb-0" v-model="getWorkflowSetup(blockIndex).view_only_reportee"
-                                        :true-value="1" :false-value="0"  />
-                                        
-                                      <span>
+                                  <div class="text-center ms-2 mt-1">
+                                    <div v-if="blockIndex !== 0 && getWorkflowSetup(blockIndex).view_only_reportee || getWorkflowSetup(blockIndex).all_approvals_required || getWorkflowSetup(blockIndex).requester_as_a_approver" class="font-12 d-flex align-items-center">
+                                      <!-- <span class="">
+                                        <i class="bi bi-circle"></i>
+                                      </span> -->
+                                      <span class="font-12  approver_type_div">
 
-                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View Only Reportee' : ''}}
+
+                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'Reporting Manager only' : ''}}
+                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All of the selected approvers' : ''}}
+                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Approval by Requestor' : ''}}
                                       </span>
                                       
+                                      
+                                      <span>
+                                        <span class="ms-1">
+                                          
+                                          on rejection escalating to 
+                                        </span>
+                                          <span class="font-12 fw-bold">
+                                        {{ getWorkflowSetup(blockIndex).on_rejection ? `Level ${getWorkflowSetup(blockIndex).on_rejection}` : 'Requestor' }}
+                                          </span>
+
+                                      </span>
+                                      <span class="font-12 text-danger ms-1">
+                                        {{ getWorkflowSetup(blockIndex).all_approvals_required === 1 ? '' : '(Skipping multi approval)' }}
+                                        
+                                      </span>
+
+
+                                      
                                     </div>
-                                  </div> -->
+
+                                  </div>
+                              </div>
+                              <div class="d-flex align-items-center">
                                 <div v-if="paramId && workflowSetup.length" class="role-container">
                                   <label class="role-text d-flex align-items-center"
                                     v-if="getWorkflowSetup(blockIndex)">
-                                    <span class="role-label">
+                                    <span class="role-label fw-bold">
                                       {{
                                         getWorkflowSetup(blockIndex).roles.length > 0
                                           ? blockIndex === 0
@@ -364,7 +421,8 @@
                                   data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
                                   aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)">
                                   <img src="../../assets/oui_app-users-roles.svg" alt="Add" class="me-1" />
-                                  Add designations
+                                  {{ blockIndex === 0 ? 'Add Requestors' :'Add Approvers' }}
+                                  
                                 </button>
 
                                 <!-- Edit Designation Button (only when roles are present for that block) -->
@@ -398,9 +456,9 @@
                                     'font-14',
                                     { 'italic-style': !section.label },
                                     { 'fw-medium': section.label },
-                                  ]" @change="handleFieldChange(blockIndex, sectionIndex)"
+                                  ]" @change="handleFieldChange(blockIndex, sectionIndex)" @input="handleFieldChange(blockIndex, sectionIndex)"
                                     placeholder="Untitled section" />
-                                  <small v-if="section.errorMsg" class="text-danger font-10">
+                                  <small v-if="section.errorMsg" class="text-danger ps-3 font-10">
                                     {{ section.errorMsg }}
                                   </small>
                                 </div>
@@ -424,12 +482,12 @@
                                 <section class="row dynamicRow row-container" v-for="(row, rowIndex) in section.rows"
                                   :key="'row-' + rowIndex">
                                   <div class="d-flex justify-content-between align-items-center">
-                                    <label class="rownames">{{
+                                    <label class="rownames m-0">{{
                                       getRowSuffix(rowIndex)
                                     }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
-                                        class="btn btn-light bg-transparent border-0 font-12" @click="
+                                        class="btn btn-light bg-transparent border-0 p-1 font-12" @click="
                                           addColumn(blockIndex, sectionIndex, rowIndex)
                                           ">
                                         <i class="bi bi-plus font-14"></i> Add Column
@@ -475,8 +533,8 @@
                                                 rowIndex,
                                                 columnIndex
                                               )
-                                              " placeholder="Column Name" />
-                                            <small v-if="column.errorMsg" class="text-danger font-10">
+                                              " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex)" placeholder="Column Name" />
+                                            <small v-if="column.errorMsg" class="text-danger ps-2 font-10">
                                               {{ column.errorMsg }}
                                             </small>
                                           </div>
@@ -551,7 +609,7 @@
                                                     columnIndex,
                                                     fieldIndex
                                                   )
-                                                  " />
+                                                  " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex,fieldIndex)" />
                                                 <small v-if="field.errorMsg" class="text-danger font-10">
                                                   {{ field.errorMsg }}
                                                 </small>
@@ -1337,12 +1395,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
+                <label for="">Form Name</label>
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control " id="Form_name_print"
               :searchable="true" />
             <div class=" d-flex align-items-center gap-2">
               <div class="d-flex align-items-center py-2">
 
-                <input class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
+                <input  class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
                   type="checkbox" />
               </div>
               <div>
@@ -1363,9 +1422,9 @@
     <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
       aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel" class="font-14">
+        <span id="offcanvasRightLabel" class="font-14 fw-bold">
 
-          {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For
+          {{ selectedBlockIndex == 0 ? "Add designation for Requestors" : `Approval Settings For
           Level-${selectedBlockIndex}`
           }}
         </span>
@@ -1373,22 +1432,45 @@
         <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
           aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body p-0">
+      <div class="offcanvas-body add_desig_offCanvas_body p-0">
         <div class="">
           <div class="">
+            
            
 
 
 
             <div v-if="selectedBlockIndex !== 0"
               class=" p-3 approval-border-bottom ">
-               <div v-if="selectedBlockIndex !== 0" class=" p-2">
+              <!-- <div class="d-flex gap-1">
+
+                <div class="px-2 mt-2 d-flex align-items-center user-select-none">
+                  <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+                  <label for="Approver" class="m-0">Approval Mandatory</label>
+                </div>
+                <div v-if="allowEditSettingType === true" class="px-2 mt-2 d-flex align-items-center user-select-none">
+                  <input
+                    v-model="approver_can_edit"
+                    type="checkbox"
+                    :true-value="1"
+                    :false-value="0"
+                    id="approver_can_edit"
+                    class="me-2 m-0 form-check-input designationCheckBox"
+                  />
+                  <label for="approver_can_edit" class="m-0">
+                  Allow to Edit
+                  </label>
+              
+                </div>
+              </div>  -->
+
+               <div v-if="selectedBlockIndex !== 0" class=" ">
               <label class="fw-bold font-12 mb-2">Approver Type</label>
               <select v-model="selectedApproverType" class="form-select shadow-none font-12 ">
-                <option value="">Send To Selected Approvers</option>
-                <option value="ViewOnlyReportee">View Only Reportee</option>
-                <option value="all_approvals_required">All Approvers Required</option>
-                <option value="requester_as_a_approver">Requested Only</option>
+                <option value="">Any one of the selected approvers</option>
+                <option value="ViewOnlyReportee">Reporting Manager only</option>
+                <option value="all_approvals_required">All of the selected approvers</option>
+                <option value="requester_as_a_approver">Approval by Requestor</option>
               </select>
             </div>
 
@@ -1398,22 +1480,8 @@
                   <span class=" font-12">Approver Level {{ selectedBlockIndex }}</span>
                 </div>
               </div> -->
-              <div class="p-2">
-              <div>
-                <label for="" class="fw-bold font-12 ">On Rejection</label>
-              </div>
-                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
-                  <option disabled value="">Select Lower Level</option>
-                  <option v-for="level in lowerApproverLevels" :key="level" :value="level">
-                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
-                  </option> 
-                </select>
-              </div>
-
-            <div class="px-2 mt-2 d-flex align-items-center user-select-none">
-              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
-              <label for="Approver" class="m-0">Approver Required</label>
-            </div>
+             
+          
 
             </div>
             
@@ -1421,10 +1489,9 @@
           </div>
 
         </div>
-        <div class="p-3 listofdesignations">
-          <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
+          <!-- <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
             type="text" placeholder="Search Designation" />
-            <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span>
+            <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span> -->
 
               <!-- :disabled="ViewOnlyReportee"  -->
           <!-- <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
@@ -1447,19 +1514,27 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
-          <div class=" my-3" v-if="DesignationList.length">
-              <div  class="d-flex align-items-center gap-4">
+        <div class="px-3 listofdesignations">
+          <div class="my-1 d-flex justify-content-between">
+            <span class="font-12 fw-bold">Select {{  selectedBlockIndex === 0 ? 'Requestors': ' Approvers' }} </span>
+            <span class="italic-style text-secondary font-12">{{ designationValue.length }} Selected </span>
+          </div>
+          <div  ref="resizableDiv" class=" my-1 disgnationlist_div" v-if="DesignationList.length">
+              <div  class="d-flex align-items-center justify-content-between gap-1">
                 
                 <!-- Select All -->
                 <div class="form-check ps-1 d-flex align-items-center m-0">
                   <input
-                    type="checkbox"
-                    id="selectAll"
-                    :checked="isAllSelected"
-                    @change="toggleSelectAll"
-                    class="form-check-input me-2 designationCheckBox"
-                  />
-                  <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">Select All</label>
+            type="checkbox"
+            id="selectAll"
+            
+            :checked="isAllSelected"
+            @change="toggleSelectAll"
+            class="form-check-input me-2 designationCheckBox"
+          />
+          <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">
+            Select all designation ({{ filteredDesignationList.length }})
+          </label>
                 </div>
 
                 <!-- Show HODs -->
@@ -1472,32 +1547,74 @@
                   />
                   <label for="showHods" class="form-check-label  mt-2 fw-bold">Show HODs Only</label>
                 </div>
+                <div><button type="button" class="btn btn-sm font-12  text-danger" @click="clearall_designations"> <i class="bi bi-x" ></i>Clear all</button></div>
+
+
 
               </div>
+              <!-- {{ designationValue }}
+              {{filteredDesignationList}} -->
+            <Vue3Select v-if="DesignationList.length" :multiple="true" v-model="designationValue" 
+            :options="filteredDesignationList" :close-on-select="false" :clear-search-on-select="true"
+             placeholder="Search & Select Designations" label="label"  />
             </div>
 
 
-
-          <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
+          <!-- <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
             <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
               <input type="checkbox" :id="`SelectedDisignation_${index}`" v-model="designationValue" :value="item"
                 class="designationCheckBox  form-check-input mt-0" @change="handleSingleSelect" />
               <label :for="`SelectedDisignation_${index}`" class="ps-2">{{ item }}</label>
 
             </li>
-          </ul>
+          </ul>  -->
           <div v-else>
             <div class="d-flex justify-content-center">
               <span>No Designations Found</span>
             </div>
           </div>
         </div>
+         <div v-if="selectedBlockIndex !== 0 " class="p-3">
+              <div>
+                <label for="" class="fw-bold font-12 ">On Rejection</label>
+              </div>
+                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
+                  <!-- <option disabled value="">Select Lower Level</option> -->
+                  <option v-for="level in lowerApproverLevels" :key="level" :value="level">
+                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
+                  </option> 
+                </select>
+              </div>
+              <div v-if="selectedBlockIndex !== 0 ">
+                <div class="">
+
+                <div class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+              <label for="Approver" class="m-0">Approval Mandatory</label>
+            </div>
+            <div v-if="allowEditSettingType === true" class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+              <input
+                v-model="approver_can_edit"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+                id="approver_can_edit"
+                class="me-2 m-0 form-check-input designationCheckBox"
+              />
+              <label for="approver_can_edit" class="m-0">
+               Allow this approver to edit the form
+              </label>
+              
+              </div>
+            </div>
+              </div>
+
       </div>
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
-            name=" Add Designations" />
+            :name="selectedBlockIndex === 0 ? 'Add Requestor':'Add Approvers'" />
         </div>
       </div>
     </div>
@@ -1523,12 +1640,14 @@ import FormPreview from "../../Components/FormPreview.vue";
 import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import VueMultiselect from "vue-multiselect";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+// import { toast } from "vue3-toastify";
+// import "vue3-toastify/dist/index.css";
 // import { nextTick } from "vue";
 import { useDragAndDrop } from "../../shared/services/draggable";
 import FormPreviewComp from "../../Components/FormPreviewComp.vue";
-
+import { showError, showInfo, showSuccess } from "../../shared/services/toast";
+import Vue3Select from 'vue3-select'
+import 'vue3-select/dist/vue3-select.css';
 const route = useRoute();
 const router = useRouter();
 const activeStep = ref(1);
@@ -1553,12 +1672,14 @@ const all_approvals_required = ref(false);
 const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
 const approval_required=ref('');
+const approver_can_edit=ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 const fieldErrors = reactive({});
 // const childtableRows = ref([]);
 const childtableHeaders = ref([]);
+const allowEditSettingType = ref(false);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
 const filteredForms = ref([]);
@@ -1580,6 +1701,24 @@ const selectedData = ref({
 const printFormatID = ref('')
 const is_landscape = ref(false)
 const showHods = ref(false);
+
+const formTypeOptions = [
+  { label: "Public", value: 1 },
+  { label: "Private", value: 0 },
+];
+
+const selectedFormType = computed({
+  get() {
+    // This returns the option object that matches filterObj.as_web_view
+    return formTypeOptions.find(
+      (opt) => opt.value === filterObj.value.as_web_view
+    );
+  },
+  set(selected) {
+    // 👇 This line updates filterObj.as_web_view every time user selects a new option
+    filterObj.value.as_web_view = selected ? selected.value : null;
+  },
+});
 
 
 // const computedDisabled = computed(() => {
@@ -1608,6 +1747,7 @@ const filterObj = ref({
   is_linked: 0,
   is_linked_form: "",
   is_predefined_doctype: route.query.id ? 1 : 0,
+  as_web_view: 0,
 
 
 });
@@ -1625,7 +1765,7 @@ watch(
 );
 const restrictedLabels = [
   "name", "parent", "creation", "owner", "modified", "modified_by",
-  "parentfield", "parenttype", "file_list", "flags", "docstatus"
+  "parentfield", "parenttype", "file_list", "flags", "docstatus","idx", "doctype","company_field","business_unit"
 ].map(label => label.toLowerCase().trim());
 
 const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
@@ -1776,14 +1916,12 @@ const GetDoctypeList = async (searchText) => {
     fields: JSON.stringify(["name"]),
     filters: JSON.stringify(filters),
     limit_page_length: "None",
+    doctype:doctypes.doctypesList,
   };
 
   try {
-    const res = await axiosInstance.get(
-      apis.resource + doctypes.doctypesList,
-      { params: queryParams }
-    );
-    return res.data || [];
+    const res = await axiosInstance.get(apis.GetDoctypeData, { params: queryParams });
+    return res.message.data || [];
   } catch (error) {
     console.error("Error fetching doctype list:", error);
     return [];
@@ -1854,13 +1992,14 @@ function searchForm() {
       limit_page_length: 10,
       limit_start: 0,
       filters: JSON.stringify(filters),
+      doctype:doctypes.EzyFormDefinitions,
       order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
     };
 
     axiosInstance
-      .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+      .get(`${apis.GetDoctypeData}`, { params: queryParams })
       .then((response) => {
-        filteredForms.value = response.data || [];
+        filteredForms.value = response.message.data || [];
       })
       .catch((error) => {
         console.error("Error fetching form definitions:", error);
@@ -1957,13 +2096,14 @@ function fetchDoctypeList(searchText, b, s, r, c, f) {
   const queryParams = {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
-    limit_page_length: '10',
+    limit_page_length: 'none',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults[fieldKey] = res.data || [];
+      linkSearchResults[fieldKey] = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -1983,12 +2123,13 @@ function fetchChildDoctypeList(searchText) {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
     limit_page_length: '10',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults.value = res.data || [];
+      linkSearchResults.value = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -2086,32 +2227,51 @@ const lowerApproverLevels = computed(() => {
 // };
 
 
-
 const filteredDesignationList = computed(() => {
   let list = DesignationList.value;
 
-  // Show only HODs
   if (showHods.value) {
-    list = list.filter((item) => item.is_hod === 1);
+    list = list.filter(item => item.is_hod === 1);
   }
 
-  // Search filter
-  if (searchDesignation.value.trim()) {
-    list = list.filter((item) =>
+  if (searchDesignation.value?.trim()) {
+    list = list.filter(item =>
       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
     );
   }
 
-  // Sort selected first
-  list = list.sort((a, b) => {
-    const aSelected = designationValue.value.includes(a.role);
-    const bSelected = designationValue.value.includes(b.role);
-    if (aSelected === bSelected) return 0;
-    return aSelected ? -1 : 1;
-  });
+  // Remove already selected items for display only
+  list = list.filter(item => !designationValue.value.includes(item.role));
 
-  return list.map((item) => item.role);
+  return list.map(item => item.role);
 });
+
+
+// const filteredDesignationList = computed(() => {
+//   let list = DesignationList.value;
+
+//   // Show only HODs if toggled
+//   if (showHods.value) {
+//     list = list.filter(item => item.is_hod === 1);
+//   }
+
+//   // Search filter
+//   if (searchDesignation.value?.trim()) {
+//     list = list.filter(item =>
+//       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+//     );
+//   }
+
+//   // Remove already selected items from the dropdown
+//   list = list.filter(item => !designationValue.value.includes(item.role));
+
+//   // Sort remaining items (optional)
+//   list = list.sort((a, b) => a.role.localeCompare(b.role));
+
+//   // Return array of strings for Vue3Select
+//   return list.map(item => item.role);
+// });
+
 
 
 // const filteredDesignationList = computed(() => {
@@ -2194,6 +2354,7 @@ onMounted(() => {
     OwnerOftheForm();
     // console.log(paramId.value, "[[[]]]");
   }
+  sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
   if (route.query.preId === 'PreDefine') {
@@ -2521,14 +2682,14 @@ const formatTableName = (tableName) => {
 const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
   if (hasErrors) {
-    toast.error("Please fix validation errors before creating the table", {
+    showError("Please fix validation errors before creating the table", {
       transition: "zoom",
     });
     return;
   }
   if (matched.value) {
     //  tableExistsMessage.value = 'Table already exists';
-    toast.error("Table already exists", {
+    showError("Table already exists", {
       transition: "zoom",
     });
     return;
@@ -2556,7 +2717,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   // // section.afterCreated[tableIndex] = table;
 
   // // blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
-  // //toast.success("Table created successfully!", {
+  // //showSuccess("Table created successfully!", {
   //  // autoClose: 500,
   //  // transition: "zoom",
   //  //});
@@ -2569,10 +2730,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
       // Save original table to afterCreated
       section.afterCreated[tableIndex] = { ...table };
 
-      toast.success("Table created successfully!", {
-        autoClose: 500,
-        transition: "zoom",
-      });
+      showSuccess("Table created successfully!");
 
       const responseData = res.message?.[0]?.[0]?.child_doc;
 
@@ -2729,7 +2887,7 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 //       .post(apis.childtable, formData)
 //       .then((response) => {
 //         afterdata.value = response.data;
-//         toast.success("Fields updated successfully!", { autoClose: 500 });
+//         showSuccess("Fields updated successfully!", { autoClose: 500 });
 
 //       })
 //       .catch((error) => {
@@ -2755,9 +2913,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 });
 
     if (!isValid){
-     toast.error("Please fix the errors in the highlighted fields before saving!", {
-      autoClose: 1000,
-    });
+     showError("Please fix the errors in the highlighted fields before saving!");
       
       return; // stop save if invalid
     }
@@ -2778,7 +2934,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
       .post(apis.childtable, formData)
       .then((response) => {
         afterdata.value = response.data;
-        toast.success("Fields updated successfully!", { autoClose: 500 });
+        showSuccess("Fields updated successfully!");
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -2846,7 +3002,7 @@ const toggleEdit = (tableName, description) => {
     });
 
     if (!isValid) {
-      toast.error("Please fix the errors before saving", { autoClose: 1000 });
+      showError("Please fix the errors before saving");
       return;
     }
 
@@ -2866,7 +3022,7 @@ const toggleEdit = (tableName, description) => {
       .post(apis.childtable, formData)
       .then((response) => {
         afterdata.value = response.data;
-        toast.success("Fields updated successfully!", { autoClose: 500 });
+        showSuccess("Fields updated successfully!");
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -3115,31 +3271,77 @@ const handleRemove = (option) => {
     filterObj.value.accessible_departments = [];
   }
 };
-
 const isAllSelected = computed(() => {
-  return (
-    filteredDesignationList.value.length > 0 &&
-    filteredDesignationList.value.every((role) =>
-      designationValue.value.includes(role)
-    )
-  );
+  return designationValue.value.length === DesignationList.value.length;
 });
-
-// ✅ Toggle select all
+// Toggle Select All
+// Toggle Select All
 function toggleSelectAll(event) {
   if (event.target.checked) {
-    // Add all filtered roles
-    const newSelection = [
-      ...new Set([...designationValue.value, ...filteredDesignationList.value]),
-    ];
-    designationValue.value = newSelection;
+    // Select all items currently visible in the filtered dropdown
+    const itemsToSelect = DesignationList.value
+      .filter(item => {
+        // Respect HOD filter
+        if (showHods.value && item.is_hod !== 1) return false;
+
+        // Respect search filter
+        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(item => item.role);
+
+    designationValue.value = itemsToSelect;
   } else {
-    // Remove only filtered roles
-    designationValue.value = designationValue.value.filter(
-      (role) => !filteredDesignationList.value.includes(role)
-    );
+    // Unselect all visible items
+    const itemsToRemove = DesignationList.value
+      .filter(item => {
+        if (showHods.value && item.is_hod !== 1) return false;
+        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+          return false;
+        }
+        return true;
+      })
+      .map(item => item.role);
+
+    // Remove only the visible items from the selection
+    designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
   }
 }
+
+
+
+// Toggle select all
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     console.log(designationValue.value);
+//     // Select all
+//     designationValue.value = [...DesignationList.value];
+//   } else {
+//     // Unselect all
+//     designationValue.value = [];
+//   }
+// }
+function clearall_designations(){
+  designationValue.value = []
+}
+// ✅ Toggle select all
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     // Add all filtered roles
+//     const newSelection = [
+//       ...new Set([...designationValue.value, ...filteredDesignationList.value]),
+//     ];
+//     designationValue.value = newSelection;
+//   } else {
+//     // Remove only filtered roles
+//     designationValue.value = designationValue.value.filter(
+//       (role) => !filteredDesignationList.value.includes(role)
+//     );
+//   }
+// }
 
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {
@@ -3159,6 +3361,7 @@ function addDesignationBtn() {
     type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
     roles: designationValue.value,
     approval_required:approval_required.value,
+    approver_can_edit:approver_can_edit.value,
     fields: block.sections.flatMap(extractFieldnames),
     idx: selectedBlockIndex.value,
   };
@@ -3206,6 +3409,7 @@ function initializeDesignationValue(blockIndex) {
 
   OnRejection.value = currentSetup.on_rejection;
   approval_required.value=currentSetup.approval_required;
+  approver_can_edit.value = currentSetup.approver_can_edit;
   // Check for view_only_reportee flag
   // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   // OnRejection.value = currentSetup.on_rejection
@@ -3334,15 +3538,9 @@ function add_Wf_roles_setup() {
       console.log(res);
 
       if (selectedBlockIndex.value == 0) {
-        toast.success("Requestor Added", {
-          autoClose: 1000,
-          transition: "zoom",
-        });
+        showSuccess("Requestor Added");
       } else {
-        toast.success(`Approver-${selectedBlockIndex.value} Added`, {
-          autoClose: 1000,
-          transition: "zoom",
-        });
+        showSuccess(`Approver-${selectedBlockIndex.value} Added`);
       }
     });
 }
@@ -3370,10 +3568,7 @@ function clearForm() {
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error("Please check all required fields before proceeding.", {
-      autoClose: 2000,
-      transition: "zoom",
-    });
+    showError("Please check all required fields before proceeding.");
     return;
   }
 
@@ -3386,10 +3581,7 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error("Please check all required fields before proceeding.", {
-      autoClose: 2000,
-      transition: "zoom",
-    });
+    showError("Please check all required fields before proceeding.");
     return;
   }
 
@@ -3410,10 +3602,16 @@ const prevStep = () => {
 const returTables = ref([])
 // Get form by ID
 function getFormData() {
+   const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "none",
+        doctype:doctypes.EzyFormDefinitions,
+        doc_id:paramId.value,
+    };
   axiosInstance
-    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId.value}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      let res_data = res?.data;
+      let res_data = res?.message.data;
       if (res_data) {
         router.push({
           query: {
@@ -3430,8 +3628,7 @@ function getFormData() {
             res_data.owner_of_the_form || filterObj.value.owner_of_the_form || "",
         };
 
-        // console.log(res.data, "7777777777777777");
-        const parsedFormJson = JSON.parse(res.data?.form_json);
+        const parsedFormJson = JSON.parse(res.message.data?.form_json);
         wrkAfterGetData.value = parsedFormJson.workflow;
         // console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
@@ -3441,12 +3638,12 @@ function getFormData() {
           (field) => field.fieldtype === "Table"
         );
 
-        is_landscape.value = res.data.is_landscape;
+        is_landscape.value = res.message.data.is_landscape;
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
-        childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+        childtableHeaders.value = JSON.parse(res.message.data.form_json).child_table_fields;
 
         childTables.value = []
         tableFieldsCache.value = []
@@ -3487,10 +3684,7 @@ function SetPrintFormatFn() {
       console.log(res);
       const modal = bootstrap.Modal.getInstance(document.getElementById('customFormatModal'));
       modal.hide();
-      toast.success("Print Format Added Successfully", {
-        autoClose: 1000,
-        transition: "zoom",
-      });
+      showSuccess("Print Format Added Successfully");
 
     })
     .catch((error) => {
@@ -3503,22 +3697,16 @@ function deptData() {
     fields: JSON.stringify(["name","department_name"]),
     limit_page_length: "none",
     business_unit: `${selectedData.value.business_unit || route.query.business_unit}`,
-
+    doctype:doctypes.departments,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.departments, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.length) {
-        // Mapping department names
-        // label="name" track-by="name"
-        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-//                 OwnerOfTheFormData.value = res.data.map((dept) => ({
-//   label: dept.department_name, // shows in dropdown
-//   value: dept.name             // stored in v-model
-// })); 
-        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-        // departments.value = res.data.map(item => item.category)
+      if (res?.message.data?.length) {
+        OwnerOfTheFormData.value = res.message.data.map((dept) => dept.name);
+        formOptions.value = res.message.data.map((dept) => dept.name); // Store the full data for accessible departments
+        // departments.value = res.message.data.map(item => item.category)
       }
     })
     .catch((error) => {
@@ -3542,11 +3730,16 @@ function OwnerOftheForm(newVal) {
 }
 
 function categoriesData(newVal) {
+  const queryParams = {
+    fields: JSON.stringify(["ezy_departments_items"]),
+    doctype:doctypes.departments,
+    doc_id:newVal,
+  };
   axiosInstance
-    .get(apis.resource + doctypes.departments + `/${newVal}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.ezy_departments_items) {
-        departments.value = res.data.ezy_departments_items.map((item) => item.category);
+      if (res?.message.data?.ezy_departments_items) {
+        departments.value = res.message.data.ezy_departments_items.map((item) => item.category);
       }
     })
     .catch((error) => {
@@ -3620,26 +3813,23 @@ function formData(status) {
         // console.log(paramId.value, "Updated paramId");
 
         if (workflowSetup.length < blockArr.length) {
-          toast.info("Add Workflow", {
-            autoClose: 2000,
-            transition: "zoom",
-          });
+          showInfo("Add Workflow");
         } else {
           if (isBlockRemoved.value === true) {
-            toast.success("Form Created Successfully!", {
+            showSuccess("Form Created Successfully!", {
               autoClose: 2000,
               transition: "zoom",
-              onClose: () => {
-                let toPath = localStorage.getItem('routepath');
-                if (status === "save") {
-                  router.push({ path: toPath });
-                }
-                else if (status === "Draft") {
-                  router.push({ path: toPath });
-
-                }
-              },
+              // onClose: () => {
+              // },
             });
+            let toPath = localStorage.getItem('routepath');
+            if (status === "save") {
+              router.push({ path: toPath });
+            }
+            else if (status === "Draft") {
+              router.push({ path: toPath });
+
+            }
           }
         }
       } else {
@@ -3873,7 +4063,7 @@ const addSection = (blockIndex, sectionIndex) => {
 //   let item = blockArr[blockIndex].sections[sectionIndex];
 //   if (item.parent) deleted_items.push(item);
 //   blockArr[blockIndex].sections.splice(sectionIndex, 1);
-//   // toast.success("Section removed", { autoClose: 500 })
+//   // showSuccess("Section removed", { autoClose: 500 })
 // }; 
 const removeSection = (blockIndex, sectionIndex) => {
   let item = blockArr[blockIndex].sections[sectionIndex];
@@ -3892,7 +4082,7 @@ const removeSection = (blockIndex, sectionIndex) => {
   });
 
   // Optionally show a toast
-  // toast.success("Section removed", { autoClose: 500 });
+  // showSuccess("Section removed", { autoClose: 500 });
 };
 
 
@@ -3938,7 +4128,7 @@ const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
   });
 
   // Optionally show toast
-  // toast.success("Column/Row removed", { autoClose: 500 });
+  // showSuccess("Column/Row removed", { autoClose: 500 });
 };
 
 
@@ -3951,7 +4141,7 @@ const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
 //     columnIndex,
 //     1
 //   );
-//   // toast.success("Column removed", { autoClose: 500 })
+//   // showSuccess("Column removed", { autoClose: 500 })
 // };
 
 // Function to add a new field inside a column
@@ -3985,7 +4175,7 @@ const removeField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex
   blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
     columnIndex
   ].fields.splice(fieldIndex, 1);
-  // toast.success("Field removed", { autoClose: 500 })
+  // showSuccess("Field removed", { autoClose: 500 })
 };
 
 // Function to copy a field and add it below the original field inside a column
@@ -4078,11 +4268,30 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-  function validateLabel(label, errorPath) {
+  // function validateLabel(label, errorPath) {
+  //   if (isRestricted(label)) {
+  //     errorPath.errorMsg = "Entered label is restricted";
+  //   } else if (hasInvalidCharacters(label)) {
+  //     errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
+  //   } else {
+  //     errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase())
+  //       ? "Duplicate Label Name"
+  //       : "";
+  //   }
+  // }
+    function validateLabel(label, errorPath) {
+    if (!label) {
+      errorPath.errorMsg = "";
+      return;
+    }
+
     if (isRestricted(label)) {
       errorPath.errorMsg = "Entered label is restricted";
     } else if (hasInvalidCharacters(label)) {
-      errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
+      errorPath.errorMsg =
+        "Label should not contain special characters, double quotes (\") or single quotes (')";
+    } else if (label.length > 64) {
+      errorPath.errorMsg = "Label should not exceed 64 characters";
     } else {
       errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase())
         ? "Duplicate Label Name"
@@ -4115,8 +4324,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
   }
    blockArr.forEach((block) => {
     block.sections.forEach((section) => {
+      validateLabel(section.label, section);
       section.rows.forEach((row) => {
         row.columns.forEach((column) => {
+          validateLabel(column.label, column);
           column.fields.forEach((field) => {
             validateLabel(field.label, field);
           });
@@ -4233,14 +4444,15 @@ function handleInputChange(event, fieldType) {
   const queryParams = {
     fields: JSON.stringify(['form_name','form_short_name']),
     filters: JSON.stringify(filters),
+    doctype:doctypes.EzyFormDefinitions,
   };
 
   axiosInstance
-    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+    .get(`${apis.GetDoctypeData}`, {
       params: queryParams,
     })
     .then((res) => {
-      ezyFormsData.value = res.data;
+      ezyFormsData.value = res.message.data;
 
       // Check for duplicates (ignore spaces when comparing)
       if (fieldType === "form_name") {
@@ -4314,7 +4526,7 @@ function delete_form_items_fields() {
 async function saveFormData(type) {
   // Check for errors
   if (hasErrors.value) {
-    toast.error("Please fix the errors before proceeding.");
+    showError("Please fix the errors before proceeding.");
     return;
   }
   isBlockRemoved.value = true;
@@ -4332,6 +4544,26 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+
+.approver_type_div{
+  border: 1px solid #BAFFC2;
+  border-radius: 6px;
+  padding: 2px 4px;
+  color: #00C917;
+  background-color: #EAFFED;
+}
+.approver_type_div span{
+  font-size: 11px;
+  color: #23b207;
+  font-weight: 500;
+  padding: 0px 4px;
+  
+}
+.approver_type_div i{
+  color: #23b207;
+  font-weight: 900;
+  -webkit-text-stroke: 1px #23b207;
+}
 .formlist {
   max-height: 180px;
   /* 🔥 Set desired height */
@@ -4395,9 +4627,9 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 }
 
-.approval-border-bottom {
-  border-bottom: 1px solid #ccc;
-}
+// .approval-border-bottom {
+//   border-bottom: 1px solid #ccc;
+// } 
 
 .rounded-table {
   border-radius: 10px;
@@ -4473,7 +4705,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 }
 
 .SelectallDesignation {
-  color: #1b14df;
+  color: #000;
 }
 
 .designation-scroll {
@@ -4807,6 +5039,7 @@ select {
 
 .designationCheckBox {
   font-size: 20px !important;
+  border: 1px solid #000;
 }
 
 .designationCheckBox:focus {
@@ -4948,7 +5181,7 @@ select {
 }
 
 .requestandAppHeader {
-  padding: 10px 6px;
+  padding: 12px 6px;
   // box-shadow: 0px 4px 4px 0px #0000000d; 
 }
 
@@ -5097,7 +5330,7 @@ select {
 }
 
 .more-count {
-  color: #000;
+  color: #1b14df;
   font-weight: 500;
   display: inline;
   cursor: pointer;
@@ -5126,4 +5359,118 @@ td {
   color: #999;
   background-color: #f9f9f9;
 }
+:deep(.vs__selected) {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  padding: 0px 8px;
+  font-size: 12px;
+}
+
+:deep(.vs__selected-options) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 1px;
+}
+
+:deep(.vs__dropdown-toggle) {
+  height: auto !important;
+}
+
+
+:deep(.vs__deselect) svg {
+  color: #000;
+  background-color: #f1f1f1 ;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-top: 8px;
+  font-size: 5px !important;
+
+  padding: 4px;
+
+}
+
+:deep(.vs__deselect:hover) {
+  color: #000;
+}
+.vue3-select__dropdown,
+.vue3-select-dropdown {
+  z-index: 9999 !important;
+}
+
+/* Vue 3 SFC scoped style */
+::v-deep(.vs__dropdown-toggle) {
+  border: 1px solid transparent !important;
+  border-radius: 6px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  transition: border-color 0.15s ease;
+  padding: 2px;
+
+}
+
+/* when dropdown is open or focused */
+::v-deep(.vs__dropdown-toggle.vs--open),
+::v-deep(.vs__dropdown-toggle:focus),
+::v-deep(.vs__dropdown-toggle:focus-within) {
+  border: 1px solid #1b14df !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding:2px;
+}
+/* Placeholder styling for Vue3Select */
+::v-deep(.vs__search::placeholder) {
+  color: #9ca3af !important;  /* grey placeholder text */
+  font-size: 13px !important; /* adjust size */
+  opacity: 1;                 /* make sure it’s visible */
+  padding: 2px 6px;
+}
+
+
+
+
+.disgnationlist_div{
+  border: 1px solid #CCCCCC !important;
+  border-radius: 6px;
+  
+  // padding: 0px 4px;
+}
+::v-deep(.vs__selected) {
+  // min-width: 100px; /* adjust per tag */
+  margin: 1px;
+  max-height: 30px;
+}
+::v-deep(.vs__selected-options) {
+  max-height: 130px; /* 4 rows * 40px per tag */
+  overflow-y: auto;
+  flex-wrap: wrap;
+}
+/* Selected tags container */
+::v-deep(.vs__selected-options) {
+  display: flex;
+  max-width: calc(4 * 120px); /* show 4 tags */
+  overflow-x: auto;            /* scroll only if needed */
+  scrollbar-width: thin;       /* Firefox */
+  white-space: nowrap;          /* prevent wrapping */
+}
+
+/* Hide scrollbar by default */
+::v-deep(.vs__selected-options::-webkit-scrollbar) {
+  display: none;
+}
+
+/* Show scrollbar on hover */
+::v-deep(.vs__selected-options:hover::-webkit-scrollbar) {
+  display: block;
+}
+
+/* Optional: Firefox */
+::v-deep(.vs__selected-options) {
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
+}
+
 </style>

@@ -6,7 +6,6 @@
   <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon3.jpeg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Bootstrap -->
 <link rel="stylesheet" href="/assets/ezy_forms/libs/bootstrap.min.css">
 <script src="/assets/ezy_forms/libs/bootstrap.bundle.min.js"></script>
@@ -23,19 +22,62 @@
 <!-- Local Fonts -->
  <link rel="stylesheet" href="/assets/ezy_forms/libs/fonts.css">
  
-
-
-
 <!-- XLSX -->
 <script  src="/assets/ezy_forms/libs/xlsx.full.min.js"></script>
 
-
-
   <title>Ezy Forms</title>
+  <style>
+  #loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #ffffff;
+  }
+
+  .loader-text {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 5px;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    gap: 5px;
+  }
+
+ .loader-text span {
+  display: inline-block;
+  animation: wave 0.8s infinite ease-in-out; /* faster total animation */
+  color: #000;
+}
+
+/* Reduce delays so letters wave faster */
+.loader-text span:nth-child(1) { animation-delay: 0s; }
+.loader-text span:nth-child(2) { animation-delay: 0.05s; }
+.loader-text span:nth-child(3) { animation-delay: 0.1s; }
+.loader-text span:nth-child(4) { animation-delay: 0.15s; }
+.loader-text span:nth-child(5) { animation-delay: 0.2s; }
+.loader-text span:nth-child(6) { animation-delay: 0.25s; }
+.loader-text span:nth-child(7) { animation-delay: 0.3s; }
+.loader-text span:nth-child(8) { animation-delay: 0.35s; }
+.loader-text span:nth-child(9) { animation-delay: 0.4s; }
+
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); color: #000; }
+  30% { transform: translateY(-15px); color: #ff5722; }
+}
+</style>
 </head>
 
 <body>
-  <div id="app"></div>
+  <div id="loader">
+  <h4 class="loader-text">
+    <span>E</span><span>Z</span><span>Y</span>
+    <span>&nbsp;</span>
+    <span>F</span><span>O</span><span>R</span><span>M</span><span>S</span>
+  </h4>
+</div>
+  <div id="app">
+  </div>
   <script>window.csrf_token = '{{ frappe.session.csrf_token }}';</script>
   <script type="module" src="/src/main.js"></script>
 </body>

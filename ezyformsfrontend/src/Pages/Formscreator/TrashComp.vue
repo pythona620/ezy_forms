@@ -43,6 +43,7 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showSuccess } from "../../shared/services/toast";
 
 const totalRecords = ref(0);
 const formDescriptions = ref({})
@@ -82,7 +83,7 @@ function toggleFunction(rowData, rowIndex, event) {
             .then((response) => {
                 // console.log("Response:", response.data);
                 // Adjust the toast message accordingly:
-                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                showSuccess(`Form ${actionText}d successfully`);
                 // Refresh the table data after a short delay
                 setTimeout(() => {
                     fetchTable();
@@ -139,7 +140,7 @@ function actionCreated(rowData, actionEvent) {
                     .then((response) => {
                         // console.log("Response:", response.data);
                         // Adjust the toast message accordingly:
-                        toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                        showSuccess(`Form ${actionText}d successfully`);
                         // Refresh the table data after a short delay
                         setTimeout(() => {
                             fetchTable();

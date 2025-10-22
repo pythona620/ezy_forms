@@ -127,6 +127,7 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import "@vueform/multiselect/themes/default.css";
+import { showError, showSuccess } from '../../shared/services/toast';
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -183,11 +184,12 @@ function clearModalData() {
 }
 
 const tableheaders = ref([
+    { th: "Name", td_key: "name" },
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
-    { th: "Business Unit", td_key: "business_unit" },
 ])
 const fieldMapping = ref({
+    name: { type: "input" },
     department_code: { type: "input" },
     department_name: { type: "input" },
     form_category: { type: "select", options: ["Software", "Hardware"] },
@@ -434,7 +436,7 @@ function createDepart() {
     }
 
     if (!categoriesDataEdit.value.ezy_departments_items || categoriesDataEdit.value.ezy_departments_items.length === 0) {
-        toast.error("At least one category is required");
+        showError("At least one category is required");
         return;
     }
 
@@ -442,13 +444,13 @@ function createDepart() {
         CreateDepartments.value.ezy_departments_items = categoriesDataEdit.value.ezy_departments_items;
         const dataObj = {
             ...CreateDepartments.value,
-            department_code: `${CreateDepartments.value.department_code}-${CreateDepartments.value.department_name}`,
+            department_code: `${CreateDepartments.value.department_code}`,
             doctype: doctypes.departments,
 
         }
         axiosInstance.post(apis.DataUpdate, dataObj).then((res) => {
             if (res.message.data) {
-                toast.success("Department Created successfully", { autoClose: 500, "transition": "zoom" })
+                showSuccess("Department Created successfully")
                 deptData()
                 CreateDepartments.value = {
                     department_code: "",
@@ -465,7 +467,7 @@ function createDepart() {
         })
     }
     else {
-        toast.error("Please correct the required fields")
+        showError("Please correct the required fields")
     }
 }
 
@@ -479,7 +481,7 @@ function UpdateDeprtment() {
     }
 
     if (!categoriesDataEdit.value.ezy_departments_items || categoriesDataEdit.value.ezy_departments_items.length === 0) {
-        toast.error("At least one category is required");
+        showError("At least one category is required");
         return;
     }
 
@@ -490,7 +492,7 @@ function UpdateDeprtment() {
         formErrors.value.department_code ||
         formErrors.value.department_name
     ) {
-        toast.error("Please correct the required fields", { autoClose: 1000, transition: "zoom" });
+        showError("Please correct the required fields");
         return;
     }
         CreateDepartments.value.ezy_departments_items = categoriesDataEdit.value.ezy_departments_items;
@@ -504,7 +506,7 @@ function UpdateDeprtment() {
             .put(`${apis.DataUpdate}/${CreateDepartments.value.name}`, dataObj)
             .then((res) => {
                 if (res.message.success==true) {
-                    toast.success("Department Updated successfully", { autoClose: 500, transition: "zoom" });
+                    showSuccess("Department Updated successfully");
                     deptData();
 
                     // Reset values
@@ -518,7 +520,7 @@ function UpdateDeprtment() {
                     modal.hide();
                 }
                 if (res.message.success==false) {
-                    toast.error(res.message.message)
+                    showError(res.message.message)
                 }
 
             })

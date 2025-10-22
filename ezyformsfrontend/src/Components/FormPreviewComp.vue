@@ -13,6 +13,8 @@
                         class="bi bi-download me-2"></i>Download Pdf</button>
             </div>
         </div>
+      
+
 
         <!-- <div class="d-flex gap-2">
             <div class="dropdown">
@@ -38,8 +40,29 @@
                 </ul>
             </div>
         </div> -->
+<div class="device-preview mt-2" :class="selectedDevice">
+         <div class="d-flex justify-content-center mt-3">
 
-        <div class="container card form-containe-div border-0 mt-4">
+          <div class="d-flex gap-2 mb-3">
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'desktop' }"
+        @click="selectedDevice = 'desktop'">
+        <i class="bi bi-laptop"></i>
+    </button>
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'tablet' }"
+        @click="selectedDevice = 'tablet'">
+        <i class="bi bi-tablet"></i>
+    </button>
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'mobile' }"
+        @click="selectedDevice = 'mobile'">
+        <i class="bi bi-phone"></i>
+    </button>
+</div>
+        </div>
+        <div class="container card form-containe-div border-0 mt-1" >
+            
             <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex">
                 <div class="d-flex align-items-center justify-content-end me-2">
                     <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
@@ -49,10 +72,35 @@
                                 : `Approver ${blockIndex}
                         `
                         }}: <b>{{ workFlowRoles[blockIndex].roles.join(", ") }}</b>
+                        
                     </span>
+                    
+                </div>
+                <div class="d-flex justify-content-end">
+                    <span v-if="blockIndex !== 0" class="workflow-conditions d-flex flex-wrap align-items-center gap-1">
+                             <!-- Approver types -->
+                            <span v-if="workFlowRoles[blockIndex].view_only_reportee" class="approver-type">
+                            Reporting Manager only
+                            </span>
+                            <span v-if="workFlowRoles[blockIndex].all_approvals_required" class="approver-type">
+                            All of the selected approvers
+                            </span>
+                            <span v-if="workFlowRoles[blockIndex].requester_as_a_approver" class="approver-type">
+                            Approval by Requestor
+                            </span>
+
+
+                            <!-- On rejection escalation -->
+                            <span class="ms-1">
+                                on rejection escalating to 
+                                <b class="text-danger">
+                                {{ workFlowRoles[blockIndex].on_rejection ? `Level ${workFlowRoles[blockIndex].on_rejection}` : 'Requestor' }}
+                                </b>
+                            </span>
+                        </span>
                 </div>
                 <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
-                    class="preview-section">
+                    class="preview-section ">
                     <div v-if="section.label" class="d-flex justify-content-between section-label">
                         <h5 class="m-0 font-13">{{ section.label }}</h5>
                     </div>
@@ -60,13 +108,13 @@
                         <div class="container">
                             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                                 <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
-                                    class="col dynamicColumn">
+                                    class="col dynamicColumn" style="background-color: #f5f5f5;">
                                     <div v-if="column.label" class="border-bottom p-3">
                                         <h6 class="m-0 font-12">{{ column.label || "-" }}</h6>
                                     </div>
                                     <div class="mx-3 my-2">
                                         <div v-for="(field, fieldIndex) in column.fields"
-                                            :key="'field-preview-' + fieldIndex">
+                                            :key="'field-preview-' + fieldIndex"  >
                                             
                                             <div v-if="field.label && field.fieldtype !== 'Table'">
                                                 <label :for="'field-' +
@@ -161,11 +209,11 @@ option, index
                                                         v-model="field.value" :type="field.fieldtype"
                                                         class="form-control font-10 previewInputHeight" />
                                                 </template>
+
+                                            </div>
                                                 <span v-if="field.description !== 'Field'" class="font-11"><span
                                                         class="fw-semibold">Description: </span>{{
                                                     field.description }}</span>
-
-                                            </div>
                                             <div >
 
 
@@ -212,6 +260,8 @@ option, index
 
             </div>
         </div>
+        </div>
+       
     </div>
 </template>
 
@@ -239,7 +289,7 @@ const workFlowRoles = ref([]);
 
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-
+const workflowConitions = ref([]);
 
 const selectedData = ref({
     business_unit: route.query.business_unit || "", // Retrieve from query
@@ -263,6 +313,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
+    console.log(props.blockArr, "props.blockArr");
     fetchDepartmentDetails();
     // if(!route.query.id){
 
@@ -273,7 +324,14 @@ onMounted(() => {
     // }
 
 })
+const selectedDevice = ref("desktop"); // default preview
 
+// optionally, define device-specific classes
+// const deviceClasses = {
+//     desktop: "w-100",
+//     tablet: "w-75 mx-auto",
+//     mobile: "w-50 mx-auto"
+// };
 function fetchDepartmentDetails() {
 
     const queryParams = {
@@ -295,6 +353,9 @@ function fetchDepartmentDetails() {
             childtableHeaders.value = JSON.parse(
                 formDescriptions.value.form_json
             ).child_table_fields;
+            workflowConitions.value = JSON.parse(
+                formDescriptions.value.form_json
+            ).workflow;
 
 
 
@@ -378,32 +439,46 @@ function setView(view) {
     updateWorkFlowRoles();
 }
 function updateWorkFlowRoles() {
-    let approverIndex = 0; // Keep track of approvers
+  let approverIndex = 0; // Keep track of approvers
 
+  workFlowRoles.value = displayedBlocks.value.map((block) => {
+    let roles = [];
+    let workflowConditions = {
+      view_only_reportee: 0,
+      all_approvals_required: 0,
+      requester_as_a_approver: 0,
+      on_rejection: null
+    };
 
-    workFlowRoles.value = displayedBlocks.value.map((block) => {
-        let roles = [];
+    if (block.fieldname === "requestor") {
+      // ✅ Find requestor roles
+      const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
+      roles = requestorWorkflow ? requestorWorkflow.roles : [];
+      // No extra conditions for requestor
+    } else if (block.label.startsWith("approver-")) {
+      // ✅ Get all approvers
+      const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
 
-        if (block.fieldname === "requestor") {
-            // ✅ Find requestor roles
-            const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
-            roles = requestorWorkflow ? requestorWorkflow.roles : [];
-        } else if (block.label.startsWith("approver-")) {
-            // ✅ Get all approvers
-            const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
+      if (approverWorkflow[approverIndex]) {
+        roles = approverWorkflow[approverIndex].roles || [];
 
-            // ✅ Assign correct role (removes `-1` mistake)
-            if (approverWorkflow[approverIndex]) {
-                roles = approverWorkflow[approverIndex].roles || [];
-            }
+        // Assign workflow conditions
+        workflowConditions.view_only_reportee = approverWorkflow[approverIndex].view_only_reportee || 0;
+        workflowConditions.all_approvals_required = approverWorkflow[approverIndex].all_approvals_required || 0;
+        workflowConditions.requester_as_a_approver = approverWorkflow[approverIndex].requester_as_a_approver || 0;
+        workflowConditions.on_rejection = approverWorkflow[approverIndex].on_rejection || null;
+      }
 
-            approverIndex++; // Move to the next approver
-        }
+      approverIndex++; // Move to the next approver
+    }
 
-        return { roles };
-    });
-
+    return {
+      roles,
+      ...workflowConditions
+    };
+  });
 }
+
 
 
 //  Filter blocks based on the view
@@ -540,6 +615,7 @@ const getFieldComponent = (type) => {
         case "Date":
         case "Int":
         case "Datetime":
+        case "Link":
         case "radio":
             return "input";
         case "Text":
@@ -560,7 +636,25 @@ const getFieldComponent = (type) => {
 </script>
 
 
-<style scoped>
+<style lang="scss" scoped>
+.workflow-conditions {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+
+.approver-type {
+  border: 1px solid #BAFFC2;
+  border-radius: 6px;
+  padding: 2px 4px;
+  color: #00C917;
+  background-color: #EAFFED;
+  font-size: 12px;
+  display: inline-block;
+/* spacing between badges */
+}
+
+
 .previewInputHeight {
     /* height: 35px; */
     margin-bottom: 5px;
@@ -651,7 +745,7 @@ td {
 }
 
 .backBtn {
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    // box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -660,5 +754,57 @@ td {
 .form-containe-div {
     height: 80vh;
     overflow-y: scroll;
+}
+.form-containe-div.w-75 { max-width: 768px; }
+.form-containe-div.w-50 { max-width: 375px; }
+
+.active { border: 1px solid #000; }
+.device-preview {
+    transition: all 0.3s ease-in-out;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background: #fff;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.device-preview.desktop {
+    width: 100%;
+}
+
+.device-preview.tablet {
+    max-width: 768px;
+}
+
+.device-preview.mobile {
+    max-width: 375px;
+}
+
+/* Optional: smooth scaling when changing device */
+.device-preview-enter-active,
+.device-preview-leave-active {
+    transition: all 0.4s ease;
+}
+
+.device-preview-enter-from,
+.device-preview-leave-to {
+    transform: scale(0.95);
+    opacity: 0;
+}
+.form-check-input{
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
+
+
+}
+.form-check-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid blue !important;
 }
 </style>

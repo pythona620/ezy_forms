@@ -1,14 +1,27 @@
 <template>
 
-  <!-- <button type="button" class="btn btn-dark btn-
-                  " @click="toggleEdit">
-              {{ isEditable ? 'Cancel' : 'Edit' }}
-            </button> -->
   <section>
+    <!-- <div class="d-flex justify-content-end">
 
-    <div v-if="filteredBlocks.length" class="card p-2">
+        <button
+        type="button"
+        class="btn btn-light font-12 text-dark mb-2"
+        :class="isEditable ? 'btn-outline-secondary' : 'btn-outline-light'"
+        @click="toggleEdit"
+      >
+        <template v-if="!isEditable">
+          <i class="bi bi-pencil-fill"></i> Edit
+        </template>
+        <template v-else>
+          Cancel
+        </template>
+      </button>
 
-      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container  rounded-2" :class="blockIndex < currentLevel ? 'my-2':''">
+    </div> -->
+
+    <div v-if="filteredBlocks.length" class="card mb-5 p-2">
+
+      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container  rounded-2" :class="blockIndex < currentLevel ? 'my-0':''">
         <div v-if="blockIndex === 0"><label class=" fw-bold Request_ID " :style="{ 'padding-left': '12px' }">Request ID: </label> <span class="Request_ID">
             {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
           <!-- <div><span class="font-12 ps-2 border-bottom"> {{
@@ -38,6 +51,7 @@
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start justify-content-start')
                     : ''">
+
                      <!-- :style="['Approver', 'Approved On', 'Approved By'].includes(field.label) && blockIndex == currentLevel  
                     ? { opacity: 0 } 
                     : {}" -->
@@ -46,7 +60,7 @@
                           :class="[
                             ((props.readonlyFor === 'true' || blockIndex < currentLevel) &&
                               field.value &&
-                              (field.value.length <= 20 || field.fieldtype === 'Attach' || field.fieldtype ==='Int'))
+                              (field.value.length <= 25 || field.fieldtype === 'Attach' || field.fieldtype ==='Int'))
                               ? 'd-flex'
                               : '',
                             field.fieldtype === 'Check'
@@ -59,7 +73,7 @@
                           ]"
                         >
 
-                      <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
+                      <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.fieldtype !== 'Check'">
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  text-nowrap">
@@ -89,548 +103,659 @@
                             </option>
                           </select>
                         </template>
-                        <template v-if="
-                          field.fieldtype === 'Select'
-                        ">
-                          <div class="">
-
-                            <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
-                              <span class=" font-12">{{ field.value }}</span>
-                            </div>
-                            <div v-else>
-                              <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
-                                :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                                :modelValue="field.value" placeholder="Select"
-                                @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                class="font-11 multiselect" />
-                              <!-- <Vue3Select  class="font-11" style="min-width: 200px;" :append-to-body="true"
-                                                                                  :multiple="field.fieldtype === 'Table MultiSelect'"
-                                :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                                :modelValue="field.value" placeholder="Select"
-                                @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
-                            </div>
+                        <template v-if="field.fieldtype === 'Select'">
+                          <!-- 🧩 READ-ONLY MODE -->
+                          <div v-if="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)">
+                            <span class="font-12">{{ field.value }}</span>
                           </div>
 
-
+                          <!-- ✏️ EDIT MODE -->
+                          <div v-else>
+                            <Vue3Select
+                              class="font-11"
+                              style="min-width: 200px;"
+                              :append-to-body="true"
+                              :multiple="field.fieldtype === 'Table MultiSelect'"
+                              :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                              :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                              :model-value="field.value"
+                              placeholder="Select"
+                              @update:model-value="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                            />
+                          </div>
                         </template>
-                        <template v-if="field.fieldtype === 'Small Text'">
-                          <div>
-                            <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
-                              <div class="row">
-                                <template v-for="(option, index) in field?.options?.split('\n')">
-                                  <div v-if="(JSON.parse(field.value || '[]') || []).includes(option)" :key="index"
-                                    class=" col-12 col-sm-6 col-md-4   mb-2">
-                                    <div class="form-check">
-                                      <input class="form-check-input" type="checkbox" :checked="true" :disabled="true"
-                                        :id="`${option}-${index}`" />
-                                      <label class="form-check-label font-12 m-0 text-dark" :for="`${option}-${index}`">
-                                        {{ option }}
-                                      </label>
+
+                       <!-- <template v-if="field.fieldtype === 'Select'">
+                              <div v-if="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)">
+                                <span class="font-12">{{ field.value }}</span>
+                              </div>
+
+                              <div v-else>
+                                <Multiselect
+                                  :multiple="field.fieldtype === 'Table MultiSelect'"
+                                  :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                  :modelValue="field.value"
+                                  :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                  placeholder="Select"
+                                  @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                  class="font-11 multiselect"
+                                />
+                              </div>
+                            </template> -->
+
+                                <template v-else-if="field.fieldtype === 'Small Text'">
+                                  <!-- readonly -->
+                                  <div v-if="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)">
+                                    <div class="row">
+                                      <template v-for="(option, index) in field?.options?.split('\n')">
+                                        <div
+                                          v-if="(JSON.parse(field.value || '[]') || []).includes(option)"
+                                          :key="index"
+                                          class="col-lg-12 col-sm-6 col-md-4 mb-2"
+                                          :class="getResponsiveCols(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                        >
+                                          <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" checked disabled />
+                                            <label class="form-check-label font-12 m-0 text-dark">{{ option }}</label>
+                                          </div>
+                                        </div>
+                                      </template>
+                                    </div>
+                                  </div>
+
+                                  <!-- editable -->
+                                  <div v-else>
+                                    <div class="container-fluid">
+                                      <div class="row">
+                                        <div
+                                          class="form-check col-12 col-sm-6 col-md-4 mb-1"
+                                          v-for="(option, index) in field?.options?.split('\n')"
+                                          :key="index"
+                                          :class="[getResponsiveCols(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex), { 'd-none': index === 0 }]"
+                                        >
+                                          <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                            :checked="(JSON.parse(field.value || '[]') || []).includes(option)"
+                                            :value="option"
+                                            :name="`${field.fieldname}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                            :id="`${field.fieldname}-${option}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}-${index}`"
+                                            @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                          />
+                                          <label
+                                            class="form-check-label font-12 m-0"
+                                            :for="`${field.fieldname}-${option}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}-${index}`"
+                                          >
+                                            {{ option }}
+                                          </label>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </template>
-                              </div>
-                            </div>
 
 
-                            <div v-else>
-                              <div class="container-fluid">
-                                <div class="row">
-                                  <div class="form-check  col-12 col-sm-6 col-md-4  mb-1"
-                                    v-for="(option, index) in field?.options?.split('\n')" :key="index"
-                                    :class="{ 'd-none': index === 0 }">
 
-                                    <div>
-                                      <input class="form-check-input" type="checkbox"
-                                        :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
-                                        :checked="(JSON.parse(field.value || '[]') || []).includes(option)"
-                                        :value="option"
-                                        :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                        :id="`${option}-${index}`"
-                                        @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
+
+                                      <template v-else-if="field.fieldtype === 'Check' && field.fieldname !== 'auto_calculations'">
+                                            <div class="d-flex flex-column align-items-start">
+                                              <!-- Checkbox + Label Row -->
+                                              <div class="d-flex align-items-center gap-2">
+                                                <input
+                                                  type="checkbox"
+                                                  :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                  :checked="field.value == 1 || field.value === true || field.value === '1' || field.value === 'true'"
+                                                  :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                                  :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                  @change="(event) =>
+                                                    logFieldValue(
+                                                      event,
+                                                      blockIndex,
+                                                      sectionIndex,
+                                                      rowIndex,
+                                                      columnIndex,
+                                                      fieldIndex
+                                                    )"
+                                                  class="form-check-input fs-6 previewInputHeight font-10"
+                                                />
+                                                <label
+                                                  class="label-text fw-medium text-wrap font-12"
+                                                  :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                >
+                                                  {{ field.label }}
+                                                  <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
+                                                </label>
+                                              </div>
+
+                                            
+                                            </div>
+                                          </template>
+
+                                                        <template v-else-if="field.fieldtype === 'Link'">
+                                        <!-- Read-only view -->
+                                        <div
+                                          v-if="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                          class="d-flex align-items-end"
+                                        >
+                                          <span class="font-12" :class="{
+                                            'border-0 bg-transparent': !isEditable || props.readonlyFor === 'true' || blockIndex < currentLevel
+                                          }">
+                                            {{ field.value && field.value !== '' ? field.value : '-' }}
+                                          </span>
+                                        </div>
+
+                                        <!-- Editable dropdown -->
+                                        <div v-else>
+                                      <Vue3Select
+                                        v-tooltip.top="row[field.fieldname]"
+                                        class="font-11"
+                                        style="min-width: 200px;"
+                                        :append-to-body="true"
+                                        :multiple="false"
+                                        :options="field.linkSearchResults || []"
+                                        
+                                        :model-value="field.value"
+                                        placeholder="Select"
+                                        @open="fetchDoctypeList(field.options, '', blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                        @search="(searchText) => fetchDoctypeList(field.options, searchText, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                        @update:model-value="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                      />
+                                        </div>
+                                      </template>
+
+
+
+
+                              <!-- Field Type Check or Radio -->
+                              <template v-else-if="
+
+
+                                field.fieldtype === 'radio'
+                              ">
+                                <div class="container-fluid">
+                                  <div class="row">
+                                    <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
+                                      '\n'
+                                    )" :key="index">
+                                      <div>
+                                        <input v-if="
+
+                                          index !== 0
+                                        " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
+                                          " :checked="field.value === option" :value="option"
+                                          :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                          :id="`${option}-${index}`" @blur="
+                                            (event) =>
+                                              logFieldValue(
+                                                event,
+                                                blockIndex,
+                                                sectionIndex,
+                                                rowIndex,
+                                                columnIndex,
+                                                fieldIndex
+                                              )
+                                          " />
+
+                                        <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
+                                          " class="form-check-input" type="radio"
+                                          :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                          :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
+                                            (event) =>
+                                              logFieldValue(
+                                                event,
+                                                blockIndex,
+                                                sectionIndex,
+                                                rowIndex,
+                                                columnIndex,
+                                                fieldIndex
+                                              )
+                                          " />
+                                      </div>
+                                      <div>
+                                        <label class="form-check-label m-0" :for="`${option}-${index}`">
+                                          {{ option }}
+                                        </label>
+                                      </div>
                                     </div>
-
-                                    <div>
-                                      <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
-                                        {{ option }}
-                                      </label>
-                                    </div>
-
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div>
-
-                        </template>
-
-
-
-                        <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
-
-
-                          <input type="checkbox" :checked="field.value"
-                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                            :placeholder="'Enter ' + field.label" :name="'field-' +
-                              sectionIndex +
-                              '-' +
-                              columnIndex +
-                              '-' +
-                              fieldIndex
-                              " @change="
-                                (event) =>
-                                  logFieldValue(
-                                    event,
-                                    blockIndex,
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                  )
-                              " class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
-                        </template>
-
-                        <!-- Field Type Check or Radio -->
-                        <template v-else-if="
-
-
-                          field.fieldtype === 'radio'
-                        ">
-                          <div class="container-fluid">
-                            <div class="row">
-                              <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
-                                '\n'
-                              )" :key="index">
-                                <div>
-                                  <input v-if="
-
-                                    index !== 0
-                                  " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
-                                    " :checked="field.value === option" :value="option"
-                                    :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                    :id="`${option}-${index}`" @blur="
-                                      (event) =>
-                                        logFieldValue(
-                                          event,
-                                          blockIndex,
-                                          sectionIndex,
-                                          rowIndex,
-                                          columnIndex,
-                                          fieldIndex
-                                        )
-                                    " />
-
-                                  <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
-                                    " class="form-check-input" type="radio"
-                                    :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                    :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
-                                      (event) =>
-                                        logFieldValue(
-                                          event,
-                                          blockIndex,
-                                          sectionIndex,
-                                          rowIndex,
-                                          columnIndex,
-                                          fieldIndex
-                                        )
-                                    " />
-                                </div>
-                                <div>
-                                  <label class="form-check-label m-0" :for="`${option}-${index}`">
-                                    {{ option }}
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </template>
+                              </template>
 
 
                         <!-- @click="openInNewWindow(field.value)" -->
-                                          <template v-else-if="field.fieldtype == 'Attach'" >
-                          <div class=" d-flex gap-1">
-                          
+                              <template v-else-if="field.fieldtype == 'Attach'" >
+                                  <div class=" d-flex gap-1">
+                                  
 
 
-                          <!-- File Input (if no value or for specific cases) -->
-                          <!-- <input
-                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
-                            type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"  :style="{ minWidth: '100px', maxWidth: '200px' }"
-                            class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
-                            
-                          <input
-                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :disabled="props.readonlyFor === 'true' "
-                            type="file"
-                            :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            
-                            :id="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            style="display: none"
-                            class="form-control previewInputHeight font-10 mb-1 mt-1"
-                            multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                          />
+                                  <!-- File Input (if no value or for specific cases) -->
+                                  <!-- <input
+                                    v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
+                                    :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
+                                    type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
+                                    
+                                    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"  :style="{ minWidth: '100px', maxWidth: '200px' }"
+                                    class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
+                                    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
+                                    
+                              <template v-if="!isReadOnlyField(blockIndex)">
+                                          <!-- File Input and Attach Button (skip for special fields) -->
+                                          <template v-if="!['requestor_signature'].includes(field.fieldname) && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By')">
+                                            <input
+                                              type="file"
+                                              multiple
+                                              :id="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                              style="display: none"
+                                              class="form-control previewInputHeight font-10 mb-1 mt-1"
+                                              :disabled="isFieldAlwaysDisabled(field)"
+                                              @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                            />
 
-                          <!-- Custom file input label (acts as button) -->
-                          <label
-                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :for="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="btn btn-sm btn-light font-10 mb-1 mt-1"
-                            :class="{ 'disabled d-none': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
-                          >
-                            <i class="bi bi-paperclip me-1"></i> Attach
-                          </label>
-                          
-                          <!-- View Attachments Label -->
-                          <!-- ✅ Direct Image Preview for Specific Fields -->
-                           <template v-if="field.value && (
-                            field.fieldname === 'requestor_signature' ||
-                            field.label.includes('Approved By') ||
-                            field.label.includes('Acknowledged By')
-                          )">
-                            <div class="d-flex gap-2 flex-wrap ">
-                              <img v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())" :key="index" 
-                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
-                                style="max-width: 60px; max-height: 50px" @click="previewAttachment(fileUrl)" />
-                            </div>
-                          </template>
+                                            <label
+                                              :for="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                              class="btn btn-sm btn-light font-10 mb-1 mt-1"
+                                              :class="{ 'disabled': isFieldAlwaysDisabled(field) }"
+                                            >
+                                              <i class="bi bi-paperclip me-1"></i> Attach
+                                            </label>
+                                          </template>
 
-                          <!-- ✅ View Attachments Label for All Other Fields -->
-                          <template v-else-if="field.value && field.value.length">
-                                    <span
-                                        class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                        @click="openAttachmentList(field.value, blockIndex)"
-                                      >
-                                        <span class="text-dark text-decoration-underline label-text">View</span>
-                                        <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
-                                        <i
-                                          class="bi bi-paperclip text-secondary"
-                                          style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
-                                        ></i>
+                                          <!-- View existing attachments (if any) -->
+                                          <template v-if="field.value && field.value.length && (
+                                                                  field.fieldname !== 'requestor_signature' &&
+                                                                  !field.label.includes('Approved By') &&
+                                                                  !field.label.includes('Acknowledged By')
+                                                                )">
+                                              <span
+                                                class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
+                                                @click="openAttachmentList(field.value, blockIndex)"
+                                              >
+                                                <span class="text-dark text-decoration-underline label-text">View</span>
+                                                <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
+                                                <i
+                                                  class="bi bi-paperclip text-secondary"
+                                                  style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
+                                                ></i>
 
-                                        <!-- ✅ Show Seen Label -->
-                                        <span
-                                          v-if="isFieldSeen(field)"
-                                          class=" font-10"
-                                          
-                                        >
-                                         <i class="bi bi-check2-circle fs-6 fw-bold text-success" style="text-shadow: 0 0 1px currentColor, 0 0 1px currentColor;"></i>
-                                        </span>
+                                                <span v-if="isFieldSeen(field)" class="font-10">
+                                                  <i
+                                                    class="bi bi-check2-circle fs-6 fw-bold text-success"
+                                                    style="text-shadow: 0 0 1px currentColor, 0 0 1px currentColor;"
+                                                  ></i>
+                                                </span>
+                                              </span>
+                                            </template>
+                                          <template v-if="field.value && (
+                                                                  field.fieldname === 'requestor_signature' ||
+                                                                  field.label.includes('Approved By') ||
+                                                                  field.label.includes('Acknowledged By')
+                                                                )">
+                                            <div class="d-flex gap-2 flex-wrap">
+                                              <img
+                                                v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
+                                                :key="index"
+                                                :src="fileUrl"
+                                                class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
+                                                style="max-width: 60px; max-height: 50px"
+                                                @click="previewAttachment(fileUrl)"
+                                              />
+                                            </div>
+                                          </template>
+
+                                        </template>
+
+                                          <!-- 🧩 Read-Only Mode -->
+                                          <template v-else>
+                                            <!-- Image preview for special fields -->
+                                            <template v-if="field.value && (
+                                                                    field.fieldname === 'requestor_signature' ||
+                                                                    field.label.includes('Approved By') ||
+                                                                    field.label.includes('Acknowledged By')
+                                                                  )">
+                                              <div class="d-flex gap-2 flex-wrap">
+                                                <img
+                                                  v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
+                                                  :key="index"
+                                                  :src="fileUrl"
+                                                  class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
+                                                  style="max-width: 60px; max-height: 50px"
+                                                  @click="previewAttachment(fileUrl)"
+                                                />
+                                              </div>
+                                            </template>
+
+                                            <!-- View Attachments for normal fields -->
+                                            <template v-else-if="field.value && field.value.length">
+                                              <span
+                                                class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
+                                                @click="openAttachmentList(field.value, blockIndex)"
+                                              >
+                                                <span class="text-dark text-decoration-underline label-text">View</span>
+                                                <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
+                                                <i
+                                                  class="bi bi-paperclip text-secondary"
+                                                  style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
+                                                ></i>
+
+                                                <span v-if="isFieldSeen(field)" class="font-10">
+                                                  <i
+                                                    class="bi bi-check2-circle fs-6 fw-bold text-success"
+                                                    style="text-shadow: 0 0 1px currentColor, 0 0 1px currentColor;"
+                                                  ></i>
+                                                </span>
+                                              </span>
+                                            </template>
+                                          </template>
+
+                                        </div>
+                                  <!-- ✅ View Attachments Label for All Other Fields -->
+                                  <!-- <template v-else-if="field.value && field.value.length"> 
+                                    <template v-if=" 
+                                    field.fieldname === 'requestor_signature' ||
+                                    field.label.includes('Approved By') ||
+                                    field.label.includes('Acknowledged By')
+                                  ">
+                                    <div class="d-flex gap-2 flex-wrap mb-2">
+                                      <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
+                                        :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
+                                        style="max-width: 80px; max-height: 60px" @click="previewAttachment(fileUrl)" />
+                                    </div>
+                                  </template>
+                                    
+                                    <div >
+                                      <span class="text-dark text-decoration-underline cursor-pointer font-12"
+                                        @click="openAttachmentList(field.value)">
+                                        View <i class="bi bi-paperclip"></i>
                                       </span>
-
-                                   </template>
-                                </div>
-                          <!-- ✅ View Attachments Label for All Other Fields -->
-                          <!-- <template v-else-if="field.value && field.value.length"> 
-                            <template v-if=" 
-                            field.fieldname === 'requestor_signature' ||
-                            field.label.includes('Approved By') ||
-                            field.label.includes('Acknowledged By')
-                          ">
-                            <div class="d-flex gap-2 flex-wrap mb-2">
-                              <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
-                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
-                                style="max-width: 80px; max-height: 60px" @click="previewAttachment(fileUrl)" />
-                            </div>
-                          </template>
-                            
-                            <div >
-                              <span class="text-dark text-decoration-underline cursor-pointer font-12"
-                                @click="openAttachmentList(field.value)">
-                                View <i class="bi bi-paperclip"></i>
-                              </span>
-                            </div>
-                          </template> -->
+                                    </div>
+                                  </template> -->
 
 
-                          <!-- Attachment List Modal -->
-                          <div v-if="showListModal" class="modal fade show"
-                            style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050;">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                              <div class="modal-content">
+                                  <!-- Attachment List Modal -->
+                                  <div v-if="showListModal" class="modal fade show"
+                                    style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050;">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg ">
+                                      <div class="modal-content">
 
-                                <div class="modal-header">
-                                  <h5 class="modal-title font-14">Attachments</h5>
-                                  <button type="button" @click="closeAttachmentList" class="btn position-absolute"
-                                    style="right: 10px; top: 10px;"> &times;</button>
-                                </div>
+                                        <div class="modal-header">
+                                          <h5 class="modal-title font-14">Attachments</h5>
+                                          <div class="d-flex justify-content-end w-100 me-5">
+                                            <button class="btn btn-sm font-13 btn-light" 
+                                              @click="downloadAllAttachments" :disabled="isDownloadingAll">
+                                              {{ isDownloadingAll ? 'Downloading...' : 'Download All Files' }}
+                                            </button>
+                                          </div>
+                                          <button type="button" @click="closeAttachmentList" class="btn position-absolute"
+                                            style="right: 10px; top: 10px;"> &times;</button>
+                                        </div>
 
-                                <div class="modal-body">
-                                  <ul class="list-group font-13">
-                                    <li v-for="(url, i) in attachmentList" :key="i" 
-                                      class="list-group-item d-flex justify-content-between align-items-center">
-                                       <!-- <button
-                                v-if="hovered[`${field.fieldname}-${i}`] "
-                                @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                class="btn btn-sm btn-light border-0 position-absolute"
-                                style="top: -15px; right: -10px; border-radius: 50%; padding: 0 5px; height: 27px;">
-                                <i class="bi bi-x fs-6"></i>
-                              </button> -->
-                              <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
-                                      <span class="d-flex align-items-center gap-2">
-                                        <!-- File Type Icon -->
-                                        <i v-if="isImageFile(url)"
-                                          class="bi bi-file-earmark-image text-secondary fs-5"></i>
-                                        <i v-else-if="isPdfFile(url)"
-                                          class="bi bi-file-earmark-pdf text-danger fs-5"></i>
-                                        <i v-else-if="isExcelFile(url)"
-                                          class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
-                                        <i v-else class="bi bi-file-earmark fs-5"></i>
+                                        <div class="modal-body attachmnet_list_modal">
+                                          <ul class="list-group font-13">
+                                            <li v-for="(url, i) in attachmentList" :key="i" 
+                                              class="list-group-item d-flex justify-content-between align-items-center">
+                                      <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
+                                              <span class="d-flex align-items-center gap-2">
+                                                <!-- File Type Icon -->
+                                                <i v-if="isImageFile(url)"
+                                                  class="bi bi-file-earmark-image text-secondary fs-5"></i>
+                                                <i v-else-if="isPdfFile(url)"
+                                                  class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                                <i v-else-if="isExcelFile(url)"
+                                                  class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
+                                                <i v-else class="bi bi-file-earmark fs-5"></i>
 
-                                        <!-- File Name -->
-                                        <span style="max-width:500px;" class="nowrap">
-                                         
+                                                <!-- File Name -->
+                                                <span style="max-width:500px;" class="nowrap">
+                                                
 
-                                        {{ getFilename(url) }}
-                                        </span>
-                                      </span>
-                                      <div class="d-flex gap-2">
-                                        <span
-                                          class="fs-6 d-flex align-items-center"
-                                          :class="previewedAttachments.has(url) ? 'text-success' : 'text-secondary'"
-                                          style="border-radius: 5px;"
-                                        >
-                                          <i
-                                            class="bi bi-check2-circle"
-                                            :style="previewedAttachments.has(url) ? 'font-weight: 900; -webkit-text-stroke: 1px;' : 'font-size: 12px;'"
-                                          ></i>
-                                        </span>
-                                                                                <button class="btn btn-sm font-13 btn-light"
-                                                                                  @click="previewAttachment(url)">Show</button>
-                                                                              <button class="btn btn-sm font-13 btn-light"
-                                          @click="downloadAttachment(url, getFilename(url))">
-                                          Download
-                                        </button>
-                                        
-                                       <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
-                                  class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                                <i class="bi bi-x fs-6"></i>
-                                              </button>
+                                                {{ getFilename(url) }}
+                                                </span>
+                                              </span>
+                                              <div class="d-flex gap-2">
+                                                <span
+                                                  class="fs-6 d-flex align-items-center"
+                                                  :class="previewedAttachments.has(url) ? 'text-success' : 'text-secondary'"
+                                                  style="border-radius: 5px;"
+                                                >
+                                                  <i
+                                                    class="bi bi-check2-circle"
+                                                    :style="previewedAttachments.has(url) ? 'font-weight: 900; -webkit-text-stroke: 1px;' : 'font-size: 12px;'"
+                                                  ></i>
+                                                </span>
+                                                                                        <button class="btn btn-sm font-13 btn-light"
+                                                                                          @click="previewAttachment(url)">Show</button>
+                                                                                      <button class="btn btn-sm font-13 btn-light"
+                                                  @click="downloadAttachment(url, getFilename(url))">
+                                                  Download
+                                                </button>
+                                                
+                                              <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
+                                          class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                                        <i class="bi bi-x fs-6"></i>
+                                                      </button>
+                                              </div>
+                                            </li>
+                                          </ul>
+
+                                        </div>
+
                                       </div>
-                                    </li>
-                                  </ul>
-
-                                </div>
-
-                              </div>
-                            </div>
-                          </div>
-
-                          <!-- Preview Modal -->
-                          <div v-if="showPreviewModal" class="modal fade show"
-                            style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055;">
-                            <div class="modal-dialog modal-dialog-centered modal-xl">
-                              <div class="modal-content">
-
-                                <div class="modal-header">
-                                  <h5 class="modal-title font-14">Preview: {{ getFilename(previewUrl) }}</h5>
-                                  <button type="button" class="btn-close" @click="closePreviewModal">&times;</button>
-                                </div>
-
-                                <div class="modal-body text-center">
-                                  <img v-if="isImageFile(previewUrl)" :src="previewUrl" class="img-fluid border rounded"
-                                    style="max-height: 80vh;" />
-                                  <iframe v-else-if="isPdfFile(previewUrl)" :src="previewUrl" width="100%"
-                                    height="600px" style="border: none;"></iframe>
-                                  <div v-else class="text-center font-12">
-                                    <p>Preview not available for this file type.
-                                       <!-- <a :href="previewUrl"
-                                        download>Download</a> -->
-                                        <button class="btn btn-sm font-13 btn-light"
-  @click="downloadAttachment(url, previewUrl)">
-  Download
-</button>
-                                        </p>
+                                    </div>
                                   </div>
-                                </div>
 
-                              </div>
-                            </div>
-                          </div>
+                                  <!-- Preview Modal -->
+                                  <div v-if="showPreviewModal" class="modal fade show"
+                                    style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055;">
+                                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                                      <div class="modal-content">
 
+                                        <div class="modal-header">
+                                          <h5 class="modal-title font-14">Preview: {{ getFilename(previewUrl) }}</h5>
+                                          <button type="button" class="btn-close" @click="closePreviewModal">&times;</button>
+                                        </div>
 
-                        </template>
+                                        <div class="modal-body text-center">
+                                          <img v-if="isImageFile(previewUrl)" :src="previewUrl" class="img-fluid border rounded"
+                                            style="max-height: 80vh;" />
+                                          <iframe v-else-if="isPdfFile(previewUrl)" :src="previewUrl" width="100%"
+                                            height="600px" style="border: none;"></iframe>
+                                          <div v-else class="text-center font-12">
+                                            <p>Preview not available for this file type.
+                                              <!-- <a :href="previewUrl"
+                                                download>Download</a> -->
+                                                <button class="btn btn-sm font-13 btn-light"
+                                                      @click="downloadAttachment(url, previewUrl)">
+                                                      Download
+                                                    </button>
+                                                </p>
+                                          </div>
+                                        </div>
 
-
-
-                        <!-- Modal -->
-
-
-
-                        <!-- Hover preview -->
-                        <!-- <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
-                                  class="image-popup position-absolute"
-                                  style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
-                                  <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-                                </div> -->
-
-                        <template v-else-if="field.fieldtype === 'Link'">
-
-                          <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
-                            <span class="font-12">
-                              {{ field.value }}
-                            </span>
-
-                          </div>
-                          <div v-else>
-
-
-                            <input type="text" :value="field.value"
-                              :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                              @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
-                              @change="(event) =>
-                                logFieldValue(
-                                  event,
-                                  blockIndex,
-                                  sectionIndex,
-                                  rowIndex,
-                                  columnIndex,
-                                  fieldIndex
-                                )" class="form-control font-12 " />
-                          </div>
+                                      </div>
+                                    </div>
+                                  </div>
 
 
-                          <!-- <button v-if="field.value && field.label !== 'Department'"
-                              class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
-                                class="bi bi-link-45deg font-15"></i></button> -->
+                                </template>
 
 
-                        </template>
-                        <template v-else-if="field.fieldtype == 'Datetime'">
-                          <template v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
-                            <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
-                              :value="field.value" :type="field.fieldtype">
-                              {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
-                            </span>
-                          </template>
-                          <template v-else>
 
-                            <input type="datetime-local" v-model="field.value"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-white  pb-0 bg-transparent ' : ' '"
-                              :disabled="['Approved On', 'Acknowledged On'].includes(field.label)"
-                              :placeholder="'Enter ' + field.label" :name="'field-' +
-                                sectionIndex +
-                                '-' +
-                                columnIndex +
-                                '-' +
-                                fieldIndex
-                                " class="form-control p-1 previewInputHeight" @blur="
-                                  (event) =>
-                                    logFieldValue(
-                                      event,
-                                      blockIndex,
-                                      sectionIndex,
-                                      rowIndex,
-                                      columnIndex,
-                                      fieldIndex
-                                    )
-                                " />
-                          </template>
-                        </template>
+                                <!-- Modal -->
+
+
+
+                                <!-- Hover preview -->
+                                <!-- <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                                          class="image-popup position-absolute"
+                                          style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                                          <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                                        </div> -->
+
+
+
+
+                                  <!-- <button v-if="field.value && field.label !== 'Department'"
+                                      class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
+                                        class="bi bi-link-45deg font-15"></i></button> -->
+                                  <template v-else-if="field.fieldtype === 'Datetime'">
+                                    <!-- Read-only display -->
+                                    <template v-if="(!isEditable || ['Requested On' ,'Approved On'].includes(field.label))&& (props.readonlyFor === 'true' || blockIndex < currentLevel)">
+                                      <span
+                                        style="font-size: 12px;"
+                                        class="border-0 bg-transparent"
+                                      >
+                                        {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
+                                      </span>
+                                    </template>
+
+                                    <!-- Editable input -->
+                                    <template v-else>
+                                      <input
+                                        type="datetime-local"
+                                        v-model="field.value"
+                                        class="form-control  previewInputHeight"
+                                        :disabled="['Approved On', 'Acknowledged On','Requested On'].includes(field.label)"
+                                        :placeholder="'Enter ' + field.label"
+                                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                        @blur="(event) =>
+                                          logFieldValue(
+                                            event,
+                                            blockIndex,
+                                            sectionIndex,
+                                            rowIndex,
+                                            columnIndex,
+                                            fieldIndex
+                                          )"
+                                      />
+                                    </template>
+                                  </template>
+
 
 
                         <!-- Field Type Default -->
-                        <template v-else>
+                                <template v-else>
 
-                          <textarea v-if="field.fieldtype === 'Text'" :disabled="blockIndex < currentLevel" :class="[
-                            'form-control previewInputHeight mt-0 outline-none',
-                            (props.readonlyFor === 'true' || blockIndex < currentLevel) ? 'border-0 bg-transparent no-drag' : ''
-                          ]" :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
-                            :placeholder="'Enter ' + field.label"
-                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="form-control previewInputHeight mt-0 outline-none"
-                            :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
-                            @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" @blur="
-                              (event) =>
-                                logFieldValue(
-                                  event,
-                                  blockIndex,
-                                  sectionIndex,
-                                  rowIndex,
-                                  columnIndex,
-                                  fieldIndex
-                                )
-                            " />
+                                <textarea
+                                        v-if="field.fieldtype === 'Text'"
+                                        v-model="field.value"
+                                        :placeholder="'Enter ' + field.label"
+                                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                        :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+                                        :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                        :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                        :class="[
+                                          'form-control font-12 mt-0 p-1 outline-none',
+                                          !isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel) ? 'border-0 bg-transparent no-drag' : ''
+                                        ]"
+                                        @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)"
+                                        @blur="(event) =>
+                                          logFieldValue(
+                                            event,
+                                            blockIndex,
+                                            sectionIndex,
+                                            rowIndex,
+                                            columnIndex,
+                                            fieldIndex
+                                          )"
+                                      />
 
-                          <input v-if="field.fieldtype == 'Int'"
-                            :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
-                              " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-white' : ' '"
-                            :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
-                              sectionIndex +
-                              '-' +
-                              columnIndex +
-                              '-' +
-                              fieldIndex
-                              " class="form-control previewInputHeight" @blur="
-                                (event) =>
-                                  logFieldValue(
-                                    event,
-                                    blockIndex,
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                  )
-                              " />
-
-
-
-
-                          <template
-                            v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && (blockIndex === 0 || props.readonlyFor === 'true')">
-                            <span
-                              class="responsive-text"
-                              :class="[
-                                props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : '',
-                                field.value && field.value.length > 10 ? 'wrap-text' : ''
-                              ]"
-                              :value="field.value"
-                              :type="field.fieldtype">
-                              {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
-                            </span>
-                          </template>
+                                                              <input
+                                        v-if="field.fieldtype === 'Int'"
+                                        type="number"
+                                        v-model="field.value"
+                                        :placeholder="'Enter ' + field.label"
+                                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                        :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                        :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
+                                        :class="[
+                                          'form-control previewInputHeight',
+                                          !isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel) ? 'border-0 bg-white' : ''
+                                        ]"
+                                        @blur="(event) =>
+                                          logFieldValue(
+                                            event,
+                                            blockIndex,
+                                            sectionIndex,
+                                            rowIndex,
+                                            columnIndex,
+                                            fieldIndex
+                                          )"
+                                      />
 
 
-                          <template v-else>
-                            <component
-                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
-                              :style="{
-                                width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
-                              :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0  w-50 bg-transparent'
-                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
-                              :type="field.fieldtype"
-                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
-                                (event) =>
-                                  logFieldValue(
-                                    event,
-                                    blockIndex,
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                  )
-                              " class="form-control previewInputHeight w-100 p-1" />
-                          </template>
-                        </template>
-                      </div>
-                    </div>
+
+                                  <template
+                                    v-if="
+                                      (
+                                          !isEditable || 
+                                          ['Requested By'].includes(field.label) // ✅ show span even in edit mode for Requested By
+                                        ) &&
+                                      field.fieldtype !== 'Text' &&
+                                      field.fieldtype !== 'Int' &&
+                                      field.fieldtype !== 'Select' && field.value !== '' && field.value !== null && field.value !== undefined && !['Approver'].includes(field.label) &&
+                          blockIndex < currentLevel 
+                                    "
+                                  >
+                                    <span
+                                      class="responsive-text"
+                                      :class="[
+                                        (!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel))
+                                          ? 'border-0 bg-transparent'
+                                          : '',
+                                        field.value && field.value.length > 10 ? 'wrap-text' : ''
+                                      ]"
+                                      :value="field.value"
+                                      :type="field.fieldtype"
+                                    >
+                                      {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
+                                    </span>
+                                  </template>
+        
+                                  <template v-else>
+                                    <component
+                                      v-if="
+                                        field.fieldtype !== 'Text' &&
+                                        field.fieldtype !== 'Int' &&
+                                        field.fieldtype !== 'Select' 
+                                      "
+                                      :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                      :style="{
+                                        width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
+                                      }"
+                                      :disabled="isFieldAlwaysDisabled(field)"
+                                      :is="getFieldComponent(field.fieldtype)"
+                                      :class="(!isEditable || ['Requested By', 'Approver'].includes(field.label))  && (props.readonlyFor === 'true' || blockIndex < currentLevel)
+                                        ? 'border-0 bg-transparent'
+                                        : ''"
+                                      :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
+                                      :type="field.fieldtype"
+                                      :readOnly="!isEditable && (blockIndex < currentLevel || props.readonlyFor === 'true')"
+                                      :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                      @blur="
+                                        (event) =>
+                                          logFieldValue(
+                                            event,
+                                            blockIndex,
+                                            sectionIndex,
+                                            rowIndex,
+                                            columnIndex,
+                                            fieldIndex
+                                          )
+                                      "
+                                      class="form-control previewInputHeight w-100"
+                                    />
+                                  </template>
+
+                                </template>
                     <div
                       v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
+                    </div>
+                      </div>
                     </div>
 
                     <div v-if="field.fieldtype === 'Table' && field.options !== 'Ezy Item Details' && field.options !== 'ezy item details'" class="field-width">
@@ -1196,8 +1321,7 @@
                                                   </template>
                                                   <template v-else>
                                                     <p>No preview available for this file type.
-                                                      <!-- <a :href="previewUrl"
-                                                        download>Download</a> -->
+                                                      
                                                         <button class="btn btn-sm font-13 btn-light"
                                                           @click="downloadAttachment(url, previewUrl)">
                                                           Download
@@ -1344,7 +1468,7 @@
                                 </table>
                               </div>
                               <!-- File Preview Modal -->
-                              <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
+                              <!-- <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                   <div class="modal-content">
                                     <div class="modal-header">
@@ -1385,7 +1509,7 @@
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              </div> -->
                               <button
                                 v-if="blockIndex !== 0 && selectedData.formStatus !== 'Completed' && props.readonlyFor !== 'true'"
                                 class="btn btn-sm btn-light font-12 my-2" @click="addRow(tableName)">
@@ -1425,6 +1549,9 @@ import 'vue3-select/dist/vue3-select.css';
 import { onBeforeUnmount } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
 const props = defineProps({
   blockArr: {
     type: [Array, null],
@@ -1446,6 +1573,11 @@ const props = defineProps({
   employeeData: {
     type: Array,
   },
+  isEditable: {
+    type: Boolean,
+    default: false
+  },
+  
 });
 const route = useRoute();
 const router = useRouter();
@@ -1476,14 +1608,14 @@ const hovered = reactive({});
 const showPreview = ref(false);
 const attachmentFiles = ref([])
 // const currentTime = ref("");
-
+const linkSearchResults = ref([]);
 // let timer = null;
-// const isEditable = ref(false);
-
+const isEditable = computed(() => props.isEditable);
+const fieldChanges = ref({}) 
 // // Example function to toggle edit mode
-// function toggleEdit() {
-//   isEditable.value = !isEditable.value;
-// } 
+function toggleEdit() {
+  isEditable.value = !isEditable.value;
+}  
 
 // function updateTime() {
 //   currentTime.value = new Date()
@@ -1693,7 +1825,36 @@ const tableFileUpload = (file, row, fieldname) => {
   });
 };
 
+function isReadOnlyField(bIndex) {
+  return !isEditable.value && (props.readonlyFor === 'true' || bIndex < props.currentLevel);
+}
 
+function isFieldAlwaysDisabled(field) {
+  const alwaysDisabledLabels = ['Approver','Requested By'];
+  const alwaysDisabledExact = ['Approved On', 'Acknowledged On'];
+  if (props.readonlyFor === 'true') return true;
+  if (alwaysDisabledLabels.includes(field.label)) return true;
+  if (alwaysDisabledExact.includes(field.label)) return true;
+  return false;
+}
+function isSpecialField(field) {
+  const specialNames = ['requestor_signature'];
+  const specialLabels = ['Approved By', 'Acknowledged By', 'Requestor']; // adjust as needed
+  if (specialNames.includes(field.fieldname)) return true;
+
+  // check label ignoring case and extra spaces
+  const normalizedLabel = (field.label || '').trim().toLowerCase();
+  return specialLabels.some(lbl => normalizedLabel === lbl.toLowerCase());
+}
+
+const getResponsiveCols = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+  const total = blockIndex + sectionIndex + rowIndex + columnIndex + fieldIndex;
+
+  // Dynamically adjust number of columns based on total index sum
+  if (total % 4 === 0) return "col-lg-3 col-md-4 col-sm-6 col-12";
+  if (total % 3 === 0) return "col-lg-4 col-md-6 col-sm-6 col-12";
+  return "col-lg-6 col-md-6 col-sm-12 col-12";
+};
 
 watch(
   () => props.childData,
@@ -1824,6 +1985,38 @@ function getEmploye() {
       console.error("Error fetching user data:", error);
     });
 }
+function fetchDoctypeList(resourceName, searchText, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
+  if (!resourceName) return;
+
+  // Get the specific field object
+  const field =
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
+
+  const filters = [];
+  if (searchText && searchText.trim()) {
+    const searchField = resourceName.includes('Ezy Departments') ? 'department_name' : 'name';
+    filters.push([searchField, 'like', `%${searchText}%`]);
+  }
+
+  const fields = resourceName.includes('Ezy Departments') ? ['department_name', 'name'] : ['name'];
+
+  axiosInstance
+    .get(`/api/resource/${encodeURIComponent(resourceName)}`, {
+      params: { fields: JSON.stringify(fields), filters: JSON.stringify(filters) },
+    })
+    .then((res) => {
+      // Update field's dropdown options
+      field.linkSearchResults = res.data.map(item => item.name);
+      // console.log(field.linkSearchResults, 'Options updated for this field');
+    })
+    .catch((err) => {
+      console.error('Error fetching doctype list:', err);
+    });
+}
+
+
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
@@ -1841,6 +2034,26 @@ watch(
   { immediate: true }
 ); // Runs immediately in case childData already has a value
 
+// const handleSelectChange = (
+//   value,
+//   blockIndex,
+//   sectionIndex,
+//   rowIndex,
+//   columnIndex,
+//   fieldIndex
+// ) => {
+//   const field =
+//     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//       columnIndex
+//     ].fields[fieldIndex];
+
+//   field.value = value;
+
+//   const mockEvent = { target: { value: field.value } };
+//   // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+
+//   logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+// };
 const handleSelectChange = (
   value,
   blockIndex,
@@ -1854,13 +2067,36 @@ const handleSelectChange = (
       columnIndex
     ].fields[fieldIndex];
 
-  field.value = value;
+  const oldValue = field.value;
+  const newValue = value;
+  const key = field.label || field.fieldname;
 
-  const mockEvent = { target: { value: field.value } };
-  // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+  // update field value
+  field.value = newValue;
 
-  logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+  // only record change if different
+  if (oldValue !== newValue) {
+    fieldChanges.value[key] = {
+      oldValue,
+      newValue,
+    };
+
+    emit("field-change", fieldChanges.value);
+  }
+
+  // ✅ optional: call same validation + updateField emit as logFieldValue
+  validateField(
+    field,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+  );
+
+  emit("updateField", field);
 };
+
 const filteredBlocks = computed(() => {
 
   if (!props.blockArr || props.blockArr.length === 0) return [];
@@ -2251,7 +2487,7 @@ const logFieldValue = (
     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
       columnIndex
     ].fields[fieldIndex];
-
+const oldValue = field.value;
   if (eve.target.files && eve.target.files.length > 0) {
     let files = Array.from(eve.target.files); // Convert FileList to an array
 
@@ -2274,14 +2510,10 @@ const logFieldValue = (
   } else if (eve.target.type === "checkbox") {
     if (field.fieldtype === "Check") {
       // Ensure value is a string, not an array
-      if (eve.target.checked) {
-        // If checked, set the value as a string
-        field["value"] = eve.target.checked ? 1 : 0;
-
-      } else {
-        // If unchecked, set the value as an empty string (or use any default value)
-        field.value = "";
-      }
+      if (field.fieldtype === "Check") {
+    // Always set value as 1 or 0
+    field.value = eve.target.checked ? 1 : 0;
+  }
     } else if (field.fieldtype === "Small Text") {
       let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
 
@@ -2294,7 +2526,7 @@ const logFieldValue = (
       }
 
       field.value = JSON.stringify(selectedValues); // Store as stringified array
-      console.log(field.value);
+      // console.log(field.value);
       // console.log(field.value, "selectedValues", selectedValues);
 
 
@@ -2322,6 +2554,18 @@ const logFieldValue = (
     }
 
     field["value"] = inputValue;
+  }
+    const newValue = field.value;
+  const key = field.label || field.fieldname;
+
+  // Only store if the value actually changed
+  if (oldValue !== newValue) {
+    fieldChanges.value[key] = {
+      oldValue,
+      newValue,
+    };
+    // console.log("Field change recorded:", fieldChanges.value);
+    emit('field-change', fieldChanges.value);
   }
   validateField(
     field,
@@ -2378,25 +2622,38 @@ const generateRandomNumber = () => {
 };
 
 const uploadFile = (file, field) => {
-  // const randomNumber = generateRandomNumber();
+  const oldValue = field.value; // ← store old value
+
   let fileName = `ezyForms-@${file.name}`;
 
   const formData = new FormData();
   formData.append("file", file, fileName);
   formData.append("is_private", "0");
   formData.append("folder", "Home");
+
   axiosInstance
     .post(apis.uploadfile, formData)
     .then((res) => {
-      // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
           field["value"] += `|${res.message.file_url}`;
         } else {
           field["value"] = res.message.file_url;
         }
+
+        // ✅ emit updateField as before
         emit("updateField", field);
-        // console.log(field);
+
+        // ✅ add old/new to fieldChanges without touching your main logic
+        const newValue = field.value;
+        const key = field.label || field.fieldname;
+        if (oldValue !== newValue) {
+          fieldChanges.value[key] = {
+            oldValue,
+            newValue,
+          };
+          emit("field-change", fieldChanges.value);
+        }
       } else {
         console.error("file_url not found in the response.");
       }
@@ -2405,19 +2662,7 @@ const uploadFile = (file, field) => {
       console.error("Upload error:", error);
     });
 };
-const clearImage = (
-  blockIndex,
-  sectionIndex,
-  rowIndex,
-  columnIndex,
-  fieldIndex
-) => {
-  const field =
-    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].fields[fieldIndex];
-  field.value = ""; // Reset the field value
-};
+
 
 
 // Modal handling
@@ -2479,12 +2724,15 @@ const previewedAttachments = ref(new Set());
 //   console.log(allAttachments.value,"allAttachments.value");
 // }
 
+
+
 function collectAllAttachments(blocks) {
+  // console.log("Current Level =>", props.currentLevel); 
   const attachments = [];
 
   (blocks || []).forEach((block, blockIndex) => {
-    // 🚫 Skip the current level block
-    if (String(blockIndex) === String(props.currentLevel)) {
+    // 🚫 Only check previous levels
+    if (Number(blockIndex) >= Number(props.currentLevel)) {
       return;
     }
 
@@ -2492,26 +2740,22 @@ function collectAllAttachments(blocks) {
       (section.rows || []).forEach((row) => {
         (row.columns || []).forEach((column) => {
           (column.fields || []).forEach((field) => {
-            // console.log("Attach field =>",field.label,"| fieldtype =>",field.fieldtype,"| value =>",field.value);
-
+            
             if (field.fieldtype === "Attach" && field.value) {
               const files = field.value
                 .split("|")
                 .map((f) => f.trim())
                 .filter((f) => f);
 
-              // ✅ Normal Attachments (require preview)
               if (
-                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(
-                  field.label
-                )
+                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(field.label)
               ) {
                 attachments.push(...files);
               } else {
-                // ✅ Auto-mark these as previewed
                 files.forEach((f) => previewedAttachments.value.add(f));
               }
             }
+
           });
         });
       });
@@ -2520,12 +2764,14 @@ function collectAllAttachments(blocks) {
 
   allAttachments.value = attachments;
 
-  // ✅ Check if attachments are already all previewed
+  // ✅ Only require preview for previous levels’ attachments
   const allPreviewed = allAttachments.value.every((f) =>
     previewedAttachments.value.has(f)
   );
+
   emit("attachmentsReady", allPreviewed);
 }
+
 
 
 /**
@@ -2605,6 +2851,39 @@ function isExcelFile(file) {
   return /\.(xls|xlsx)$/i.test(file)
 }
 
+const isDownloadingAll = ref(false);
+
+async function downloadAllAttachments() {
+  const zip = new JSZip();
+
+  for (const url of attachmentList.value) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("File not found");
+
+      const blob = await response.blob();
+      zip.file(getFilename(url), blob);
+
+      // ✅ Mark this file as previewed
+      previewedAttachments.value.add(url);
+    } catch (err) {
+      console.error("Failed to fetch file:", url, err);
+    }
+  }
+
+  // ✅ Generate ZIP file
+  const content = await zip.generateAsync({ type: "blob" });
+  saveAs(content, "attachments.zip");
+
+  // ✅ Check if all attachments are downloaded
+  const allDownloaded = attachmentList.value.every((f) =>
+    previewedAttachments.value.has(f)
+  );
+
+  // ✅ Emit event to parent
+  emit("attachmentsReady", allDownloaded);
+}
+
 async function downloadAttachment(url, filename) {
   try {
     const response = await fetch(url);
@@ -2616,6 +2895,15 @@ async function downloadAttachment(url, filename) {
     link.download = filename;
     link.click();
     window.URL.revokeObjectURL(link.href);
+     previewedAttachments.value.add(url);
+
+    // ✅ Check if ALL attachments are downloaded
+    const allDownloaded = allAttachments.value.every((f) =>
+      previewedAttachments.value.has(f)
+    );
+
+    // ✅ Emit event like previewAttachment
+    emit("attachmentsReady", allDownloaded);
   } catch (err) {
     alert("Unable to download file: " + err.message);
   }
@@ -2656,7 +2944,7 @@ const removeFile = (
       columnIndex
     ].fields[fieldIndex];
 
-  console.log(field, "field in remove file");
+  // console.log(field, "field in remove file");
 
   const files = field.value ? field.value.split('|').map(f => f.trim()) : [];
 
@@ -2748,7 +3036,22 @@ const isImageVendor = (url) => {
 //       position: absolute; top: -4px;
 // }
 
+.form-check-input{
+  // border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
 
+
+}
+.form-check-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid blue !important;
+}
 .responsive-text {
   font-size: 12px; /* default for mobile */
 }
@@ -2867,7 +3170,7 @@ border: 1px solid #EEEEEE !important;
   // margin-top: 5px;
   // margin-bottom: 5px;
   font-size: 12px;
-  padding: 3px 3px;
+  // padding: 3px 3px;
 }
 
 .dynamicColumn {
@@ -3200,5 +3503,17 @@ td {
   white-space: normal !important;
   word-break: break-word;
   max-width: 100%;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #000;
+  outline: 0;
+  box-shadow: none;
+}
+.attachmnet_list_modal{
+  height: 80vh;
+  overflow: auto;
+}
+.download-all-btn{
+  background-color: #adadad;
 }
 </style>

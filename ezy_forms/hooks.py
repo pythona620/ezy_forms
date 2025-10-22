@@ -20,8 +20,8 @@ app_license = "mit"
 # 		"has_permission": "ezy_forms.api.permission.has_app_permission"
 # 	}
 # ]
-after_install = ["ezy_forms.api.v1.default_mail_templates.email_template_create","ezy_forms.api.v1.custom_role_permission.system_role_permissions"]
-after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
+after_install = ["ezy_forms.api.v1.default_mail_templates.email_template_create","ezy_forms.api.v1.custom_role_permission.system_role_permissions","ezy_forms.api.v1.custom_role_permission.wf_role_creation"]
+after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap","ezy_forms.api.v1.custom_role_permission.system_role_permissions"]
     
 # Includes in <head>
 # ------------------
@@ -161,6 +161,7 @@ doc_events = {
     "after_insert":"ezy_forms.api.v1.make_private_file_to_public.make_file_public_after_insert"
 },
 "Role": {
+        "before_insert": "ezy_forms.api.v1.custom_role_permission.restrict_spical_characters_in_role",
         "after_insert": "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions"    
 }
 }

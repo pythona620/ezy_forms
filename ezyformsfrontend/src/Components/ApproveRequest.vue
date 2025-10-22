@@ -8,13 +8,13 @@
           <div class="backtofromPage  px-2 py-2">
             <!-- <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
                   class="bi bi-arrow-left px-2"></i></span>Back</router-link>  -->
-                  <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
-                    <i class="bi bi-arrow-left px-2"></i>Back</span>
+            <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
+              <i class="bi bi-arrow-left px-2"></i>Back</span>
           </div>
           <div>
-            <button class="btn btn-light font-12  me-2 d-xl-none " type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
-                class="bi bi-clock font-14"></i> Activity</button>
+            <button class="btn btn-light font-12  me-2 d-xl-none " type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="bi bi-clock font-14"></i>
+              Activity</button>
 
 
           </div>
@@ -45,6 +45,7 @@
                         v-if="tableData?.status === 'Request Cancelled'">
                         Request Rejected
                       </span>
+
                     </div>
                     <!-- <span v-if="tableData?.status === 'Completed'"><i
                         class="bi approved-icon bi-check2-circle "></i></span>
@@ -56,10 +57,13 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event"
-                    @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
-                    <!-- @attachmentsReady="attachmentsReady = $event" -->
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+                    @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"
+                    @field-change="handleFieldChanges" @updateTableData="approvalChildData" :childData="responseData"
+                    :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
+                    @updateField="updateFormData" @formValidation="isFormValid = $event"
+                    @acknowledgementValidation="isAcknowledgementValid = $event" />
+                  <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
                 <div v-if="selectedData?.type === 'myforms' &&
@@ -77,7 +81,7 @@
                 <div v-if="selectedData.type === 'mytasks'" class="">
 
                   <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column ">
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column">
                     <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
@@ -88,13 +92,22 @@
                     </div> -->
 
                     <div class="form-floating mb-2 p-1">
-                      <!-- :disabled="view_only_reportee === 1" -->
                       <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
                         @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                        v-model="ApproverReason"></textarea>
+                        v-model="ApproverReason" maxlength="140"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
-                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
+
+                      <!-- Validation error -->
+                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">
+                        Please enter comments**
+                      </span>
+
+                      <!-- Character counter -->
+                      <span class="font-10 text-muted ps-1">
+                        {{ ApproverReason.length }}/140
+                      </span>
                     </div>
+
                     <div class=" d-flex justify-content-between ">
                       <div>
                         <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
@@ -120,23 +133,36 @@
                           </button>
 
                         </div> -->
-                        <div>
-                            <!-- @click.prevent="handleApprove" -->
-                          <!-- <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                        <div class="d-flex gap-2">
+                          <!-- ✏️ Edit / Discard Button -->
+                          <div v-if="allowEdit" class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-light font-12 text-dark mb-2"
+                              :class="isEditable ? 'btn-outline-secondary' : 'btn-outline-light'"
+                              @click="handleEditClick">
+                              <template v-if="!isEditable">
+                                <i class="bi bi-pencil-fill"></i> Edit
+                              </template>
+                              <template v-else>
+                                Discard
+                              </template>
+                            </button>
+                          </div>
+
+                          <!-- ✅ Approve / Save & Approve Button -->
+                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="handleApprove" :class="isEditable ? 'wide-approve' : 'normal-approve'">
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
-                          </button> -->
-                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="handleApprove">
-                            
-                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                              aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
+                            <span v-else>
+                              <i class="bi bi-check-lg font-15 me-2"></i>
+                              <span class="font-12">
+                                {{ isEditable ? "Save & Approve" : "Approve" }}
+                              </span>
+                            </span>
                           </button>
+
+
+                          <!-- 🧩 Custom Modal -->
 
                         </div>
                       </div>
@@ -149,57 +175,7 @@
           </div>
           <div class="col-lg-3 d-none d-lg-block">
             <div class="activity-log-container px-1">
-              <!-- <div class=" w-100  mb-2">
-              <div class=" py-2 px-3">
-
-                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
-              </div>
-              <div class="py-2 px-3">
-                <span class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData.total_levels }})</span>
-              </div>
-            </div> -->
-              <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
-              <h6 class="font-14 ps-3  mb-0">Activity log <span
-                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                  class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData?.total_levels }})</span>
-                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
-                  Completed
-                </span>
-                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
-                  Request Rejected
-                </span>
-              </h6>
-              <button v-if="tableData.status === 'Completed'"
-                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
-                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                PDF</button>
-            </div> -->
               <div class="row mb-3">
-                <!-- <div class="col-xl-3 col-lg-12 col-md-12">
-                  <div class="d-flex  align-items-baseline  mt-2">
-                   
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                        class="text-warning font-11 text-nowrap fw-bold">
-                        Pending ({{ tableData.current_level }} /
-                        {{ tableData?.total_levels }})</span>
-                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
-                        Approved
-                      </span>
-                      <span class=" font-11 requestRejected text-nowrap"
-                        v-if="tableData?.status === 'Request Cancelled'">
-                        Request Rejected
-                      </span>
-                    </div>
-                  </div>
-
-
-                </div> -->
-
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
 
@@ -216,9 +192,6 @@
 
                         <i class="bi bi-arrow-right px-2"></i>
                       </button>
-
-
-
                     </div>
                     <!-- Case 1: Both PDF + Workorder available -->
                     <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
@@ -254,30 +227,11 @@
 
 
 
-                    <!-- <div>
-                      <button
-                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
-                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
-                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
-                      </button>
-                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>
-                    </div> -->
-                    <!-- data-bs-toggle="modal"
-                      data-bs-target="#pdfView" -->
-                    <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>  -->
 
-                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
+
+                    <button v-if="tableData.status !== 'Completed'" type="button"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " data-bs-toggle="modal"
+                      data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
                     </button>
 
@@ -299,28 +253,70 @@
                 </div>
 
                 <!-- Activity Log -->
-                <div v-if="activeTab === 'activity'">
                   <!-- <div class="py-2">
                     <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
                   </div> -->
-                  <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-                    :class="{ 'last-item': index === activityData.length - 1 }">
-                    <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                      ? 'activity-log-dot'
-                      : 'activityRedDot'"></div>
+              <div v-if="activeTab === 'activity'">
+                <!-- Activity log items -->
+                <div
+                  v-for="(item, index) in activityData"
+                  :key="index"
+                  class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 && !formatApprover(tableData.assigned_to_users) }"
+                >
+                  <div
+                    :class="[
+                      item.action === 'Approved' ||
+                      item.action === 'Request Raised' ||
+                      item.action === 'Completed'
+                        ? 'activity-log-dot'
+                        : 'activityRedDot'
+                    ]"
+                  ></div>
+
+                      <div class="activity-log-content ">
+                        <div class="font-12">
+                          <span class="fw-bold">{{ formatAction(item.action) }}</span>
+                          <span class="activity_role">{{ item.role }}</span><br />
+                          <span>{{ item.user }}</span>
+                          <span class="px-1">on</span>
+                          <span class="italic_font px-1">{{ formatCreation(item.time) }}</span>
+                          <div class="activity_reason">
+                            <span class="comments_span">comments: </span>
+                            <span>{{ item.reason || 'N/A' }}</span>
+                          </div>
+                        </div>
+
+                        <div class="text-end">
+                          <button
+                            v-if="item.field_changes && item.field_changes !== 'null'"
+                            class="btn btn-sm font-13 edits_btn"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#changesOffcanvas"
+                            @click="openChanges(item)"
+                          >
+                            <i class="bi bi-pencil"></i> Edits in form
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                <!-- ✅ Next Approver Section -->
+                  <div v-if="formatApprover(tableData.assigned_to_users)" class="activity-log-item last-item">
+                    <div class="activityPendingDot"></div>
                     <div class="activity-log-content">
-                      <p class="font-12 mb-1">
-
-                        <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
-                        <span class="strong-content fw-bolder">{{ item.user }}</span><br />
-                        <span>{{ item.role }}</span><br />
-                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-
-                      </p>
+                      <span class=" fw-bold font-12">Pending</span><br/>
+                      <span class="font-12 text-muted fw-normal">
+                        Waiting for
+                        <span class="fw-semibold text-dark">
+                          {{ formatApprover(tableData.assigned_to_users) }}
+                        </span> approval
+                      </span>
                     </div>
                   </div>
-                </div>
+            </div>
+
 
                 <!-- Linked Forms -->
                 <div v-else-if="activeTab === 'linked'">
@@ -411,17 +407,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body linkedformspreview p-4">
-            <!-- Show key-value -->
-            <!-- <table class="table table-bordered table-sm">
-                        <tbody>
-                          <tr v-for="(item, index) in normalFields" :key="index">
-                            <th class="font-12 text-nowrap">
-                              {{ formatKey(item.key) }}
-                            </th>
-                            <td class="font-12">{{ item.value }}</td>
-                          </tr>
-                        </tbody>
-                      </table> -->
+
             <div class="row">
               <div class=" col-md-12">
                 <div class="row">
@@ -431,23 +417,7 @@
                   </div>
                 </div>
               </div>
-              <!-- <div class=" col-md-6 ">
-                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
-                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
-                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                              ? 'activity-log-dot'
-                              : 'activityRedDot'"></div>
-                            <div class="activity-log-content">
-                              <p class="font-12 mb-1">
-                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                                <span class="strong-content">{{ item.user_name }}</span><br />
-                                <span>{{ item.role }}</span><br />
-                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-                              </p>
-                            </div>
-                          </div>
-                        </div> -->
+
             </div>
 
 
@@ -479,7 +449,38 @@
         </div>
       </div>
     </div>
+    <div class="offcanvas offcanvas-end custom-responsive " tabindex="-1" id="changesOffcanvas"
+      aria-labelledby="changesOffcanvasLabel">
+      <div class="offcanvas-header">
+        <h6 class="offcanvas-title" id="changesOffcanvasLabel">
+          Field Changes
+        </h6>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
 
+      <div class="offcanvas-body">
+        <table v-if="selectedItem && selectedItem.field_changes" class="table table-sm table-bordered font-12">
+          <thead class="table-light">
+            <tr>
+              <th>Field</th>
+              <th>Original Value</th>
+              <th>New Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(change, key) in parsedChanges" :key="key">
+              <td>{{ key }}</td>
+              <td class="old-value">{{ change.oldValue || '-' }}</td>
+              <td class="new-value">{{ change.newValue || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div v-else class="text-center text-muted font-12">
+          No field changes found.
+        </div>
+      </div>
+    </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -488,56 +489,9 @@
       </div>
       <div class="offcanvas-body">
         <div class="activity-log-container mt-0 px-1">
-          <!-- <div class=" w-100  mb-2">
-              <div class=" py-2 px-3">
 
-                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
-              </div>
-              <div class="py-2 px-3">
-                <span class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData.total_levels }})</span>
-              </div>
-            </div> -->
-          <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
-              <h6 class="font-14 ps-3  mb-0">Activity log <span
-                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                  class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData?.total_levels }})</span>
-                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
-                  Completed
-                </span>
-                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
-                  Request Rejected
-                </span>
-              </h6>
-              <button v-if="tableData.status === 'Completed'"
-                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
-                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                PDF</button>
-            </div> -->
           <div class="row mb-3">
-            <!-- <div class="col-xl-3 col-lg-12 col-md-12">
-                  <div class="d-flex  align-items-baseline  mt-2">
-                   
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                        class="text-warning font-11 text-nowrap fw-bold">
-                        Pending ({{ tableData.current_level }} /
-                        {{ tableData?.total_levels }})</span>
-                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
-                        Approved
-                      </span>
-                      <span class=" font-11 requestRejected text-nowrap"
-                        v-if="tableData?.status === 'Request Cancelled'">
-                        Request Rejected
-                      </span>
-                    </div>
-                  </div>
 
-
-                </div> -->
 
             <div class="col-xl-12 col-lg-12 col-md-12">
               <div class=" d-flex justify-content-between gap-2">
@@ -587,37 +541,6 @@
                   <i class="bi bi-download px-2 fw-bold"></i> Download
                 </button>
 
-
-
-
-
-                <!-- <div>
-                      <button
-                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
-                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
-                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
-                      </button>
-                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>
-                    </div> -->
-                <!-- data-bs-toggle="modal"
-                      data-bs-target="#pdfView" -->
-                <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>  -->
-
-                <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
-                      Preview
-                    </button> -->
-
               </div>
             </div>
           </div>
@@ -636,27 +559,65 @@
             </div>
 
             <!-- Activity Log -->
-            <div v-if="activeTab === 'activity'">
-              <!-- <div class="py-2">
-                    <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
-                  </div> -->
-              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-                :class="{ 'last-item': index === activityData.length - 1 }">
-                <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                  ? 'activity-log-dot'
-                  : 'activityRedDot'"></div>
-                <div class="activity-log-content">
-                  <p class="font-12 mb-1">
+             <div v-if="activeTab === 'activity'">
+                <!-- Activity log items -->
+                <div
+                  v-for="(item, index) in activityData"
+                  :key="index"
+                  class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 && !formatApprover(tableData.assigned_to_users) }"
+                >
+                  <div
+                    :class="[
+                      item.action === 'Approved' ||
+                      item.action === 'Request Raised' ||
+                      item.action === 'Completed'
+                        ? 'activity-log-dot'
+                        : 'activityRedDot'
+                    ]"
+                  ></div>
 
-                    <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                    <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
-                    <span class="strong-content">{{ item.user_name }}</span><br />
-                    <span>{{ item.role }}</span><br />
-                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                      <div class="activity-log-content ">
+                        <div class="font-12">
+                          <span class="fw-bold">{{ formatAction(item.action) }}</span>
+                          <span class="activity_role">{{ item.role }}</span><br />
+                          <span>{{ item.user }}</span>
+                          <span class="px-1">on</span>
+                          <span class="italic_font px-1">{{ formatCreation(item.time) }}</span>
+                          <div class="activity_reason">
+                            <span class="comments_span">comments: </span>
+                            <span>{{ item.reason || 'N/A' }}</span>
+                          </div>
+                        </div>
 
-                  </p>
-                </div>
-              </div>
+                        <div class="text-end">
+                          <button
+                            v-if="item.field_changes && item.field_changes !== 'null'"
+                            class="btn btn-sm font-13 edits_btn"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#changesOffcanvas"
+                            @click="openChanges(item)"
+                          >
+                            <i class="bi bi-pencil"></i> Edits in form
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                <!-- ✅ Next Approver Section -->
+                  <div v-if="formatApprover(tableData.assigned_to_users)" class="activity-log-item last-item">
+                    <div class="activityPendingDot"></div>
+                    <div class="activity-log-content">
+                      <span class=" fw-bold font-12">Pending</span><br/>
+                      <span class="font-12 text-muted">
+                        Waiting for
+                        <span class="fw-semibold text-dark">
+                          {{ formatApprover(tableData.assigned_to_users) }}
+                        </span> approval
+                      </span>
+                    </div>
+                  </div>
             </div>
 
             <!-- Linked Forms -->
@@ -777,12 +738,35 @@
       </div>
     </div>
 
+    <div class="modal modal-confirm fade show d-block" tabindex="-1" role="dialog" v-if="showConfirmModal"
+      style="background-color: rgba(0, 0, 0, 0.4)">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow">
+          <div class="modal-header">
+            <h6 class="modal-title fw-bold">Confirm Action</h6>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
 
+          <div class="modal-body">
+            <p class="m-0 text-secondary font-15">
+              {{ isEditable ? "Are you sure you want to discard changes?" : "Are you sure you want to edit the form?" }}
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light btn-sm font-13" @click="closeModal">Cancel</button>
+            <button class="btn btn-dark font-14 px-4" @click="confirmAction">
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed,onMounted } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -792,6 +776,7 @@ import { rebuildToStructuredArray } from "../shared/services/field_format";
 // import ButtonComp from "./ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showDefault, showError, showSuccess } from "../shared/services/toast";
 const route = useRoute();
 
 const selectedData = ref({
@@ -838,11 +823,17 @@ const activeTab = ref("activity");
 const linkedActivity = ref([]);
 const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
+const isEditable = ref(false);
+const allowEdit = ref(false);
+const changedFields = ref([]);
 const resetCommentsValidation = () => {
-  if (ApproverReason.value.trim() !== "") {
-    // If comment is not empty, set isCommentsValid to true
+  // Trim whitespace and validate
+  if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
     isCommentsValid.value = true;
   }
+  // else {
+  //   isCommentsValid.value = false;
+  // }
 };
 function formatCreation(dateStr) {
   const [datePart, timePart] = dateStr.split(' ');
@@ -864,25 +855,72 @@ function formatCreation(dateStr) {
   return `${formattedDate} ${formattedTime}`;
 }
 
+const showConfirmModal = ref(false);
+
+function handleEditClick() {
+  showConfirmModal.value = true;
+}
+
+function closeModal() {
+  showConfirmModal.value = false;
+}
+
+function confirmAction() {
+  if (isEditable.value) {
+    // Currently in edit mode — discard changes
+    window.location.reload(); // refresh page
+  } else {
+    // Enable edit mode
+    isEditable.value = true;
+  }
+  closeModal();
+}
 
 const ApprovePDF = ref(true)
+function handleFieldChanges(updatedChanges) {
+  // console.log("Received from child:", updatedChanges);
+  changedFields.value = updatedChanges;
+  // You can store or process these values as needed
+}
+const attachmentViewRequired=ref("");
+
+onMounted(() => {
+  attachmentViewRequired.value = sessionStorage.getItem("attachmentViewRequired");
+});
 
 const attachmentsReady = ref(false);
-
-// // Approve button click handler
 const handleApprove = () => {
-  console.log(attachmentsReady.value);
-  if (!attachmentsReady.value) {
-    toast("⚠️ Please preview all attachments before approving", { 
-      transition: "zoom",
-      theme: "auto",
-    });
+  // console.log(attachmentsReady.value);
+
+  // 🧩 Check if all attachments are previewed before approval
+  if (attachmentViewRequired.value == 1 && !attachmentsReady.value) {
+    showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
+  // console.log(emittedFormData.value, "pp");
+  // console.log(changedFields.value);
+
+  // 🧠 If editable, treat as Save & Approve
+  if (isEditable.value) {
+    // console.log("💾 Save & Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Approve");
+  } else {
+    // console.log("✅ Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Approve");
+  }
+};
+
+// // Approve button click handler
+// const handleApprove = () => {
+//   console.log(attachmentsReady.value);
+//   if (!attachmentsReady.value) {
+//     showDefault("⚠️ Please preview all attachments before approving");
+//     return;
+//   }
 
 
-  ApproverFormSubmission(emittedFormData, "Approve");
-}; 
+//   ApproverFormSubmission(emittedFormData, "Approve");
+// }; 
 
 // Format the date for display
 // const formatDate = (dateString) => {
@@ -934,6 +972,27 @@ function EditformSubmission() {
     });
   }
 }
+const formatApprover = (value) => {
+  if (!value) return "";
+
+  // If it's a string that looks like an array: "['IT', 'HR']"
+  if (typeof value === "string" && value.startsWith("[")) {
+    try {
+      // Replace single quotes with double quotes and parse
+      const parsed = JSON.parse(value.replace(/'/g, '"'));
+      if (Array.isArray(parsed)) {
+        return parsed.join(", ");
+      }
+      return parsed;
+    } catch {
+      // Fallback if JSON.parse fails
+      return value.replace(/[\[\]']/g, "");
+    }
+  }
+
+  return value;
+};
+
 
 // console.log("emittedFormData", emittedFormData.value);
 watch(
@@ -959,7 +1018,21 @@ function approvalChildData(data) {
   childtablesData.value = data;
   // console.log(data);
 }
+const selectedItem = ref(null);
 
+const openChanges = (item) => {
+  selectedItem.value = item;
+};
+
+const parsedChanges = computed(() => {
+  if (!selectedItem.value?.field_changes) return {};
+  try {
+    return JSON.parse(selectedItem.value.field_changes);
+  } catch (error) {
+    console.error("Invalid JSON:", error);
+    return {};
+  }
+});
 
 
 const formatAction = (action) => {
@@ -1131,14 +1204,14 @@ async function ApproverFormSubmission(dataObj, type) {
   //   isCommentsValid.value = false; // Show validation error
   //   return; // Stop execution
   // }
-if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields");
+  if (!isFormValid.value) {
+    showError("Please Fill All Mandatory Fields");
     return;
   }
 
- if (!isAcknowledgementValid.value) {
-      toast.error("Acknowledgement is required.");
-      return;
+  if (!isAcknowledgementValid.value) {
+    showError("Acknowledgement is required.");
+    return;
   }
   // isCommentsValid.value = true;
   loading.value = true; // Start loader
@@ -1155,14 +1228,14 @@ if (!isFormValid.value) {
   //   // ✅ Submit child table data first
   //   await ChildTableData();
   // } catch (error) {
-  //   toast.error("❌ Child table submission failed");
+  //   showError("❌ Child table submission failed");
   //   loading.value = false;
   //   return;
   // }
   // toast.info("Submitting form...", { autoClose: 500, transition: "zoom" });
 
 
- 
+
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
@@ -1170,13 +1243,13 @@ if (!isFormValid.value) {
         approvalStatusFn(dataObj, type);
       } else {
         loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+        showError("Failed to submit form");
       }
     })
     .catch((error) => {
       console.error("Error submitting form:", error);
       loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while submitting the form.");
     });
 }
 
@@ -1198,7 +1271,10 @@ function approvalStatusFn(dataObj, type) {
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
   };
-
+  // field_changes: Object.keys(changedFields.value).length ? changedFields.value : '',
+if (Object.keys(changedFields.value).length > 0) {
+    data.field_changes = changedFields.value;
+  }
   axiosInstance
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
@@ -1212,20 +1288,22 @@ function approvalStatusFn(dataObj, type) {
         }
         // DynamicCalculateMethod()
         ApproverReason.value = ""; // Clear reason after success
-        toast.success(`Request ${type}ed`, {
-          autoClose: 500,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
-          }
-        });
+        // toast.success(`Request ${type}d`, {
+        //   autoClose: 500,
+        //   transition: "zoom",
+        //   pauseOnHover: false,
+        //   onClose: () => {
+        //   }
+        // });
+        showSuccess(`Request ${type}d`);
+        router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
       } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+        showError(`Failed to ${type} request`);
       }
     })
     .catch((error) => {
       console.error("Error processing request:", error);
-      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while processing your request.");
     })
     .finally(() => {
       loading.value = false; // Ensure loader stops
@@ -1262,7 +1340,7 @@ function DynamicCalculateMethod() {
 //   //   // ✅ Submit child table data first
 //   //   await ChildTableData();
 //   // } catch (error) {
-//   //   toast.error("❌ Child table submission failed");
+//   //   showError("❌ Child table submission failed");
 //   //   loading.value = false;
 //   //   return;
 //   // }
@@ -1296,25 +1374,25 @@ function DynamicCalculateMethod() {
 //               // receivedForMe()
 
 //             } else {
-//               toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+//               showError(`Failed to request`);
 //             }
 //           })
 //           .catch((error) => {
 //             console.error("Error processing request:", error);
-//             toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//             showError("An error occurred while processing your request.");
 //           })
 
 
 
 //       } else {
 //         loading.value = false; // Stop loader on failure
-//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//         showError("Failed to submit form");
 //       }
 //     })
 //     .catch((error) => {
 //       console.error("Error submitting form:", error);
 //       loading.value = false; // Stop loader on error
-//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//       showError("An error occurred while submitting the form.");
 //     });
 //   // console.log(request_id,"data");
 //   // console.log(selectedcurrentLevel.value,"current level");
@@ -1349,13 +1427,13 @@ function ApproverCancelSubmission(dataObj, type) {
         approvalCancelFn(dataObj, type);
       } else {
         rejectLoad.value = false; // Stop loader on failure
-        toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
+        showError("Failed to cancel request");
       }
     })
     .catch((error) => {
       console.error("Error cancelling request:", error);
       rejectLoad.value = false; // Stop loader on error
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while cancelling the request.");
     });
 }
 
@@ -1405,20 +1483,23 @@ function approvalCancelFn(dataObj, type) {
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       if (response?.message) {
-        toast.success(`${type}`, {
-          autoClose: 500,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ name: "ReceivedForMe" }); // Navigate after toast
-          },
-        });
+        // toast.success(`Request ${type}ed`, {
+        //   autoClose: 500,
+        //   transition: "zoom",
+        //   pauseOnHover: false,
+        //   onClose: () => {
+        //   },
+        // });
+        showSuccess(`Request ${type}ed`);
+        router.push({ name: "ReceivedForMe" }); // Navigate after toast 
+
       } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+        showError(`Failed to ${type} request`);
       }
     })
     .catch((error) => {
       console.error("Error processing cancellation:", error);
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while cancelling the request.");
     })
     .finally(() => {
       rejectLoad.value = false; // Ensure loader stops
@@ -1450,12 +1531,12 @@ function receivedForMe(data) {
     // }
   }
 
-   const queryParams = {
-    fields: JSON.stringify(["linked_form_id","is_linked_form","property","doctype_name","name","current_level","total_levels","json_columns","status","action","assigned_to_users",
-    "be_half_of","cluster_name","department","department","employee_id","is_linked","requested_by","requested_on","requester_name","role","user_session_id"]),
+  const queryParams = {
+    fields: JSON.stringify(["linked_form_id", "is_linked_form", "property", "doctype_name", "name", "current_level", "total_levels", "json_columns", "status", "action", "assigned_to_users",
+      "be_half_of", "cluster_name", "department", "department", "employee_id", "is_linked", "requested_by", "requested_on", "requester_name", "role", "user_session_id"]),
     filters: JSON.stringify(filters),
-    doctype:doctypes.WFWorkflowRequests,
-    limit_page_length:"none"
+    doctype: doctypes.WFWorkflowRequests,
+    limit_page_length: "none"
   };
 
   // Fetch the records matching filters
@@ -1475,8 +1556,8 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
-      // console.log(" wrk === =>", view_only_reportee.value);
+      allowEdit.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.approver_can_edit === 1 ? true : false;
+      // console.log(" wrk === =>", allowEdit.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
@@ -1786,7 +1867,7 @@ function Wfactivitylog(name) {
   axiosInstance
     .post(apis.get_wf_activate_log, FormId)
     .then((responce) => {
-      // console.log(responce, "activity log data"); 
+      console.log(responce, "activity log data");
       activityData.value = responce.message || []; // Ensure it's always an array
 
     })
@@ -1841,7 +1922,7 @@ function toLinkedForm() {
       },
     });
   } else {
-    toast.error("No linked form available", { autoClose: 1000, transition: "zoom" });
+    showError("No linked form available");
   }
 
   // console.log("Linked Form Data:", tableData.value.is_linked_form);
@@ -1946,16 +2027,22 @@ watch(activityData, (newVal) => {
 
 
 .approvebtn {
-  width: 146px;
-  //height: 30px;
   background: #099819;
   color: white;
-  padding: 5px 15px 5px 15px;
-  gap: 7px;
+  padding: 5px 15px;
   border-radius: 4px;
-  opacity: 0px;
   font-weight: bold;
+  transition: width 0.3s ease;
 }
+
+.normal-approve {
+  width: 146px;
+}
+
+.wide-approve {
+  width: 180px;
+}
+
 
 .requestPreviewDiv {
   height: 75vh;
@@ -1994,8 +2081,10 @@ watch(activityData, (newVal) => {
   z-index: 10;
   background-color: #fff;
 }
+
 .responsive-title {
-  font-size: 12px; /* default mobile */
+  font-size: 12px;
+  /* default mobile */
 }
 
 @media (min-width: 768px) {
@@ -2017,13 +2106,14 @@ watch(activityData, (newVal) => {
   transform: translateX(-50%);
   z-index: 10;
   background-color: #fff;
-  padding: 5px ;
+  padding: 5px;
   display: flex;
   justify-content: space-between;
   width: 50%;
   margin: 2px 5px;
 
 }
+
 @media (max-width: 768px) {
   .approveBtns {
     width: 100%;
@@ -2049,21 +2139,9 @@ watch(activityData, (newVal) => {
   position: relative;
 }
 
-/* Activity log item */
-.activity-log-item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  /* Ensure dot and text align properly */
-  gap: 10px;
-  padding-left: 15px;
-  /* Space between dot and text */
-  margin-bottom: 10px;
-  /* Space between logs */
-}
 
 .activity_height {
-  height: 80vh;
+  height: 71vh !important;
   overflow-y: scroll;
   position: relative;
 }
@@ -2089,53 +2167,7 @@ watch(activityData, (newVal) => {
 }
 
 /* Activity log dot with inner padding and dotted border */
-.activity-log-dot {
-  position: relative;
-  width: 16px;
-  /* Increase size to accommodate padding */
-  height: 16px;
-  background-color: white;
-  /* Inner padding effect */
-  border-radius: 50%;
-  border: 2px dotted #ccc;
-  /* Dotted border */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 0;
-  margin-top: 3px;
-}
 
-/* Inner dot */
-.activity-log-dot::before {
-  content: "";
-  width: 8px;
-  /* Inner dot size */
-  height: 8px;
-  background-color: #2BED12;
-  /* Inner dot color */
-  border-radius: 50%;
-  display: block;
-}
-
-/* Add vertical line using ::after */
-.activity-log-dot::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  /* Position below the dot */
-  left: 50%;
-  width: 1px;
-  height: calc(100% + 50px);
-
-  /* Adjust line length */
-  background: repeating-linear-gradient(to bottom,
-      rgb(133, 133, 133),
-      rgb(133, 133, 133) 4px,
-      transparent 4px,
-      transparent 8px);
-  transform: translateX(-50%);
-}
 
 
 /* Remove line for the last item */
@@ -2143,53 +2175,11 @@ watch(activityData, (newVal) => {
   content: none;
 }
 
-.activityRedDot {
-  position: relative;
-  width: 16px;
-  /* Increase size to accommodate padding */
-  height: 16px;
-  background-color: white;
-  /* Inner padding effect */
-  border-radius: 50%;
-  border: 2px dotted #ccc;
-  /* Dotted border */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 0;
-  margin-top: 3px;
-}
 
 /* Inner dot */
-.activityRedDot::before {
-  content: "";
-  width: 8px;
-  /* Inner dot size */
-  height: 8px;
-  background-color: #ed1212;
-  /* Inner dot color */
-  border-radius: 50%;
-  display: block;
-}
 
 /* Add vertical line using ::after */
-.activityRedDot::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  /* Position below the dot */
-  left: 50%;
-  width: 1px;
-  height: calc(100% + 50px);
 
-  /* Adjust line length */
-  background: repeating-linear-gradient(to bottom,
-      rgb(133, 133, 133),
-      rgb(133, 133, 133) 4px,
-      transparent 4px,
-      transparent 8px);
-  transform: translateX(-50%);
-}
 
 /* Activity log content */
 .activity-log-content {
@@ -2197,6 +2187,116 @@ watch(activityData, (newVal) => {
   color: #333;
   flex: 1;
   /* Ensure text takes up remaining space */
+}
+.activity_role{
+  background-color: #E0E1FF;
+  padding: 1px 6px;
+  border-radius:6px;
+  margin: 0px 5px;
+}
+.activity_reason{
+  background-color: #FFFDE3;
+  padding: 6px;
+  margin: 2px 6px 2px 2px;
+  border-radius: 6px;
+}
+.edits_btn{
+  color:#1B14DF;
+}
+.activity-log-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding-bottom: 13px; /* space for line end */
+}
+
+/* Vertical dotted line for all items */
+.activity-log-item::after {
+  content: "";
+  position: absolute;
+  top: 25px; /* just below the dot */
+  left: 8px; /* align with dot center (since dot is 16px wide) */
+  width: 1px;
+  bottom: 0; /* extends till bottom of item */
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(133, 133, 133),
+    rgb(133, 133, 133) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Remove line for last item */
+.activity-log-item.last-item::after {
+  content: none;
+}
+
+/* Dots */
+.activity-log-dot,
+.activityRedDot,
+.activityPendingDot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  border: 2px dotted #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3px;
+  flex-shrink: 0;
+  z-index: 1; /* keeps dot above the line */
+}
+
+/* Inner dots */
+.activity-log-dot::before,
+.activityRedDot::before,
+.activityPendingDot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.activity-log-dot::before {
+  background-color: #2bed12;
+}
+
+.activityRedDot::before {
+  background-color: #ed1212;
+}
+.activityPendingDot::before {
+  background-color: #ffd700; /* Yellow for next approver */
+}
+/* Content styling */
+.activity-log-content {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  padding-left: 8px;
+}
+
+.activity_role {
+  background-color: #e0e1ff;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin: 0 5px;
+}
+
+.activity_reason {
+  background-color: #fffde3;
+  padding: 6px;
+  margin: 2px 6px 2px 2px;
+  border-radius: 6px;
+}
+
+.edits_btn {
+  color: #1b14df;
 }
 
 .activity-log-content strong {
@@ -2221,7 +2321,13 @@ td {
 .strong-content {
   font-weight: 500;
 }
+.italic_font{
+  font-style: italic !important;
 
+}
+.comments_span{
+  color: #DFCE14;
+}
 .status_completed {
   color: #2BED12;
   border: 2px solid #2BED12;
@@ -2274,6 +2380,7 @@ td {
 .offcanvas-header {
   box-shadow: 0px 2px 4px 0px #0000000D;
 }
+
 .offcanvas-end {
   width: 400px;
 }
@@ -2288,7 +2395,48 @@ td {
 /* Small screens */
 @media (max-width: 768px) {
   .offcanvas-end {
-    width: 80%; /* full width on mobile */
+    width: 80%;
+    /* full width on mobile */
+  }
+}
+
+.modal-confirm {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.old-value {
+  background-color: #fff0f0 !important;
+}
+
+/* 🟩 New value background */
+.new-value {
+  background-color: #e4f5e9 !important;
+}
+
+
+.offcanvas.custom-responsive.offcanvas-end {
+  width: 90% !important;
+}
+
+@media (min-width: 768px) {
+  .offcanvas.custom-responsive.offcanvas-end {
+    width: 50% !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .offcanvas.custom-responsive.offcanvas-end {
+    width: 40% !important;
   }
 }
 </style>

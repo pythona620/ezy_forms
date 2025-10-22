@@ -14,7 +14,7 @@
             />
             <i
               v-if="userData.profile_image"
-              class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0"
+              class="bi bi-pencil-fill edit-profile-icon position-absolute "
               @click="triggerFileInput('profile')"
               style="cursor: pointer;"
             ></i>
@@ -22,38 +22,52 @@
 
           <!-- Employee Details -->
           <div class="ms-md-3 flex-grow-1 text-center text-md-start">
-            <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
+            <h6 class="mb-3 mt-2">{{ userData.emp_name || "N/A" }}</h6>
 
             <!-- Top details -->
-            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 role-details">
-              <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
-              <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
-              <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
-              <span><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
-              <span><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "-" }}</span>
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-4 role-details">
+              <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "N/A" }}</span>
+              <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "N/A" }}</span>
+              <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "N/A" }}</span>
+              <span><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "N/A" }}</span>
+              <span><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "N/A" }}</span>
             </div>
 
             <!-- Bottom info -->
-            <div class="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-3 font-11">
-              <span>Department: {{ userData.department || "-" }}</span>
-              <span>Reporting Manager: {{ userData.reporting_to || "-" }}</span>
-              <span>Acknowledged On: {{ formatDateTime(userData.acknowledge_on) || "-" }}</span>
+            <div class="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-4 font-11">
+              <span>Department: 
+                <span class="fw-bold">
+
+                {{ userData.department || "N/A" }}
+                </span>
+
+              </span>
+              <span>Reporting Manager: 
+                <span class="fw-bold">
+                  {{ userData.reporting_to || "N/A" }}
+                </span>
+              </span>
+              <span>Acknowledged On: 
+                <span class="fw-bold">
+                {{ formatDateTime(userData.acknowledge_on) || "N/A" }}
+                </span>
+                </span>
             </div>
 
             <!-- Signature -->
-            <div class="mt-3 d-flex flex-column flex-sm-row align-items-center">
-              <p class="m-0 me-sm-2">Signature:</p>
+            <div class="mt-3 d-flex flex-column flex-sm-row align-items-end">
+              <p class="m-0 me-sm-2 fw-bold font-12">Signature:</p>
               <div class="position-relative d-inline-block mt-2 mt-sm-0">
                 <img
                   v-if="userData?.signature"
                   :src="userData.signature"
-                  class="img-fluid signiture-image border"
+                  class="img-fluid signiture-image border p-1"
                   @click="triggerFileInput('signature')"
                   style="cursor: pointer;"
                 />
                 <i
                   v-if="userData?.signature"
-                  class="bi bi-pencil edit-image m-2"
+                  class="bi bi-pencil-fill edit-image m-2"
                   @click="triggerFileInput('signature')"
                   style="cursor: pointer;"
                 ></i>
@@ -72,6 +86,38 @@
         </div>
       </div>
     </div>
+
+    <div v-if="reportingData.length">
+      <h6 class="font-16 my-3 ms-2 fw-bold">My Team</h6>
+      <div class="container-fluid p-0">
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-3" v-for="(employee, index) in reportingData" :key="index">
+            <div class="card p-3 shadow-sm team-card">
+              <div class="d-flex align-items-center">
+                <!-- Profile Image -->
+               <img :src="employee.profile_image || defaultImage" :class="[employee.profile_image ? 'rounded-circle' : '', 'me-3']" alt="Profile Image"
+                  width="80" height="80" />
+
+                <div>
+                  <h5 class="mb-0 font-14">{{ employee.emp_name || "N/A" }}</h5>
+                  <p class="paragraph-txt mb-2">{{ employee.emp_code || "N/A"}}</p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Designation :</strong> {{ employee.designation || "N/A" }}
+                  </p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Department :</strong> {{ employee.department || "N/A" }}
+                  </p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Email :</strong> {{ employee.emp_mail_id || "N/A" }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -79,10 +125,11 @@
 import { apis, doctypes } from "../../shared/apiurls";
 import axiosInstance from "../../shared/services/interceptor";
 import { onMounted, ref } from "vue";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+// import { toast } from "vue3-toastify";
+// import "vue3-toastify/dist/index.css";
 import defaultImage from "@/assets/UploadProfile.jpg";
 import defaultSign from "@/assets/Sign.png";
+import { showSuccess } from "../../shared/services/toast";
 
 
 const employeeData = ref({});
@@ -92,7 +139,7 @@ const userData = ref([])
 
 const fileInput = ref(null);
 const uploadType = ref('');
-
+const reportingData = ref("");
 
 function triggerFileInput(type) {
     uploadType.value = type; // 'profile' or 'signature'
@@ -100,7 +147,7 @@ function triggerFileInput(type) {
 }
 
 function formatDateTime(datetime) {
-  if (!datetime) return "-";
+  if (!datetime) return "N/A";
   const options = {
     year: 'numeric',
     month: 'short',
@@ -139,7 +186,7 @@ function uploadImage(event) {
         .then(() => {
             // userDetails(userData.value.name);
             userDetails(userData.value.name);
-            toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`, { autoClose: 300 });
+            showSuccess(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`);
         })
         .catch((error) => {
             console.error("Error uploading image:", error);
@@ -157,16 +204,12 @@ function uploadImage(event) {
 //         });
 // }
 function userDetails(empEmail) {
-  console.log(empEmail);
- 
-
-
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","company_field","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","name","profile_image","reporting_designation","reporting_to","signature"]),
     doctype:doctypes.EzyEmployeeList,
     filters: JSON.stringify([["Ezy Employee","emp_mail_id","=",empEmail]]),
-    
+
     order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
   };
 
@@ -174,12 +217,34 @@ function userDetails(empEmail) {
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
-        console.log(res.message.data);
         userData.value = res.message.data[0] || {};
+          fetchReportingToData()
       }
     })
     .catch((error) => {
       console.error("Error fetching department data:", error);
+    });
+}
+
+function fetchReportingToData() {
+  const filters = {
+    reporting_to: userData.value.emp_mail_id,
+  };
+
+  const queryParams = {
+    filters: JSON.stringify(filters),
+    limit_page_length: "none",
+    doctype:doctypes.EzyEmployeeList,
+    fields: JSON.stringify(["profile_image","name","department","designation","emp_code","emp_mail_id","emp_name"]),
+  };
+
+  axiosInstance
+    .get(`${apis.GetDoctypeData}`, { params: queryParams })
+    .then((res) => {
+      reportingData.value = res.message.data; // make sure `data.data` is correct
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
     });
 }
 
@@ -234,11 +299,12 @@ onMounted(() => {
 
 .edit-image {
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 79px;
-    background: black;
+    /* background: black; */
+    color: black;
     border-radius: 13px;
-    color: white;
+    /* color: white; */
     padding: 4px;
     font-size: 13px;
     height: 24px;
@@ -248,12 +314,15 @@ onMounted(() => {
     /* position: absolute;
     top: -15px;
     left: 133px; */
-    background: black;
+    /* background: black; */
     border-radius: 13px;
-    color: white;
+    /* color: white; */
+    color: black;
     padding: 4px;
     font-size: 13px;
     height: 25px;
+    top: -14px;
+    right: -11px;
 }
 
 span {
@@ -314,5 +383,12 @@ span {
 .upload-sign-btn:hover {
   background-color: #e9ecef;
 }
+.team-card:hover{
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
 
+.paragraph-txt{
+  font-size: 13px;
+  margin: 0px;
+}
 </style>

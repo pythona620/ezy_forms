@@ -142,7 +142,6 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
 
     if not filters:
         return []
-
     # Fetch workflow requests using DatabaseQuery (parent table)
     workflow_requests = DatabaseQuery("WF Workflow Requests").execute(
         filters=filters,

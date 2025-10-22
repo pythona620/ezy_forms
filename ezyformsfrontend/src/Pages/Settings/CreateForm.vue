@@ -101,10 +101,59 @@
         </div>
       </div>
     </div>
+  
+   <div class="modal fade" id="reportmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="reportmodalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-16" id="reportmodalLabel">Report Creation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+       <div class="d-flex justify-content-between align-items-center mb-2">
+  <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
 
+  <div class="form-check m-0">
+    <input
+      id="select-all-fields"
+      type="checkbox"
+      class="form-check-input me-1"
+      v-model="selectAll"
+      @change="toggleSelectAll"
+    />
+    <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
+  </div>
+</div>
 
-    <!-- <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" /> -->
+        <div class="report-fields row">
+          <div 
+            v-for="(field, index) in reportFields" 
+            :key="index" 
+            class="col-md-4 mb-3"
+          >
+          <div class="d-flex align-items-center">
+            <input
+              :id="'field-' + index"
+              type="checkbox"
+              class="form-check-input me-2"
+              v-model="field.selected"
+            />
+            <label :for="'field-' + index" class="form-label font-12 mb-0">
+              {{ getDisplayLabel(field) }}
+            </label>
+          </div>
+        </div>
 
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light font-13" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-dark font-13 text-white" @click="generateReport">Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </template>
 
@@ -122,6 +171,7 @@ import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import ButtonComp from '../../Components/ButtonComp.vue';
+import { showError, showInfo, showSuccess, showWarning } from '../../shared/services/toast';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
@@ -143,8 +193,12 @@ const pdfPreview = ref('')
 const childtableHeaders = ref([]);
 const is_admin = ref('');
 const isEnable = ref("");
-
-
+const reportFields = ref([])
+const responcedata = ref([]);
+const selectAll = ref(false);
+// Toggle function triggered when a checkbox is clicked
+const selectedRowData = ref(null);
+const selectedActionText = ref('');
 // Business unit and filter object
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value});
@@ -221,7 +275,7 @@ function viewPreview(data, index, type) {
       // console.log(designation);
 
       if (!parsedData.workflow.length) {
-        toast.info("No Roles Added", { autoClose: 500 })
+        showInfo("No Roles Added")
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -248,7 +302,7 @@ function viewPreview(data, index, type) {
           },
         });
       } else {
-        toast.info("You do not have permission to access this Form.");
+        showInfo("You do not have permission to access this Form.");
       }
     }
     //  else {
@@ -278,9 +332,50 @@ function actionClickedDropDown(row) {
   if (is_admin.value == 1) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
   }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
+   }  
 
   actions.value = baseActions;
 
+}
+
+function toggleSelectAll() {
+  reportFields.value.forEach(field => {
+    field.selected = selectAll.value;
+  });
+}
+
+// ✅ Watch for manual changes
+watch(
+  () => reportFields.value.map(f => f.selected),
+  (newVals) => {
+    // If every field is selected -> selectAll = true
+    if (newVals.every(v => v)) {
+      selectAll.value = true;
+    } else {
+      // If even one field is unselected -> selectAll = false
+      selectAll.value = false;
+    }
+  },
+  { deep: true }
+);
+
+function getDisplayLabel(field) {
+  const suffixMatch = field.fieldname.match(/_(\d+)$/);
+  const suffixNumber = suffixMatch ? parseInt(suffixMatch[1]) + 1 : null;
+
+  // Check if this field belongs to the "Approver" group
+  const approverGroup = ["approver", "approved_on", "approved_by"];
+  const baseField = field.fieldname.replace(/_\d+$/, "");
+
+  if (approverGroup.includes(baseField)) {
+    // Add number: if has suffix (_1) → 2, else → 1
+    return suffixNumber ? `${field.label} ${suffixNumber}` : `${field.label} 1`;
+  }
+
+  // For all other fields, just show the label
+  return field.label;
 }
 
 // function actionClickedDropDown(row){
@@ -304,6 +399,7 @@ function actionClickedDropDown(row) {
 
 //   return baseActions
 // })
+const reportShortCode = ref('');
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
     if (rowData) {
@@ -327,7 +423,7 @@ function actionCreated(rowData, actionEvent) {
       });
 
     } else {
-      toast.warn(" There is no form fields ")
+      showWarning(" There is no form fields ")
     }
   }
   else if (actionEvent.name === 'Edit Form') {
@@ -343,7 +439,7 @@ function actionCreated(rowData, actionEvent) {
       const designation = JSON.parse(storedData).designation;
       // console.log(designation);
       if (!parsedData.workflow?.length) {
-        toast.info("No Roles Added", { autoClose: 500 });
+        showInfo("No Roles Added");
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -379,9 +475,9 @@ function actionCreated(rowData, actionEvent) {
           });
         }
       } else if (rowData.enable === 0) {
-        toast.info("This form is currently disabled.", { autoClose: 500 });
+        showInfo("This form is currently disabled.");
       } else {
-        toast.info("You do not have permission to access this Form.", { autoClose: 500 });
+        showInfo("You do not have permission to access this Form.");
       }
     }
     //  else {
@@ -417,7 +513,73 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'In-active this form') {
     toggleFunction(rowData, null, null);
   }
+if (actionEvent.name === 'Create Report') {
+  console.log(rowData, "rowData");
+
+  // Store document name for PUT request
+  reportShortCode.value = rowData.name;
+
+  // Parse all available fields from form_json
+  const fields = JSON.parse(rowData?.form_json)?.fields || [];
+
+  // Convert saved report_fields string into an array of fieldnames
+  let alreadySelected = [];
+  if (rowData.report_fields) {
+    alreadySelected = rowData.report_fields
+      .split(",")
+      .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
+  }
+  
+
+  // Filter valid fields and mark them as selected if previously saved
+  reportFields.value = fields
+    .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
+    .map(f => ({
+      ...f,
+      selected: alreadySelected.includes(f.fieldname) // pre-check
+    }));
+
+  // Open the modal
+  const modal = new bootstrap.Modal(document.getElementById("reportmodal"), {});
+  modal.show();
 }
+
+}
+async function generateReport() {
+  // collect only selected fields
+  // collect selected fields
+  const selectedFields = reportFields.value
+    .filter(f => f.selected)
+    .map(f => `${f.fieldname} as '${f.label}'`);
+
+  const payload = selectedFields.join(","); // comma separated string
+
+  const data = {};
+  if (payload) {
+    data.report_fields = payload;
+  }
+
+  try {
+    const response = await axiosInstance.put(
+      apis.resource + doctypes.EzyFormDefinitions + `/${reportShortCode.value}`,
+      data
+    );
+
+    console.log("Report fields updated:", response.data);
+
+    // close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('reportmodal'));
+    if (modal) modal.hide();
+
+    // show success toast
+    showSuccess("Report Fields Updated Successfully");
+  } catch (error) {
+    console.error("Error updating report fields:", error);
+    showError("Failed to update report fields");
+  }
+   
+}
+
 
 function downloadPdf() {
 
@@ -446,11 +608,7 @@ function downloadPdf() {
     });
 }
 
-const responcedata = ref([]);
 
-// Toggle function triggered when a checkbox is clicked
-const selectedRowData = ref(null);
-const selectedActionText = ref('');
 
 function toggleFunction(rowData, rowIndex, event) {
   selectedRowData.value = rowData;
@@ -476,7 +634,7 @@ function confirmAction() {
     .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${selectedRowData.value.name}`, selectedRowData.value)
     .then((response) => {
       responcedata.value = response.data;
-      toast.success(`Form ${selectedActionText.value}d successfully`, { autoClose: 700 });
+      showSuccess(`Form ${selectedActionText.value}d successfully`);
       setTimeout(() => {
         fetchDepartmentDetails();
       }, 1000);
@@ -619,7 +777,8 @@ function fetchDepartmentDetails(data) {
               "is_linked",
               "is_linked_form",
               "form_department",
-              "series"
+              "series",
+              "report_fields"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -662,7 +821,11 @@ onMounted(() => {
 
 </script>
 
-<style>
+<style scoped lang="scss">
+.report-fields{
+  max-height: 400px;
+  overflow-y: auto;
+}
 .dashedcircle {
   border: 1px dashed #AAAAAA;
   height: 30px;

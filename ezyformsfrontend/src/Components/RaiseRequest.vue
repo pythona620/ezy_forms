@@ -7,7 +7,7 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv" ref="mainBlockRef">
-          <div class="d-flex justify-content-center align-items-center px-3 pb-2 ">
+          <div class="d-flex justify-content-center align-items-center px-3 py-2 ">
             <h5 class="card-title responsive-title">{{ checkingIs_linked.form_name }}</h5>
            
            
@@ -62,15 +62,18 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Acknowledgement</h5>
+            <h5 class="modal-title font-15">Acknowledgement</h5>
             <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
-            <label for="Acknowledgement">
+            <div class="d-flex align-items-center"> 
+
+            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-0 form-check-input Acknowledgement-check " />
+            <label for="Acknowledgement" class="acknowledgement-label">
 
             I acknowledge that the information provided is correct.
             </label>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" @click="acknowledge=''" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
@@ -105,6 +108,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 // import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { useRoute, useRouter } from "vue-router";
+import { showError, showSuccess } from "../shared/services/toast";
 
 const router = useRouter();
 const route = useRoute(); // Get query params from route
@@ -312,13 +316,14 @@ function RequestUpdate() {
     .then((resp) => {
       if (resp?.message?.success) {
 
-        toast.success("Request Raised", {
-          autoClose: 2000,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: "/todo/raisedbyme" });
-          },
-        });
+        // toast.success("Request Raised", {
+        //   autoClose: 2000,
+        //   transition: "zoom",
+        //   onClose: () => {
+        //   },
+        // });
+        showSuccess("Request Raised")
+        router.push({ path: "/todo/raisedbyme" });
       }
     });
 }
@@ -409,7 +414,7 @@ function handleTableData(data) {
 
 function EditRequestUpdate() {
    if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields");
+    showError("Please Fill All Mandatory Fields");
     return;
   }
   let form = {};
@@ -440,18 +445,17 @@ function EditRequestUpdate() {
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
     // console.log(resp, "EditRequestUpdate response");
-      toast.success(resp.message.message, {
-        autoClose: 2000,
-        transition: "zoom",
-        onClose: () => {
-          router.push({ path: "/todo/raisedbyme" });
-        },
-      });
+      // toast.success(resp.message.message, {
+      //   autoClose: 2000,
+      //   transition: "zoom",
+      //   onClose: () => {
+      //   },
+      // });
+      showSuccess(resp.message.message)
+      router.push({ path: "/todo/raisedbyme" });
+
     }else {
-      toast.error(resp.message.message || "Failed to update request", {
-        autoClose: 2000,
-        transition: "zoom",
-      });
+      showError(resp.message.message || "Failed to update request");
     }
   });
 }
@@ -815,12 +819,12 @@ function toRaiseReqBtn() {
   const hasError = childRef.value?.errorStatus ?? false;
 
   if (hasError) {
-    toast.error('Please fix errors before submitting.');
+    showError('Please fix errors before submitting.');
     return;
   }
 
   if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields");
+    showError("Please Fill All Mandatory Fields");
     return;
   }
 
@@ -839,14 +843,14 @@ function toRaiseReqBtn() {
 
 async function raiseRequestSubmission() {
   // if (!isFormValid.value) {
-  //   toast.error("Please Fill All Mandatory Fields");
+  //   showError("Please Fill All Mandatory Fields");
   //   return;
   // }
 
   const childEntries = Object.entries(childtablesData.value);
 
   // if (!childEntries.length) {
-  //   toast.error("No child table data found!");
+  //   showError("No child table data found!");
   //   return;
   // }
 
@@ -891,24 +895,24 @@ async function raiseRequestSubmission() {
     if (response) {
       request_raising_fn(response.docs[0]);
     } else {
-      toast.error("Submission successful but no response data.");
+      showError("Submission successful but no response data.");
     }
   } catch (error) {
     console.error("❌ Error submitting main form:", error);
-    toast.error("Error submitting the form.");
+    showError("Error submitting the form.");
   }
 }
 
 // async function raiseRequestSubmission() {
 //   if (!isFormValid.value) {
-//     toast.error("Please Check Fields");
+//     showError("Please Check Fields");
 //     return;
 //   }
 
 //   // try {
 //   //   await ChildTableData(); // ✅ Wait until all child table APIs are done
 //   // } catch (error) {
-//   //   toast.error("Child table submission failed");
+//   //   showError("Child table submission failed");
 //   //   return; // Stop main form submission
 //   // }  
 //   const childEntries = Object.entries(childtablesData.value);
@@ -1023,7 +1027,7 @@ function gettingDataToLink() {
 
 // async function raiseRequestSubmission() {
 //   if (!isFormValid.value) {
-//     toast.error("Please Fill Mandatory Fields");
+//     showError("Please Fill Mandatory Fields");
 //     return;
 //   }
 
@@ -1110,7 +1114,7 @@ function gettingDataToLink() {
 
 // async function raiseRequestSubmission() {
 //   if (!isFormValid.value) {
-//     toast.error("Please Fill Mandatory Fields");
+//     showError("Please Fill Mandatory Fields");
 //     return;
 //   }
 
@@ -1277,20 +1281,22 @@ function request_raising_fn(item) {
       );
       modal.hide();
       // saveloading.value = false;
+      showSuccess(resp?.message?.message || "Request Raised Successfully");
 
-      toast.success(resp?.message?.message, {
-        autoClose: 1000,
-        transition: "zoom",
-        onClose: () => {
-          router.push({ path: "/todo/raisedbyme" });
-        },
-      });
+      // toast.success(resp?.message?.message, {
+      //   autoClose: 1000,
+      //   transition: "zoom",
+      //   pauseOnHover: false,
+      //   onClose: () => {
+      //   },
+      // });
+      router.push({ path: "/todo/raisedbyme" });
       
     }
   })
    .catch((error) => {
       console.error("Error raising request:", error);
-      toast.error("Error raising request");
+      showError("Error raising request");
     })
     .finally(() => {
       saveloading.value = false;
@@ -1434,6 +1440,7 @@ function linked_id_adding_method(name) {
 .backtofromPage {
   background-color: #ffffff;
   padding: 5px;
+   box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
 .no-form {
@@ -1474,5 +1481,9 @@ button {
 .bi-x-lg::before {
   content: "\f659";
   margin-top: 8px;
+}
+.acknowledgement-label{
+  font-size: 14px;
+  font-weight: 500;
 }
 </style>

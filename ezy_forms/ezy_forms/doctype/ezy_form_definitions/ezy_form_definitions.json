@@ -19,6 +19,7 @@
   "accessible_departments",
   "form_short_name",
   "form_json",
+  "report_fields",
   "form_status",
   "print_format",
   "is_landscape",
@@ -26,7 +27,14 @@
   "workflow_check",
   "is_predefined_doctype",
   "is_linked",
-  "is_linked_form"
+  "is_linked_form",
+  "qr_code",
+  "qr_url",
+  "send_mail_for_frist_approval",
+  "mail_id",
+  "as_web_view",
+  "report_fields",
+  "public_form_response"
  ],
  "fields": [
   {
@@ -149,18 +157,55 @@
    "in_list_view": 1,
    "label": "Form Department",
    "options": "Ezy Departments"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Attach",
+   "label": "QR Code"
+  },
+  {
+   "fieldname": "qr_url",
+   "fieldtype": "Small Text",
+   "label": "QR URL"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_mail_for_frist_approval",
+   "fieldtype": "Check",
+   "label": "Send mail For Frist Approval"
+  },
+  {
+   "fieldname": "mail_id",
+   "fieldtype": "Data",
+   "label": "mail id"
+  },
+  {
+   "default": "0",
+   "fieldname": "as_web_view",
+   "fieldtype": "Check",
+   "label": "As Web View"
+  },
+  {
+   "fieldname": "report_fields",
+   "fieldtype": "Long Text",
+   "label": "Report Fields"
+  },
+  {
+   "fieldname": "public_form_response",
+   "fieldtype": "Long Text",
+   "label": "Public Form Response"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-21 11:15:28.746877",
+ "modified": "2025-10-08 16:49:44.252416",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
- {
+  {
    "create": 1,
    "delete": 1,
    "email": 1,

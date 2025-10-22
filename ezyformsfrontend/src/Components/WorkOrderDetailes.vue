@@ -372,7 +372,7 @@
                                             @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete
                                             Vendor</button>
                                           <!-- :disabled="!itemDetails.length" -->
-                                          <button class="btn  add_vendor_btn btn-sm ms-2" @click="addVendorModal"><i
+                                          <button :disabled="!itemDetails.length" class="btn  add_vendor_btn btn-sm ms-2" @click="addVendorModal"><i
                                               class="bi bi-plus"></i>
                                             Add
                                             Vendor</button>
@@ -568,44 +568,15 @@
 
                                         <div class="">
                                           <label class="form-label">Total price</label>
-                                          <input v-model="vendorForm.total_value" class="form-control form-control-sm"
-                                            readonly>
+                                          <input 
+  :value="(vendorForm.total_value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })" 
+  readonly 
+  class="form-control form-control-sm"
+/>
+
+
                                         </div>
-                                        <!-- <div class="row">
-                                <div class="col">
-                                  <label class="form-label">CGST %</label>
-                                  <input type="number" v-model.number="vendorForm.cgst_percent"
-                                    class="form-control form-control-sm" @input="calculateTaxes" />
-                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
-                                    vendorForm.cgst_amount
-                                    }}</small>
-                                </div>
-
-                                <div class="col">
-                                  <label class="form-label">UTGST %</label>
-                                  <input type="number" v-model.number="vendorForm.utgst_percent"
-                                    class="form-control form-control-sm" @input="calculateTaxes" />
-                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
-                                    vendorForm.utgst_amount
-                                    }}</small>
-                                </div>
-
-                                <div class="col">
-                                  <label class="form-label">IGST %</label>
-                                  <select v-model.number="vendorForm.igst_percent" class="form-select form-select-sm"
-                                    @change="calculateTaxes">
-                                    <option value="">Select IGST %</option>
-                                    <option :value="0">0%</option>
-                                    <option :value="5">5%</option>
-                                    <option :value="12">12%</option>
-                                    <option :value="18">18%</option>
-                                    <option :value="28">28%</option>
-                                  </select>
-                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
-                                    vendorForm.igst_amount
-                                    }}</small>
-                                </div>
-                              </div> -->
+                                       
                                         <div class="row">
                                           <div class="col">
                                             <label class="form-label">Transportation/freight</label>
@@ -862,8 +833,9 @@
                                       </div>
 
                                       <div>
+                                         <!-- @open="fetchingDesignations(index)" -->
                                         <Vue3Select :append-to-body="true" v-if="workflowEditIndex === index"
-                                          :multiple="true" v-model="element.designation" :options="designationOptions"
+                                          :multiple="true" v-model="element.designation" :options="designationOptions" 
                                           label="label" @keydown.enter="stopWorkflowEditing" />
                                         <!-- <input v-if="workflowEditIndex === index" :ref="el => setWorkflowInputRef(el, index)"
                           v-model="element.designation" class="form-control form-control-sm"
@@ -1125,7 +1097,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <span class="font-13">Item Details</span>
                       <div>
-                        <button class="btn btn-dark font-12" @click="AddNewItemMaster">Create Item</button>
+                        <button class="btn btn-dark font-12" @click="openItemModalMaster('create')">Create Item</button>
                       </div>
                     </div>
                     <div class="table-responsive mt-2">
@@ -1134,6 +1106,7 @@
                           <tr>
                             <th>Item Name</th>
                             <th>Unit of Measure</th>
+                            <th v-if="isAdmin === true" class=" text-center">Actions</th>
 
                           </tr>
                         </thead>
@@ -1141,12 +1114,20 @@
                           <tr v-for="(item, index) in availableItems" :key="index">
                             <td>{{ item.item_name }}</td>
                             <td>{{ item.item_unit_of_measure }}</td>
+                            <td  v-if="isAdmin" class="text-center" >
+                              <span v-tooltip.top="'Edit'"  @click="openItemModalMaster('edit', item, index)" class="text-center ">
+
+                              <i class="bi bi-pencil-fill mx-2 "></i>
+                              </span>
+                              <span v-tooltip.top="'Delete'"  @click="deleteMasterItem(item, index)"><i class="bi bi-trash-fill mx-1 text-danger" ></i></span>
+                            
+                            </td>
 
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                  <div class="modal fade" id="NewItemModalMaster" tabindex="-1" aria-labelledby="NewItemModalMaster"
+                    <div class="modal fade" id="NewItemModalMaster" tabindex="-1" aria-labelledby="NewItemModalMaster"
                     aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
                       <div class="modal-content">
@@ -1156,10 +1137,11 @@
                         </div>
                         <div class="modal-body">
 
-                          <div class="d-flex gap-2 mb-3">
+                          <div class="d-flex gap-2 mb-5 mt-3">
                             <div class="flex-grow-1 ">
+                             
                               <label class="font-13" for="itemName">Item Name</label>
-                              <input type="text" class="form-control" placeholder="Item name" v-model="newItem.name" />
+                              <input :disabled="modalType ==='edit'" type="text" class="form-control" placeholder="Item name" v-model="newItem.name" />
                             </div>
                             
                             <div class="flex-grow-1">
@@ -1181,7 +1163,9 @@
 
                         <div class="modal-footer">
                           <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button class="btn btn-sm btn-dark" @click="addNewItem">Add Item</button>
+                           <button class="btn btn-sm btn-dark" @click="saveItemMaster">
+                              {{ modalType === 'create' ? 'Add Item' : 'Update Item' }}
+                            </button>
 
                         </div>
                       </div>
@@ -1198,7 +1182,10 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <span class="font-13">Vendor Details</span>
                     <div>
-                      <button class="btn btn-dark font-12" @click="NewMasterVendorCreate">Create vendor</button>
+                      <button class="btn btn-dark font-12" @click="NewMasterVendorCreate('create')">
+                        Create vendor
+                      </button>
+
                     </div>
                   </div>
                   <div class="table-responsive mt-2">
@@ -1210,6 +1197,7 @@
                           <th>Contact</th>
                           <th>Email</th>
                           <th>Address</th>
+                          <th v-if="isAdmin" class="text-center px-4">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1221,6 +1209,12 @@
                           <td>
                             {{ vendor.address }}
                           </td>
+                          <td v-if="isAdmin" class="text-center">
+                          <span v-tooltip.top="'Edit'" class="font-12 btn-light" @click="NewMasterVendorCreate('edit', vendor)">
+                           <i class="bi bi-pencil-fill"></i>
+                          </span>
+                        </td>
+
                         </tr>
                       </tbody>
                     </table>
@@ -1230,7 +1224,7 @@
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="NewVendorMasterData">Add New Vendor</h5>
+                          <h5 class="modal-title font-14" id="NewVendorMasterData">{{ isEditingVendor ? 'Edit Vendor': 'Add New Vendor'}}</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -1238,29 +1232,31 @@
                           <div class="p-1 mb-3">
                             <div class="row">
                               <div class="col-md-6">
-                                <label class="font-13" for="itemName">Vendor Name</label>
-                                <input type="text" class="form-control" placeholder="Vendor name" v-model="NewMasterVendor.vendor_name" />
+                                <label class="font-13 fw-medium" for="itemGST">GST Number</label>
+                              <input :disabled="isEditingVendor"  type="text" class="form-control" placeholder="GST" v-model="NewMasterVendor.gst_number" />
                               </div>
-                              <div class="col-md-6">
-                                <label class="font-13" for="itemGST">GST Number</label>
-                              <input type="text" class="form-control" placeholder="GST" v-model="NewMasterVendor.gst_number" />
-                              </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                              <label class="font-13" for="itemContact">Contact Number</label>
+                               <div class="col-md-6">
+                              <label class="font-13 fw-medium" for="itemContact">Contact Number</label>
                               <input type="text" class="form-control" placeholder="Contact Number" v-model="NewMasterVendor.contact_number" />
                             </div>
+                             
+                            </div>
+                            <div class="row">
+                               <div class="col-md-6">
+                                <label class="font-13 fw-medium" for="itemName">Vendor Name</label>
+                                <input type="text" class="form-control" placeholder="Vendor name" v-model="NewMasterVendor.vendor_name" />
+                              </div>
+                               
 
                             <div class="col-md-6">
-                              <label class="font-13" for="itemEmail">Email</label>
+                              <label class="font-13 fw-medium" for="itemEmail">Email</label>
                               <input type="email" class="form-control" placeholder="Email" v-model="NewMasterVendor.mail_id" />
                             </div>
 
                             </div>
                             <div class="row">
                             <div class="col-md-6">
-                              <label class="font-13" for="itemAddress">Address</label>
+                              <label class="font-13 fw-medium" for="itemAddress">Address</label>
                               <textarea class="form-control" placeholder="Address" v-model="NewMasterVendor.address"></textarea>
                             </div>
 
@@ -1275,8 +1271,16 @@
                         </div>
 
                         <div class="modal-footer">
-                          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button class="btn btn-sm btn-dark" @click="AddNewVendor">Add Vendor</button>
+                          <!-- <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button> -->
+                          <!-- <button class="btn btn-sm btn-dark" @click="AddNewVendor">Add Vendor</button> -->
+                          <div class="modal-footer">
+                          <button class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="resetVendorForm">Cancel</button>
+                          <button class="btn btn-sm btn-dark font-13 text-white" @click="AddOrUpdateVendor">
+                            {{ isEditingVendor ? 'Update Vendor' : 'Add Vendor' }}
+                          </button>
+
+                        </div>
+
 
                         </div>
                       </div>
@@ -1311,10 +1315,11 @@ import { ref, nextTick } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
-import { toast } from 'vue3-toastify';
+// import { toast } from 'vue3-toastify';
 import draggable from "vuedraggable";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+import { showError, showInfo, showSuccess } from '../shared/services/toast';
 
 
 const route = useRoute();
@@ -1323,10 +1328,10 @@ const searchItem = ref('');
 const selectedItems = ref([]);
 const vendorSearch = ref('')
 const filteredVendorOptions = ref([])
-const itemDetails = ref([
 
   // { id: 1, item_name: 'Cable',quantity: 10,item_unit_of_measure:'Nos'},
   // { id: 1, item_name: 'Desktop',quantity: 10,item_unit_of_measure:'Nos'}  
+const itemDetails = ref([
 
 ]);
 const disableIGST = ref(false);
@@ -1340,56 +1345,56 @@ const vendorDetails = ref([
 ]);
 const expense_code = ref('')
 const cost_center = ref('')
-
+const isAdmin = ref(false)
+// { item_name: 'Computer', item_unit_of_measure: 'Unit' },
+// { item_name: 'CPU', item_unit_of_measure: 'Unit' },
+// { item_name: 'Mouse', item_unit_of_measure: 'Unit' },
+// { item_name: 'Molds', item_unit_of_measure: 'Kilogram' },
+// { item_name: 'Keyboard', item_unit_of_measure: 'Unit' },
+// { item_name: 'Monitor', item_unit_of_measure: 'Unit' },
+// { item_name: 'RAM', item_unit_of_measure: 'GB' },
+// { item_name: 'SSD', item_unit_of_measure: 'GB' },
+// { item_name: 'Printer', item_unit_of_measure: 'Unit' },
+// { item_name: 'Scanner', item_unit_of_measure: 'Unit' },
+// { item_name: 'Router', item_unit_of_measure: 'Unit' },
+// { item_name: 'Cable', item_unit_of_measure: 'Meter' },
+// { item_name: 'Switch', item_unit_of_measure: 'Unit' },
+// { item_name: 'Hard Drive', item_unit_of_measure: 'TB' },
 const availableItems = ref([
-  // { item_name: 'Computer', item_unit_of_measure: 'Unit' },
-  // { item_name: 'CPU', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Mouse', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Molds', item_unit_of_measure: 'Kilogram' },
-  // { item_name: 'Keyboard', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Monitor', item_unit_of_measure: 'Unit' },
-  // { item_name: 'RAM', item_unit_of_measure: 'GB' },
-  // { item_name: 'SSD', item_unit_of_measure: 'GB' },
-  // { item_name: 'Printer', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Scanner', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Router', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Cable', item_unit_of_measure: 'Meter' },
-  // { item_name: 'Switch', item_unit_of_measure: 'Unit' },
-  // { item_name: 'Hard Drive', item_unit_of_measure: 'TB' },
 
 ]);
+// { rank: 3, name: 'Daniel White Pvt Ltd', gst: '32434567546554', contact: '8697237439', email: 'srinkhasu@gmail.com', total_value: '', selected: false },
+// { rank: 2, name: 'Jane Johnson Pvt Ltd', gst: '2746345345656', contact: '9954354323', email: 'venkat198@gmail.com', total_value: '', selected: false },
+// { rank: 4, name: 'Robert Wilson Pvt Ltd', gst: '330293878240', contact: '9032873873', email: 'Mail1989@gmail.com', total_value: '', selected: false },
+// { rank: 1, name: 'Sophia Martin Pvt Ltd', gst: '1NH762587654', contact: '9819675625', email: 'Badoi197@gmail.com', total_value: '', selected: false },
+// {
+//   name: 'ABC Traders',
+//   gst: '27ABCDE1234F1Z5',
+//   contact: '9876543210',
+//   email: 'abc@traders.com',
+//   rank: 'L1',
+//   total_value: '',
+//   transport: 'Free delivery',
+//   delivery_time: '5',
+//   payment_terms: '30',
+//   remark: 'Preferred vendor',
+//   address: '123 Main St, City, State, 123456'
+// },
+// {
+//   name: 'XYZ Supplies',
+//   gst: '29XYZAB1234C1Z9',
+//   contact: '9123456789',
+//   email: 'xyz@supplies.com',
+//   rank: 'L2',
+//   total_value: '25000',
+//   transport: 'Paid delivery',
+//   delivery_time: '7',
+//   payment_terms: '45',
+//   remark: '',
+//   address: '456 Elm St, City, State, 123456'
+// },
+// Add more vendor entries here...
 const vendorMasterList = ref([
-  // { rank: 3, name: 'Daniel White Pvt Ltd', gst: '32434567546554', contact: '8697237439', email: 'srinkhasu@gmail.com', total_value: '', selected: false },
-  // { rank: 2, name: 'Jane Johnson Pvt Ltd', gst: '2746345345656', contact: '9954354323', email: 'venkat198@gmail.com', total_value: '', selected: false },
-  // { rank: 4, name: 'Robert Wilson Pvt Ltd', gst: '330293878240', contact: '9032873873', email: 'Mail1989@gmail.com', total_value: '', selected: false },
-  // { rank: 1, name: 'Sophia Martin Pvt Ltd', gst: '1NH762587654', contact: '9819675625', email: 'Badoi197@gmail.com', total_value: '', selected: false },
-  // {
-  //   name: 'ABC Traders',
-  //   gst: '27ABCDE1234F1Z5',
-  //   contact: '9876543210',
-  //   email: 'abc@traders.com',
-  //   rank: 'L1',
-  //   total_value: '',
-  //   transport: 'Free delivery',
-  //   delivery_time: '5',
-  //   payment_terms: '30',
-  //   remark: 'Preferred vendor',
-  //   address: '123 Main St, City, State, 123456'
-  // },
-  // {
-  //   name: 'XYZ Supplies',
-  //   gst: '29XYZAB1234C1Z9',
-  //   contact: '9123456789',
-  //   email: 'xyz@supplies.com',
-  //   rank: 'L2',
-  //   total_value: '25000',
-  //   transport: 'Paid delivery',
-  //   delivery_time: '7',
-  //   payment_terms: '45',
-  //   remark: '',
-  //   address: '456 Elm St, City, State, 123456'
-  // },
-  // Add more vendor entries here...
 ])
 const NewMasterVendor = ref({
   vendor_name: '',
@@ -1439,6 +1444,10 @@ const vendorForm = ref({
 
   grand_total: 0
 });
+const modalType = ref("create"); 
+const isEditingVendor = ref(false);
+const editingVendorName = ref(null);
+
 const steps = [
   { label: 'Vendor & Item Details', icon: 'bi bi-box-seam' },
   { label: 'Preview Comparison', icon: 'bi bi-eye' },
@@ -1472,8 +1481,9 @@ const l1Fields = [
 ];
 onMounted(() => {
   employeeData.value = JSON.parse(localStorage.getItem('employeeData') || '{}');
-
-  // console.log(employeeData.value, "[[[[[[[[[[[[]]]]]]]]]]]]");
+  
+  isAdmin.value = employeeData.value.is_admin === 1 ? true : false;
+  
   fetchingItemsList()
   fetchingVendorMasterData()
   window.addEventListener('click', handleClickOutside);
@@ -1498,7 +1508,7 @@ const currentStep = ref(0)
 const goToStep = (index) => {
   // Block going to step 1 (Preview) if conditions not met
   // if (index === 1 && (!vendorDetails.value.length || !itemDetails.value.length)) {
-  //   toast.info("Please add vendor and item details before previewing.")
+  //   showInfo("Please add vendor and item details before previewing.")
   //   return
   // }
   currentStep.value = index
@@ -1507,7 +1517,7 @@ const goToStep = (index) => {
 const nextStep = () => {
   // If moving from step 0 to step 1, check conditions
   // if (currentStep.value === 0 && (!vendorDetails.value.length || !itemDetails.value.length)) {
-  //   toast.info("Please add vendor and item details before previewing.")
+  //   showInfo("Please add vendor and item details before previewing.")
   //   return
   // }
 
@@ -1578,29 +1588,28 @@ function addVendorModal() {
   new bootstrap.Modal(document.getElementById('vendorModal')).show();
 }
 function fetchingVendorMasterData() {
-  let queryParams = {
-    fields: JSON.stringify(['vendor_name', 'mail_id', 'contact_number', 'gst_number', 'address']),
-    limit_page_length: 'None'
-  }
+      let queryParams = {
+        fields: JSON.stringify(['vendor_name', 'mail_id', 'contact_number', 'gst_number', 'address']),
+        limit_page_length: 'None',
+        doctype: doctypes.ezyVendors
+      }
 
-  axiosInstance.get(apis.resource + doctypes.ezyVendors, { params: queryParams })
-    .then(response => {
-      console.log(response.data);
-      vendorMasterList.value = response.data.map(vendor => ({
-        vendor_name: vendor.vendor_name,
-        gst_number: vendor.gst_number,
-        phone_number: vendor.contact_number,
-        mail_id: vendor.mail_id,
-        address: vendor.address,
-        selected: false
-      }));
-
-
-    })
-    .catch(error => {
-      console.error('Error fetching items:', error);
-      toast.error('Failed to fetch items.');
-    });
+      axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+          .then((res) => {
+              if (res.message.data) {
+                          vendorMasterList.value = res.message.data.map(vendor => ({
+                  vendor_name: vendor.vendor_name,
+                  gst_number: vendor.gst_number,
+                  phone_number: vendor.contact_number,
+                  mail_id: vendor.mail_id,
+                  address: vendor.address,
+                  selected: false
+                }));
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 // const submitComparison = () => {
 //   const vendor_details = vendorDetails.value.map(vendor => {
@@ -1636,12 +1645,12 @@ function fetchingVendorMasterData() {
 //   axiosInstance.post(apis.resource + doctypes.ezyContracts, finalPayload)
 //     .then(response => {
 //       console.log('Comparison submitted successfully:', response.data);
-//       toast.success('Comparison submitted successfully!');
+//       showSuccess('Comparison submitted successfully!');
 //       request_raising_fn(response.data);
 //     })
 //     .catch(error => {
 //       console.error('Error submitting comparison:', error);
-//       toast.error('Failed to submit comparison.');
+//       showError('Failed to submit comparison.');
 //     });
 // };
 // const submitComparison = async () => {
@@ -1683,11 +1692,11 @@ function fetchingVendorMasterData() {
 //   try {
 //     const response = await axiosInstance.post(apis.savedocs, formData);
 //     console.log("Comparison saved successfully:", response);
-//     toast.success("Comparison saved successfully!");
+//     showSuccess("Comparison saved successfully!");
 //     request_raising_fn(response.docs[0]);
 //   } catch (error) {
 //     console.error("Error saving comparison:", error);
-//     toast.error("Failed to save comparison.");
+//     showError("Failed to save comparison.");
 //   }
 // };
 
@@ -1781,11 +1790,11 @@ const submitComparison = async () => {
   try { 
     const response = await axiosInstance.post(apis.savedocs, formData);
     console.log("Comparison saved successfully:", response);
-    toast.success("Comparison saved successfully!");
+    showSuccess("Comparison saved successfully!");
     request_raising_fn(response.docs[0]);
   } catch (error) {
     console.error("Error saving comparison:", error);
-    toast.error("Failed to save comparison.");
+    showError("Failed to save comparison.");
   }
 };
 
@@ -1812,11 +1821,7 @@ function request_raising_fn(item) {
     if (resp?.message?.success === true) {
 
 
-      toast.success("Request Raised", {
-        autoClose: 1000,
-        transition: "zoom",
-
-      });
+      showSuccess("Request Raised");
       setTimeout(() => {
         router.push({ path: '/todo/raisedbyme' });
       }, 300);
@@ -1824,7 +1829,7 @@ function request_raising_fn(item) {
   })
     .catch((error) => {
       console.error("Error raising request:", error);
-      toast.error("Error raising request");
+      showError("Error raising request");
     })
   // .finally(() => {
   //   saveloading.value = false;
@@ -1881,67 +1886,128 @@ const hasSelectedVendor = computed(() =>
 
 //   calculateTaxes(); // ✅ include taxes in grand total
 // }
-function updateTotalPrice(item) {
-  const qty = parseFloat(item.item_quantity || 0);
-  const price = parseFloat((item.unitPrice || "0").toString().replace(/,/g, ""));
-  const gstPercent = parseFloat(item.item_gst || 0);
+// function updateTotalPrice(item) {
+//   const qty = parseFloat(item.item_quantity || 0);
+//   const price = parseFloat((item.unitPrice || "0").toString().replace(/,/g, ""));
+//   const gstPercent = parseFloat(item.item_gst || 0);
 
-  // base total for this item
-  const itemBaseTotal = qty * price;
+//   // base total for this item
+//   const itemBaseTotal = qty * price;
 
-  // item GST
-  const itemGST = (itemBaseTotal * gstPercent) / 100;
+//   // item GST
+//   const itemGST = (itemBaseTotal * gstPercent) / 100;
 
-  // store formatted values
-  item.unitPrice = price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  item.itemBaseTotal = itemBaseTotal; // keep raw number
-  item.itemGSTAmount = itemGST;       // keep raw number
+//   // store formatted values
+//   item.unitPrice = price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+//   item.itemBaseTotal = itemBaseTotal; // keep raw number
+//   item.itemGSTAmount = itemGST;       // keep raw number
 
-  // final total for item (base + gst)
-  item.totalPrice = (itemBaseTotal + itemGST).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+//   // final total for item (base + gst)
+//   item.totalPrice = (itemBaseTotal + itemGST).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // update vendorForm total_value (sum of item base amounts only)
-  vendorForm.value.total_value = vendorForm.value.ezy_item_details.reduce((sum, i) => {
-    const val = parseFloat(i.itemBaseTotal || 0) || 0;
-    return sum + val;
-  }, 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+//   // update vendorForm total_value (sum of item base amounts only)
+//   vendorForm.value.total_value = vendorForm.value.ezy_item_details.reduce((sum, i) => {
+//     const val = parseFloat(i.itemBaseTotal || 0) || 0;
+//     return sum + val;
+//   }, 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  calculateTaxes(); // ✅ include item GST + transportation GST + others
-}
+//   calculateTaxes(); // ✅ include item GST + transportation GST + others
+// }
 function calculateTaxes() {
-  const baseTotal = parseFloat((vendorForm.value.total_value || "0").toString().replace(/,/g, "")) || 0;
+  // 1️⃣ Item Calculations
+  let itemBaseTotal = 0;
+  let itemGSTTotal = 0;
 
-  // item-wise GST (sum of all GST from items)
-  const totalItemGST = vendorForm.value.ezy_item_details.reduce((sum, i) => {
-    return sum + (parseFloat(i.itemGSTAmount || 0));
-  }, 0);
+  vendorForm.value.ezy_item_details.forEach((item) => {
+    const qty = Number(item.item_quantity) || 0;
+    const rate = Number(item.unitPrice) || 0;
+    const gstPercent = Number(item.item_gst) || 0;
 
-  // transportation charges + gst
-  const transportCharges = parseFloat(vendorForm.value.transportation_charges || 0);
-  const t_cgst = (transportCharges * (vendorForm.value.transportation_cgst_percent || 0)) / 100;
-  const t_utgst = (transportCharges * (vendorForm.value.transportation_utgst_percent || 0)) / 100;
-  const t_igst = (transportCharges * (vendorForm.value.transportation_igst_percent || 0)) / 100;
+    const baseAmount = qty * rate;
+    const gstAmount = (baseAmount * gstPercent) / 100;
+    const total = baseAmount + gstAmount;
 
-  const transportationTotal = transportCharges + t_cgst + t_utgst + t_igst;
+    // update each item
+    item.totalPrice = total.toFixed(2);
 
-  // additional
-  const additionalCharges = parseFloat(vendorForm.value.additional_charges || 0);
+    // accumulate
+    itemBaseTotal += baseAmount;
+    itemGSTTotal += gstAmount;
+  });
 
-  // store values
-  vendorForm.value.item_gst_total = totalItemGST.toFixed(2);
-  vendorForm.value.transportation_cgst_amount = t_cgst.toFixed(2);
-  vendorForm.value.transportation_utgst_amount = t_utgst.toFixed(2);
-  vendorForm.value.transportation_igst_amount = t_igst.toFixed(2);
-  vendorForm.value.transportation_total_amount = transportationTotal.toFixed(2);
+  // ✅ total_value should include item price + item GST
+  vendorForm.value.total_value = (itemBaseTotal + itemGSTTotal).toFixed(2);
 
-  // final grand total
-  vendorForm.value.grand_total = (
-    baseTotal +
-    totalItemGST +      // ✅ add item-wise gst
-    transportationTotal +
-    additionalCharges
-  ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // 2️⃣ Transportation Calculation
+  const transBase = Number(vendorForm.value.transportation_charges) || 0;
+  const tCGST = (transBase * (vendorForm.value.transportation_cgst_percent || 0)) / 100;
+  const tUTGST = (transBase * (vendorForm.value.transportation_utgst_percent || 0)) / 100;
+  const tIGST = (transBase * (vendorForm.value.transportation_igst_percent || 0)) / 100;
+
+  const transTotal = transBase + tCGST + tUTGST + tIGST;
+
+  vendorForm.value.transportation_cgst_amount = tCGST.toFixed(2);
+  vendorForm.value.transportation_utgst_amount = tUTGST.toFixed(2);
+  vendorForm.value.transportation_igst_amount = tIGST.toFixed(2);
+  vendorForm.value.transportation_total_amount = transTotal.toFixed(2);
+
+  // 3️⃣ Additional Charges
+  const additional = Number(vendorForm.value.additional_charges) || 0;
+
+  // 4️⃣ Grand Total = Items (Base + GST) + Transport (Base + GST) + Additional
+  const grandTotal = (itemBaseTotal + itemGSTTotal) + transTotal + additional;
+  vendorForm.value.grand_total = grandTotal.toFixed(2);
 }
+
+
+function updateTotalPrice(item) {
+  const qty = Number(item.item_quantity) || 0;
+  const rate = Number(item.unitPrice) || 0;
+  const gstPercent = Number(item.item_gst) || 0;
+
+  const base = qty * rate;
+  const gst = (base * gstPercent) / 100;
+  const total = base + gst;
+  item.totalPrice = total.toFixed(2);
+
+  calculateTaxes(); // auto-recalculate totals
+}
+
+
+// function calculateTaxes() {
+//   const baseTotal = parseFloat((vendorForm.value.total_value || "0").toString().replace(/,/g, "")) || 0;
+
+//   // item-wise GST (sum of all GST from items)
+//   const totalItemGST = vendorForm.value.ezy_item_details.reduce((sum, i) => {
+//     return sum + (parseFloat(i.itemGSTAmount || 0));
+//   }, 0);
+
+//   // transportation charges + gst
+//   const transportCharges = parseFloat(vendorForm.value.transportation_charges || 0);
+//   const t_cgst = (transportCharges * (vendorForm.value.transportation_cgst_percent || 0)) / 100;
+//   const t_utgst = (transportCharges * (vendorForm.value.transportation_utgst_percent || 0)) / 100;
+//   const t_igst = (transportCharges * (vendorForm.value.transportation_igst_percent || 0)) / 100;
+
+//   const transportationTotal = transportCharges + t_cgst + t_utgst + t_igst;
+
+//   // additional
+//   const additionalCharges = parseFloat(vendorForm.value.additional_charges || 0);
+
+//   // store values
+//   vendorForm.value.item_gst_total = totalItemGST.toFixed(2);
+//   vendorForm.value.transportation_cgst_amount = t_cgst.toFixed(2);
+//   vendorForm.value.transportation_utgst_amount = t_utgst.toFixed(2);
+//   vendorForm.value.transportation_igst_amount = t_igst.toFixed(2);
+//   vendorForm.value.transportation_total_amount = transportationTotal.toFixed(2);
+
+//   // final grand total
+//   vendorForm.value.grand_total = (
+//     baseTotal +
+//     totalItemGST +      // ✅ add item-wise gst
+//     transportationTotal +
+//     additionalCharges
+//   ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// }
 
 // function calculateTaxes() {
 //   const baseTotal = parseFloat((vendorForm.value.total_value || "0").toString().replace(/,/g, "")) || 0;
@@ -2028,7 +2094,9 @@ const editItem = async (index) => {
 };
 
 const saveItem = () => {
+  console.log(  editingIndex.value);
   editingIndex.value = null;
+
 };
 
 const cancelEdit = () => {
@@ -2277,7 +2345,7 @@ const addNewItem = () => {
   axiosInstance.post(apis.resource + doctypes.ezyItems, newItemObj)
     .then(response => {
 
-      toast.success('New item added successfully!' , { autoClose: 1000 });
+      showSuccess('New item added successfully!');
       // console.log('New item added:', response.data);
       newItem.value = { name: '', unit: '' };
       fetchingItemsList()
@@ -2291,34 +2359,121 @@ const addNewItem = () => {
 
 
 };
-function AddNewVendor(){
-  let MasterVendor = {
-      vendor_name: NewMasterVendor.value.vendor_name,
-      mail_id: NewMasterVendor.value.mail_id,
-      contact_number: NewMasterVendor.value.contact_number,
-      gst_number: NewMasterVendor.value.gst_number,
-      address: NewMasterVendor.value.address,
-    }
-    // console.log(MasterVendor, "api"); 
-    axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
-      .then(response => {
-        console.log('Vendor saved successfully:', response.data);
-        toast.success('Vendor details saved successfully!');
+
+const NewMasterVendorCreate = (type = 'create', vendor = null) => {
+  // Reset modal mode
+  isEditingVendor.value = type === 'edit';
+  
+  if (type === 'edit' && vendor) {
+    // Editing existing vendor
+    editingVendorName.value = vendor.gst_number;
+    NewMasterVendor.value = {
+      vendor_name: vendor.vendor_name,
+      gst_number: vendor.gst_number,
+      contact_number: vendor.phone_number,
+      mail_id: vendor.mail_id,
+      address: vendor.address,
+    };
+  } else {
+    // Creating new vendor
+    resetVendorForm();
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('NewVendorMasterData'));
+  modal.show();
+};
+const resetVendorForm = () => {
+  NewMasterVendor.value = {
+    vendor_name: '',
+    gst_number: '',
+    contact_number: '',
+    mail_id: '',
+    address: '',
+  };
+};
+const AddOrUpdateVendor = () => {
+  // Basic validation
+  if (!NewMasterVendor.value.vendor_name || !NewMasterVendor.value.gst_number) {
+    showError('Please fill required fields.');
+    return;
+  }
+
+  // Vendor payload
+  const vendorData = {
+    vendor_name: NewMasterVendor.value.vendor_name,
+    gst_number: NewMasterVendor.value.gst_number,
+    contact_number: NewMasterVendor.value.contact_number,
+    mail_id: NewMasterVendor.value.mail_id,
+    address: NewMasterVendor.value.address,
+  };
+
+  // 🔄 EDIT existing vendor
+  if (isEditingVendor.value) {
+    axiosInstance
+      .put(`${apis.resource + doctypes.ezyVendors}/${editingVendorName.value}`, vendorData)
+      .then(() => {
+        showSuccess('Vendor updated successfully!');
+        resetVendorForm();
+        fetchingVendorMasterData();
         const modal = bootstrap.Modal.getInstance(document.getElementById('NewVendorMasterData'));
         modal.hide();
-        fetchingVendorMasterData()
       })
-      .catch(error => {
-        console.error('Error saving vendor:', error);
-        toast.error('Failed to save vendor details.');
+      .catch(err => {
+        console.error('Error updating vendor:', err);
+        showError('Failed to update vendor.');
       });
+  }
 
-}
+  // ➕ CREATE new vendor
+  else {
+    axiosInstance
+      .post(apis.resource + doctypes.ezyVendors, vendorData)
+      .then(() => {
+        showSuccess('New vendor added successfully!');
+        resetVendorForm();
+        fetchingVendorMasterData();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('NewVendorMasterData'));
+        modal.hide();
+      })
+      .catch(err => {
+        console.error('Error adding vendor:', err);
+        showError('Failed to add vendor.');
+      });
+  }
+};
+
+
+
+// function AddNewVendor(){
+//   let MasterVendor = {
+//       vendor_name: NewMasterVendor.value.vendor_name,
+//       mail_id: NewMasterVendor.value.mail_id,
+//       contact_number: NewMasterVendor.value.contact_number,
+//       gst_number: NewMasterVendor.value.gst_number,
+//       address: NewMasterVendor.value.address,
+//     }
+//     // console.log(MasterVendor, "api"); 
+//     axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
+//       .then(response => {
+//         console.log('Vendor saved successfully:', response.data);
+//         showSuccess('Vendor details saved successfully!');
+//         const modal = bootstrap.Modal.getInstance(document.getElementById('NewVendorMasterData'));
+//         modal.hide();
+//         fetchingVendorMasterData()
+//       })
+//       .catch(error => {
+//         console.error('Error saving vendor:', error);
+//         showError('Failed to save vendor details.');
+//       });
+
+// }
 const editingVendorIndex = ref(null);
 
 
 function openVendorModal(index) {
   const vendor = vendorDetails.value[index];
+  const currentItemNames = vendor.ezy_item_details.map(i => i.item_name);
+  const newItems = itemDetails.value.filter(i => !currentItemNames.includes(i.item_name));
 
   vendorForm.value = {
     vendor_name: vendor.vendor_name,
@@ -2350,7 +2505,7 @@ function openVendorModal(index) {
     additional_charges: vendor.additional_charges || 0,
     grand_total: vendor.grand_total || 0,
     // Load the vendor's own items (if any), else empty array
-    ezy_item_details: vendor.ezy_item_details ? JSON.parse(JSON.stringify(vendor.ezy_item_details)) : JSON.parse(JSON.stringify(itemDetails.value))
+    ezy_item_details: [...vendor.ezy_item_details, ...JSON.parse(JSON.stringify(newItems))]
   };
 
   editingVendorIndex.value = index;
@@ -2366,16 +2521,24 @@ watch(() => vendorForm.value.ezy_item_details, () => {
     vendorDetails.value[editingVendorIndex.value].total_value = vendorForm.value.total_value;
   }
 }, { deep: true });
+// function calculateVendorTotal() {
+//   const total = vendorForm.value.ezy_item_details.reduce((sum, item) => {
+//     // remove commas before parsing
+//     return sum + parseFloat((item.totalPrice || "0").replace(/,/g, ""));
+//   }, 0);
+
+//   vendorForm.value.total_value = total.toLocaleString('en-IN', {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2
+//   });
+// }
 function calculateVendorTotal() {
   const total = vendorForm.value.ezy_item_details.reduce((sum, item) => {
-    // remove commas before parsing
-    return sum + parseFloat((item.totalPrice || "0").replace(/,/g, ""));
+    return sum + (parseFloat(item.totalPrice) || 0); // totalPrice should be a number, not string
   }, 0);
 
-  vendorForm.value.total_value = total.toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  // store as number
+  vendorForm.value.total_value = total;
 }
 
 
@@ -2459,23 +2622,23 @@ function saveVendorDetails() {
   calculateVendorTotal(); // Update vendorForm.value.total first
   // console.log(vendorForm.value, "[[[]]]");
   if (!vendorForm.value.vendor_name?.trim()) {
-    toast.info("Vendor name is required.");
+    showInfo("Vendor name is required.");
     return;
   }
   // if (!vendorForm.value.gst_number?.trim()) {
-  //   toast.info("GST number is required.");
+  //   showInfo("GST number is required.");
   //   return;
   // }
   // if (!vendorForm.value.phone_number?.trim()) {
-  //   toast.info("Phone number is required.");
+  //   showInfo("Phone number is required.");
   //   return;
   // }
   // if (!vendorForm.value.mail_id?.trim()) {
-  //   toast.info("Email is required.");
+  //   showInfo("Email is required.");
   //   return;
   // }
   // if (!vendorForm.value.ezy_item_details?.length) {
-  //   toast.info("Please add at least one item detail.");
+  //   showInfo("Please add at least one item detail.");
   //   return;
   // } 
   const vendorData = {
@@ -2539,11 +2702,11 @@ function saveVendorDetails() {
   //   axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
   //     .then(response => {
   //       console.log('Vendor saved successfully:', response.data);
-  //       toast.success('Vendor details saved successfully!');
+  //       showSuccess('Vendor details saved successfully!');
   //     })
   //     .catch(error => {
   //       console.error('Error saving vendor:', error);
-  //       toast.error('Failed to save vendor details.');
+  //       showError('Failed to save vendor details.');
   //     });
   // }
 
@@ -2567,9 +2730,10 @@ function editItemInModal(index) {
 // Save the changes
 function saveEditedItem() {
   // Recalculate vendor total
-  calculateVendorTotal();
   editingItemIndex.value = null;
   backupItem.value = {};
+  calculateVendorTotal();
+  calculateTaxes()
 }
 
 // Cancel the editing and restore the backup
@@ -2687,36 +2851,107 @@ const selectVendor = (vendor) => {
   filteredVendorOptions.value = []
 
 }
+const editingItem = ref(null);
 
-function AddNewItemMaster() {
+const openItemModalMaster = (type, item = null, index = null) => {
+  modalType.value = type;
 
-  const modal = new bootstrap.Modal(document.getElementById('NewItemModalMaster'));
+  if (type === "edit" && item) {
+    newItem.value = { 
+      name: item.item_name, 
+      unit: item.item_unit_of_measure 
+    };
+    editingItem.value = item; // 👈 store the full item
+  } else {
+    newItem.value = { name: "", unit: "" };
+    editingItem.value = null;
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById("NewItemModalMaster"));
   modal.show();
+};
 
-}
-function NewMasterVendorCreate(){
-  const modal = new bootstrap.Modal(document.getElementById('NewVendorMasterData'));
-  modal.show();
-}
+const saveItemMaster = () => {
+  if (!newItem.value.name || !newItem.value.unit) return;
+
+  const newItemObj = {
+    item_name: newItem.value.name,
+    item_unit_of_measure: newItem.value.unit,
+  };
+
+  // CREATE
+  if (modalType.value === "create") {
+    axiosInstance
+      .post(apis.resource + doctypes.ezyItems, newItemObj)
+      .then(() => {
+        showSuccess("New item added successfully!");
+        const modal = bootstrap.Modal.getInstance(document.getElementById("NewItemModalMaster"));
+        modal.hide();
+        newItem.value = { name: "", unit: "" };
+        fetchingItemsList();
+      })
+      .catch((error) => console.error("Error adding new item:", error));
+  }
+
+  // EDIT
+  else if (modalType.value === "edit" && editingItem.value) {
+    console.log(editingItem.value);
+    axiosInstance
+      .put(
+        `${apis.resource + doctypes.ezyItems}/${editingItem.value.name}`, // 👈 Frappe document name
+        newItemObj
+      )
+      .then(() => {
+        showSuccess("Item updated successfully!");
+        const modal = bootstrap.Modal.getInstance(document.getElementById("NewItemModalMaster"));
+        modal.hide();
+        newItem.value = { name: "", unit: "" };
+        fetchingItemsList();
+      })
+      .catch((error) => console.error("Error updating item:", error));
+  }
+};
+
+const deleteMasterItem = (item, index) => {
+  if (!confirm(`Are you sure you want to delete "${item.item_name}"?`)) return;
+
+  // Call your backend API to delete
+  axiosInstance.delete(`${apis.resource + doctypes.ezyItems}/${item.name}`)
+    .then(() => {
+      showSuccess(`Item "${item.item_name}" deleted successfully!`);
+      // Remove from local list without refetching (optional)
+      availableItems.value.splice(index, 1);
+    })
+    .catch(err => {
+      console.error('Error deleting item:', err);
+      showError('Failed to delete item.');
+    });
+};
 
 
 function fetchingItemsList() {
-  let queryParams = {
-    fields: JSON.stringify(['item_name', 'item_unit_of_measure']),
-    limit_page_length: 'None'
-  }
-  axiosInstance.get(apis.resource + doctypes.ezyItems, { params: queryParams })
-    .then(response => {
-      availableItems.value = response.data.map(item => ({
-        item_name: item.item_name,
-        item_unit_of_measure: item.item_unit_of_measure,
-        selected: false
-      }));
-      itemOptions.value = availableItems.value.map(item => item.item_name);
-    })
-    .catch(error => {
-      console.error('Error fetching items:', error);
-    });
+        let queryParams = {
+          fields: JSON.stringify(['item_name', 'item_unit_of_measure','name']),
+          limit_page_length: 'None',
+          doctype:doctypes.ezyItems,
+        }
+
+        axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+        .then((res) => {
+            if (res.message.data) {
+                availableItems.value = res.message.data.map(item => ({
+              item_name: item.item_name,
+              item_unit_of_measure: item.item_unit_of_measure,
+              name:item.name,
+              selected: false
+            }));
+            itemOptions.value = availableItems.value.map(item => item.item_name);
+
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 
 // // Approver data
@@ -2856,6 +3091,7 @@ const getRejectLabel = (designation) => {
   return levelIndex !== -1 ? `Level ${levelIndex + 1}` : designation;
 };
 function fetchingWork() {
+
   axiosInstance
     .get(apis.resource + doctypes.wfRoadmap + `/${employeeData.value.company_field}_${'VENDOR_COMPARISON'}`)
     .then((response) => {
@@ -2893,22 +3129,43 @@ function fetchingWork() {
     })
     .catch((error) => {
       console.error('Error fetching workflow:', error);
-      toast.error('Failed to fetch workflow.');
+      showError('Failed to fetch workflow.');
     });
 }
 
 function WfroleMatrix() {
 
+  // axiosInstance
+  //   .get(apis.resource + doctypes.WFRoleMatrix + `/${employeeData.value.company_field}`)
+  //   .then((res) => {
+  //     if (res.data) {
+  //       designationOptions.value = [
+  //         ...new Set(res.data.users.map((user) => user.role_name)),
+  //       ];
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching designations data:", error);
+  //   });
+
+     let data = { 
+    property: employeeData.value.company_field // Business unit (property) selected from filters
+  };
+
   axiosInstance
-    .get(apis.resource + doctypes.WFRoleMatrix + `/${employeeData.value.company_field}`)
+    .post(apis.addDesignationroles, data) 
     .then((res) => {
-      if (res.data) {
+      //  Check if backend returned "message" key with data
+      if (res.message) {
+        //  Store the result in DesignationList (used in UI)
         designationOptions.value = [
-          ...new Set(res.data.users.map((user) => user.role_name)),
-        ];
+          ...new Set(res.message.map((user) => user.role)),
+        ];;
+        // console.log(designationOptions.value);
       }
     })
     .catch((error) => {
+      //  Handle errors gracefully
       console.error("Error fetching designations data:", error);
     });
 }
@@ -3140,7 +3397,7 @@ function fetchCostCenters() {
 .vendor-table thead tr th {
   background-color: #F7F7F7;
   border: 1px solid #EEEEEE;
-  padding: 10px;
+  padding: 4px;
   text-align: left;
   vertical-align: middle;
   border-top: none;
@@ -3600,6 +3857,11 @@ function fetchCostCenters() {
   background-color: var(--white-color);
 }
 
+// .vendor_sidebar ul li{
+//   padding: 8px 12px;
+
+//   font-size: 13px;
+// }
 .vendor_sidebar {
   height: 90dvh;
   background-color: #FAFAFA !important;
@@ -3608,9 +3870,124 @@ function fetchCostCenters() {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.bi-pencil-fill{
+  cursor: pointer;
+}
+.bi-trash-fill{
+ cursor: pointer;
+}
+:deep(.vs__selected) {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  padding: 0px 8px;
+  font-size: 12px;
+}
 
-// .vendor_sidebar ul li{
-//   padding: 8px 12px;
+:deep(.vs__selected-options) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 1px;
+}
 
-//   font-size: 13px;
-// }</style>
+:deep(.vs__dropdown-toggle) {
+  height: auto !important;
+}
+
+
+:deep(.vs__deselect) svg {
+  color: #000;
+  background-color: #f1f1f1 ;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-top: 8px;
+  font-size: 5px !important;
+
+  padding: 4px;
+
+}
+
+:deep(.vs__deselect:hover) {
+  color: #000;
+}
+.vue3-select__dropdown,
+.vue3-select-dropdown {
+  z-index: 9999 !important;
+}
+
+/* Vue 3 SFC scoped style */
+::v-deep(.vs__dropdown-toggle) {
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  transition: border-color 0.15s ease;
+  padding: 2px;
+
+}
+
+/* when dropdown is open or focused */
+::v-deep(.vs__dropdown-toggle.vs--open),
+::v-deep(.vs__dropdown-toggle:focus),
+::v-deep(.vs__dropdown-toggle:focus-within) {
+  border: 1px solid #1b14df !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding:2px;
+}
+/* Placeholder styling for Vue3Select */
+::v-deep(.vs__search::placeholder) {
+  color: #9ca3af !important;  /* grey placeholder text */
+  font-size: 13px !important; /* adjust size */
+  opacity: 1;                 /* make sure it’s visible */
+  padding: 2px 6px;
+}
+
+
+
+
+.disgnationlist_div{
+  border: 1px solid #CCCCCC !important;
+  border-radius: 6px;
+  
+  // padding: 0px 4px;
+}
+::v-deep(.vs__selected) {
+  // min-width: 100px; /* adjust per tag */
+  margin: 1px;
+  max-height: 30px;
+}
+::v-deep(.vs__selected-options) {
+  max-height: 130px; /* 4 rows * 40px per tag */
+  overflow-y: auto;
+  flex-wrap: wrap;
+}
+/* Selected tags container */
+::v-deep(.vs__selected-options) {
+  display: flex;
+  max-width: calc(4 * 120px); /* show 4 tags */
+  overflow-x: auto;            /* scroll only if needed */
+  scrollbar-width: thin;       /* Firefox */
+  white-space: nowrap;          /* prevent wrapping */
+}
+
+/* Hide scrollbar by default */
+::v-deep(.vs__selected-options::-webkit-scrollbar) {
+  display: none;
+}
+
+/* Show scrollbar on hover */
+::v-deep(.vs__selected-options:hover::-webkit-scrollbar) {
+  display: block;
+}
+
+/* Optional: Firefox */
+::v-deep(.vs__selected-options) {
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
+}
+
+</style>

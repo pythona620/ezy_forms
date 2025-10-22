@@ -1,4 +1,4 @@
-// //"IN THE DEVELOPING MODE NEED TO UNCOMMENT THE BELOW CODE"
+//"IN THE DEVELOPING MODE NEED TO UNCOMMENT THE BELOW CODE"
 
 // import path from 'path';
 // import { defineConfig } from 'vite';
@@ -29,7 +29,7 @@
 
 
 
-//"IN THE PODUCTION MODE NEED TO UNCOMMENT THE BELOW CODE"   
+// //"IN THE PODUCTION MODE NEED TO UNCOMMENT THE BELOW CODE"   
 
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
