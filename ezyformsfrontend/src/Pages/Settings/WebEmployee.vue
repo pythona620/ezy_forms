@@ -1640,10 +1640,10 @@ function fetchingIsHod(department) {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
     limit_page_length: "none",
-    order_by: "`tabSignup Employee`.`enable` DESC,`tabSignup Employee`.`creation` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
   };
   axiosInstance
-    .get(apis.resource + doctypes.SignUpEmployee, { params: queryParams })
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
      createEmployee.value.reporting_to = res.data[0].name;
      createEmployee.reporting_designation = res.data[0].designation;
