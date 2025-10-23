@@ -552,7 +552,7 @@ async function generateReport() {
     .map(f => `${f.fieldname} as '${f.label}'`);
 
   // add static field
-  selectedFields.unshift("Name as name"); // or push() if you want it at the end
+  selectedFields.unshift("name as Name"); // or push() if you want it at the end
 
   const payload = selectedFields.join(","); // comma separated string
 
