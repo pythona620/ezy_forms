@@ -184,14 +184,12 @@ def jwt_token_method():
 			secret_key,
 			algorithms=["HS256"]
 		)
-		frappe.log_error(message=decoded_payload,title="jwt decode")
-
 		user_id = decoded_payload.get('user_id')
 		site_name = decoded_payload.get('site_name')
 		subscription_start_date = decoded_payload.get('subscription_start_date')
 		subscription_storage = decoded_payload.get('subscribtion_stroage')
 		subscription_end_date = decoded_payload.get('subscription_end_date')
-
+		
 		if user_id == "caratRED" and site_name.rstrip("/") == get_url().rstrip("/"):
 			frappe.db.set_value("Doctypes Database Logs",{"site_name": site_name},"subscribtion_stroage",subscription_storage)
 
