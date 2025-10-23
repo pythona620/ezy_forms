@@ -53,3 +53,10 @@ def create_employee_record(emp_mail_id):
 	# Commit the changes
 	frappe.db.commit()
 	return {"status": "success", "employee": doc.name}
+ 
+@frappe.whitelist(methods=["POST"])
+def employee_rejection(empl_mail_id):
+	if frappe.db.exists("Signup Employee", empl_mail_id):
+		frappe.delete_doc("Signup Employee", empl_mail_id, force=1)
+	frappe.db.commit()
+	return "Employee Deleted Sucessfully"
