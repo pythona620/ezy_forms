@@ -60,7 +60,8 @@ def create_doctypes_db_log():
 				"year": year,
 				"month": month,
 				"last_modified_on": today,
-				"total_storage": 0
+				"total_storage": 0,
+				"subscribtion_stroage":10240
 			})
 			parent_doc.insert(ignore_permissions=True)
 
@@ -96,8 +97,6 @@ def create_doctypes_db_log():
 
 			total_size = round(db_size + file_size, 2)
 			total_storage_sum += total_size
-
-			parent_doc.subscribtion_stroage = 700
 
 			# --- Check if a record for this date & doctype already exists ---
 			existing_row = next(
@@ -191,6 +190,9 @@ def jwt_token_method():
 		subscription_end_date = decoded_payload.get('subscription_end_date')
 		
 		if user_id == "caratRED" and site_name.rstrip("/") == get_url().rstrip("/"):
+			if not frappe.db.exists("Doctypes Database Logs",{"site_name": site_name}):
+				frappe.log_error(message= "Record does not exist for the Doctypes Database Logs",title="Record does not exist")
+				return {"status": "failed", "message": "Record does not exist","status_code": 404}
 			frappe.db.set_value("Doctypes Database Logs",{"site_name": site_name},"subscribtion_stroage",subscription_storage)
 
 			business_units = frappe.get_all("Ezy Business Unit", pluck='name')
@@ -204,15 +206,14 @@ def jwt_token_method():
 			)
 
 			frappe.db.commit()
-			return {"status": "success", "message": "Subscription data updated successfully"}
+			return {"status": "success", "message": "Subscription data updated successfully","status_code": 200}
 		
-		return {"status": "failed", "message": "Invalid user or site"}
+		return {"status": "failed", "message": "Invalid user or site","status_code": 404}
 
 	except ExpiredSignatureError:
-		return {"status": "error", "message": "Token has expired"}
+		return {"status": "error", "message": "Token has expired","status_code": 404}
 	except InvalidTokenError:
-		return {"status": "error", "message": "Invalid token"}
+		return {"status": "error", "message": "Invalid token","status_code": 404}
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "JWT Token Method Error")
-		return {"status": "error", "message": str(e)}
-{'user_id': 'caratRED', 'subscription_start_date': '2025-10-01', 'subscription_end_date': '2025-12-31', 'subscribtion_stroage': '10240', 'site_name': 'local.com'}
+		return {"status": "error", "message": str(e),"status_code": 404}
