@@ -1514,66 +1514,78 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
-        <div class="px-3 listofdesignations">
-          <div class="my-1 d-flex justify-content-between">
-            <span class="font-12 fw-bold">Select {{  selectedBlockIndex === 0 ? 'Requestors': ' Approvers' }} </span>
-            <span class="italic-style text-secondary font-12">{{ designationValue.length }} Selected </span>
-          </div>
-          <div  ref="resizableDiv" class=" my-1 disgnationlist_div" v-if="DesignationList.length">
-              <div  class="d-flex align-items-center justify-content-between gap-1">
-                
-                <!-- Select All -->
-                <div class="form-check ps-1 d-flex align-items-center m-0">
-                  <input
+         <div class="px-3 listofdesignations">
+    <div class="my-1 d-flex justify-content-between">
+      <span class="font-12 fw-bold">
+        Select {{ selectedBlockIndex === 0 ? "Requestors" : "Approvers" }}
+      </span>
+      <span class="italic-style text-secondary font-12">
+        {{ designationValue.length }} Selected
+      </span>
+    </div>
+
+    <div ref="resizableDiv" class="my-1 disgnationlist_div" v-if="DesignationList.length">
+      <div class="d-flex align-items-center justify-content-between gap-1">
+        <!-- ✅ Select All -->
+        <div class="form-check ps-1 d-flex align-items-center m-0">
+          <input
             type="checkbox"
             id="selectAll"
-            
             :checked="isAllSelected"
             @change="toggleSelectAll"
             class="form-check-input me-2 designationCheckBox"
           />
-          <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">
+          <label
+            for="selectAll"
+            class="form-check-label SelectallDesignation mt-2 fw-bold"
+          >
             Select all designation ({{ filteredDesignationList.length }})
           </label>
-                </div>
-
-                <!-- Show HODs -->
-                <div v-if="selectedBlockIndex !== 0 " class="form-check d-flex align-items-center m-0">
-                  <input
-                    type="checkbox"
-                    id="showHods"
-                    v-model="showHods"
-                    class="form-check-input me-2 designationCheckBox"
-                  />
-                  <label for="showHods" class="form-check-label  mt-2 fw-bold">Show HODs Only</label>
-                </div>
-                <div><button type="button" class="btn btn-sm font-12  text-danger" @click="clearall_designations"> <i class="bi bi-x" ></i>Clear all</button></div>
-
-
-
-              </div>
-              <!-- {{ designationValue }}
-              {{filteredDesignationList}} -->
-            <Vue3Select v-if="DesignationList.length" :multiple="true" v-model="designationValue" 
-            :options="filteredDesignationList" :close-on-select="false" :clear-search-on-select="true"
-             placeholder="Search & Select Designations" label="label"  />
-            </div>
-
-
-          <!-- <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
-            <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
-              <input type="checkbox" :id="`SelectedDisignation_${index}`" v-model="designationValue" :value="item"
-                class="designationCheckBox  form-check-input mt-0" @change="handleSingleSelect" />
-              <label :for="`SelectedDisignation_${index}`" class="ps-2">{{ item }}</label>
-
-            </li>
-          </ul>  -->
-          <div v-else>
-            <div class="d-flex justify-content-center">
-              <span>No Designations Found</span>
-            </div>
-          </div>
         </div>
+
+        <!-- ✅ Show HODs -->
+        <div v-if="selectedBlockIndex !== 0" class="form-check d-flex align-items-center m-0">
+          <input
+            type="checkbox"
+            id="showHods"
+            v-model="showHods"
+            class="form-check-input me-2 designationCheckBox"
+          />
+          <label for="showHods" class="form-check-label mt-2 fw-bold">
+            Show HODs Only
+          </label>
+        </div>
+
+        <!-- ✅ Clear All -->
+        <div>
+          <button v-if="designationValue.length"
+            type="button"
+            class="btn btn-sm font-12 text-danger"
+            @click="clearall_designations"
+          >
+            <i class="bi bi-x"></i> Clear all
+          </button>
+        </div>
+      </div>
+
+      <!-- ✅ Multi-select -->
+      <Vue3Select
+        v-if="DesignationList.length"
+        :multiple="true"
+        v-model="designationValue"
+        :options="filteredDesignationList"
+        :close-on-select="false"
+        :clear-search-on-select="true"
+        placeholder="Search & Select Designations"
+      />
+    </div>
+
+    <div v-else>
+      <div class="d-flex justify-content-center">
+        <span>No Designations Found</span>
+      </div>
+    </div>
+  </div>
          <div v-if="selectedBlockIndex !== 0 " class="p-3">
               <div>
                 <label for="" class="fw-bold font-12 ">On Rejection</label>
@@ -2227,24 +2239,24 @@ const lowerApproverLevels = computed(() => {
 // };
 
 
-const filteredDesignationList = computed(() => {
-  let list = DesignationList.value;
+// const filteredDesignationList = computed(() => {
+//   let list = DesignationList.value;
 
-  if (showHods.value) {
-    list = list.filter(item => item.is_hod === 1);
-  }
+//   if (showHods.value) {
+//     list = list.filter(item => item.is_hod === 1);
+//   }
 
-  if (searchDesignation.value?.trim()) {
-    list = list.filter(item =>
-      item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
-    );
-  }
+//   if (searchDesignation.value?.trim()) {
+//     list = list.filter(item =>
+//       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+//     );
+//   }
 
-  // Remove already selected items for display only
-  list = list.filter(item => !designationValue.value.includes(item.role));
+//   // Remove already selected items for display only
+//   list = list.filter(item => !designationValue.value.includes(item.role));
 
-  return list.map(item => item.role);
-});
+//   return list.map(item => item.role);
+// });
 
 
 // const filteredDesignationList = computed(() => {
@@ -3271,45 +3283,177 @@ const handleRemove = (option) => {
     filterObj.value.accessible_departments = [];
   }
 };
-const isAllSelected = computed(() => {
-  return designationValue.value.length === DesignationList.value.length;
-});
-// Toggle Select All
-// Toggle Select All
-function toggleSelectAll(event) {
-  if (event.target.checked) {
-    // Select all items currently visible in the filtered dropdown
-    const itemsToSelect = DesignationList.value
-      .filter(item => {
-        // Respect HOD filter
-        if (showHods.value && item.is_hod !== 1) return false;
+const selectAllChecked = ref(false); // select-all checkbox state
 
-        // Respect search filter
-        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
-          return false;
-        }
+// ✅ Computed filtered list
+// ✅ Filtered list (based on HODs + search)
+// const filteredDesignationList = computed(() => {
+//   let list = [...DesignationList.value]; // copy original list
 
-        return true;
-      })
-      .map(item => item.role);
+//   // ✅ Apply HOD filter
+//   if (showHods.value) list = list.filter(item => item.is_hod === 1);
 
-    designationValue.value = itemsToSelect;
-  } else {
-    // Unselect all visible items
-    const itemsToRemove = DesignationList.value
-      .filter(item => {
-        if (showHods.value && item.is_hod !== 1) return false;
-        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
-          return false;
-        }
-        return true;
-      })
-      .map(item => item.role);
+//   // ✅ Apply search filter
+//   if (searchDesignation.value?.trim()) {
+//     const search = searchDesignation.value.toLowerCase();
+//     list = list.filter(item => item.role.toLowerCase().includes(search));
+//   }
 
-    // Remove only the visible items from the selection
-    designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
+//   // ✅ Sort: move already selected items to the end
+//   list = list.sort((a, b) => {
+//     const aSelected = designationValue.value.includes(a.role);
+//     const bSelected = designationValue.value.includes(b.role);
+
+//     if (aSelected === bSelected) return 0;
+//     return aSelected ? 1 : -1; // selected items go last
+//   });
+
+//   // ✅ Map to string for Vue3Select
+//   return list.map(item => item.role);
+// });
+const filteredDesignationList = computed(() => {
+  let list = [...DesignationList.value];
+
+  // ✅ 1. Apply HOD filter
+  if (showHods.value) list = list.filter(item => item.is_hod === 1);
+
+  // ✅ 2. Apply search filter
+  if (searchDesignation.value?.trim()) {
+    const search = searchDesignation.value.toLowerCase();
+    list = list.filter(item => item.role.toLowerCase().includes(search));
   }
+
+  // ✅ 3. Sort alphabetically (A → Z)
+  list.sort((a, b) => a.role.localeCompare(b.role));
+
+  // ✅ 4. Move selected items to bottom
+  list.sort((a, b) => {
+    const aSelected = designationValue.value.includes(a.role);
+    const bSelected = designationValue.value.includes(b.role);
+    if (aSelected === bSelected) return 0;
+    return aSelected ? 1 : -1;
+  });
+
+  // ✅ 5. Return only role names for dropdown
+  return list.map(item => item.role);
+});
+
+
+
+// ✅ Computed to determine if all visible ones are selected
+const isAllSelected = computed(() => {
+  const visible = filteredDesignationList.value
+  return (
+    visible.length > 0 &&
+    visible.every(role => designationValue.value.includes(role))
+  )
+})
+
+// ✅ Watch to keep select-all checkbox synced
+watch(
+  [designationValue, filteredDesignationList],
+  () => {
+    const visible = filteredDesignationList.value
+    selectAllChecked.value =
+      visible.length > 0 &&
+      visible.every(role => designationValue.value.includes(role))
+  },
+  { immediate: true, deep: true }
+)
+function toggleSelectAll(event) {
+  const checked = event.target.checked;
+
+  // Only consider visible roles for this filter
+  const visibleRoles = DesignationList.value
+    .filter(item => {
+      if (showHods.value && item.is_hod !== 1) return false;
+      if (searchDesignation.value?.trim() &&
+          !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+      ) return false;
+      return true;
+    })
+    .map(item => item.role);
+
+  if (checked) {
+    // Add visible roles only
+    designationValue.value = Array.from(
+      new Set([...designationValue.value, ...visibleRoles])
+    );
+  } else {
+    // Remove only visible roles
+    designationValue.value = designationValue.value.filter(
+      r => !visibleRoles.includes(r)
+    );
+  }
+
+  selectAllChecked.value = checked;
 }
+
+// ✅ Select / Unselect all
+// function toggleSelectAll(event) {
+//   const checked = event.target.checked
+//   const visibleRoles = filteredDesignationList.value
+
+//   if (checked) {
+//     // Add visible items to selected list
+//     designationValue.value = Array.from(
+//       new Set([...designationValue.value, ...visibleRoles])
+//     )
+//   } else {
+//     // Remove only visible ones
+//     designationValue.value = designationValue.value.filter(
+//       r => !visibleRoles.includes(r)
+//     )
+//   }
+
+//   selectAllChecked.value = checked
+// }
+
+// ✅ Clear all selections
+function clearall_designations() {
+  designationValue.value = []
+  selectAllChecked.value = false
+  showHods.value = false
+}
+// const isAllSelected = computed(() => {
+//   return designationValue.value.length === DesignationList.value.length;
+// });
+// // Toggle Select All
+// // Toggle Select All
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     // Select all items currently visible in the filtered dropdown
+//     const itemsToSelect = DesignationList.value
+//       .filter(item => {
+//         // Respect HOD filter
+//         if (showHods.value && item.is_hod !== 1) return false;
+
+//         // Respect search filter
+//         if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+//           return false;
+//         }
+
+//         return true;
+//       })
+//       .map(item => item.role);
+
+//     designationValue.value = itemsToSelect;
+//   } else {
+//     // Unselect all visible items
+//     const itemsToRemove = DesignationList.value
+//       .filter(item => {
+//         if (showHods.value && item.is_hod !== 1) return false;
+//         if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+//           return false;
+//         }
+//         return true;
+//       })
+//       .map(item => item.role);
+
+//     // Remove only the visible items from the selection
+//     designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
+//   }
+// }
 
 
 
@@ -3324,9 +3468,9 @@ function toggleSelectAll(event) {
 //     designationValue.value = [];
 //   }
 // }
-function clearall_designations(){
-  designationValue.value = []
-}
+// function clearall_designations(){
+//   designationValue.value = []
+// }
 // ✅ Toggle select all
 // function toggleSelectAll(event) {
 //   if (event.target.checked) {
@@ -3456,6 +3600,7 @@ function initializeDesignationValue(blockIndex) {
 
 
 const AddDesignCanvas = (idx) => {
+  showHods.value = false;
   searchDesignation.value = ''
   selectedApproverType.value = ''; 
   // ViewOnlyReportee.value = false;
