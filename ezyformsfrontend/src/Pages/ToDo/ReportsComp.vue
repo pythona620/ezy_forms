@@ -282,17 +282,27 @@ function exportReport(type) {
     alert("No data to export!");
     return;
   }
-  console.log(listDataheaders.value);
-  console.log(listData.value);
 
   // ✅ Get header labels and matching keys
   const headers = listDataheaders.value.map((h) => h.th);
   const keys = listDataheaders.value.map((h) => h.td_key);
 
-  // ✅ Build rows from your listData
-  const rows = listData.value.map((row) =>
-    keys.map((key) => `"${(row[key] ?? "")?.replace(/\|/g, ",")}"`)?.join(",")
-  );
+ // ✅ Build rows safely
+    const rows = listData.value.map((row) =>
+      keys
+        .map((key) => {
+          let cell = row[key];
+
+          // Convert non-string values to string
+          if (cell === null || cell === undefined) cell = "";
+          else if (typeof cell === "object") cell = JSON.stringify(cell); // handle objects/arrays
+          else cell = String(cell); // handle numbers, booleans, etc.
+
+          // Replace '|' and escape quotes
+          return `"${cell.replace(/\|/g, ",").replace(/"/g, '""')}"`
+        })
+        .join(",")
+    );
 
   // ✅ Join headers + rows
   const csvContent = [headers.join(","), ...rows].join("\n");

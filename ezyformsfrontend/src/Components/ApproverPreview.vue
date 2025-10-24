@@ -2075,12 +2075,11 @@ const handleSelectChange = (
   field.value = newValue;
 
   // only record change if different
-  if (oldValue !== newValue) {
+ if (blockIndex < props.currentLevel && oldValue !== newValue) {
     fieldChanges.value[key] = {
       oldValue,
       newValue,
     };
-
     emit("field-change", fieldChanges.value);
   }
 
@@ -2138,7 +2137,7 @@ const filteredBlocks = computed(() => {
           if (field.label === "Approved By" || field.label === 'Acknowledged By') {
             if (emp_data.value.signature) {
 
-              field.value = emp_data.value.signature;
+              field.value = emp_data.value.signature || "";
               emit("updateField", field);
             }
 
@@ -2374,24 +2373,25 @@ const getFieldComponent = (type) => {
 const fieldErrors = ref({});
 
 const allFieldsFilled = computed(() => {
-  if (!props.blockArr || props.blockArr.length === 0) return false;
+  if (!filteredBlocks.value || filteredBlocks.value.length === 0) return false;
 
-  const currentBlock = props.blockArr[props.currentLevel];
+  const currentBlock = filteredBlocks.value[filteredBlocks.value.length - 1]; // use filteredBlocks
   if (!currentBlock || !currentBlock.sections) return false;
 
   for (const section of currentBlock.sections || []) {
     for (const row of section.rows || []) {
       for (const column of row.columns || []) {
         for (const field of column.fields || []) {
-          
-          // ✅ Check required fields only in current level
+          console.log(field,"outside");
+
           if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+          console.log(field,"inside");
+
             return false;
           }
 
           const rowKey = row.__row_id || row.id || row._temp_id;
           const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
-
           if (fieldError) {
             return false;
           }
@@ -2400,8 +2400,41 @@ const allFieldsFilled = computed(() => {
     }
   }
 
-  return true; // ✅ All required fields filled for current block only
+  return true;
 });
+
+// const allFieldsFilled = computed(() => {
+//   console.log(props.blockArr);
+//   if (!props.blockArr || props.blockArr.length === 0) return false;
+
+//   const currentBlock = props.blockArr[props.currentLevel];
+//   if (!currentBlock || !currentBlock.sections) return false;
+
+//   for (const section of currentBlock.sections || []) {
+//     for (const row of section.rows || []) {
+//       for (const column of row.columns || []) {
+//         for (const field of column.fields || []) {
+//           console.log(field,"outside");
+          
+//           // ✅ Check required fields only in current level
+//           if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+//             console.log(field,"inside");
+//             return false;
+//           }
+
+//           const rowKey = row.__row_id || row.id || row._temp_id;
+//           const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
+
+//           if (fieldError) {
+//             return false;
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   return true; // ✅ All required fields filled for current block only
+// });
 
 // const allFieldsFilled = computed(() => {
 //   if (!props.blockArr || props.blockArr.length === 0) return false;
@@ -2502,7 +2535,7 @@ const oldValue = field.value;
       files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
     }
 
-    files.forEach((file) => uploadFile(file, field));
+    files.forEach((file) => uploadFile(file, field, blockIndex));
 
     // ✅ Reset file input to allow same file re-selection
     eve.target.value = null;
@@ -2559,13 +2592,9 @@ const oldValue = field.value;
   const key = field.label || field.fieldname;
 
   // Only store if the value actually changed
-  if (oldValue !== newValue) {
-    fieldChanges.value[key] = {
-      oldValue,
-      newValue,
-    };
-    // console.log("Field change recorded:", fieldChanges.value);
-    emit('field-change', fieldChanges.value);
+  if (blockIndex < props.currentLevel && oldValue !== newValue) {
+    fieldChanges.value[key] = { oldValue, newValue };
+    emit("field-change", fieldChanges.value);
   }
   validateField(
     field,
@@ -2621,7 +2650,7 @@ const generateRandomNumber = () => {
   return Math.floor(Math.random() * 1000000);
 };
 
-const uploadFile = (file, field) => {
+const uploadFile = (file, field, blockIndex) => {
   const oldValue = field.value; // ← store old value
 
   let fileName = `ezyForms-@${file.name}`;
@@ -2647,12 +2676,13 @@ const uploadFile = (file, field) => {
         // ✅ add old/new to fieldChanges without touching your main logic
         const newValue = field.value;
         const key = field.label || field.fieldname;
-        if (oldValue !== newValue) {
-          fieldChanges.value[key] = {
-            oldValue,
-            newValue,
-          };
-          emit("field-change", fieldChanges.value);
+        if (blockIndex < props.currentLevel) {
+          const newValue = field.value;
+          const key = field.label || field.fieldname;
+          if (oldValue !== newValue) {
+            fieldChanges.value[key] = { oldValue, newValue };
+            emit("field-change", fieldChanges.value);
+          }
         }
       } else {
         console.error("file_url not found in the response.");

@@ -547,10 +547,12 @@ if (actionEvent.name === 'Create Report') {
 }
 async function generateReport() {
   // collect only selected fields
-  // collect selected fields
   const selectedFields = reportFields.value
     .filter(f => f.selected)
     .map(f => `${f.fieldname} as '${f.label}'`);
+
+  // add static field
+  selectedFields.unshift("name as Name"); // or push() if you want it at the end
 
   const payload = selectedFields.join(","); // comma separated string
 
@@ -572,13 +574,13 @@ async function generateReport() {
     if (modal) modal.hide();
 
     // show success toast
-    showSuccess("Report Fields Updated Successfully");
+    showSuccess("Report Created Successfully");
   } catch (error) {
     console.error("Error updating report fields:", error);
     showError("Failed to update report fields");
   }
-   
 }
+
 
 
 function downloadPdf() {

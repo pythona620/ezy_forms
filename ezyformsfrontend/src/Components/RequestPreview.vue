@@ -1991,10 +1991,12 @@ const allFieldsFilled = computed(() => {
                 for (const column of row.columns) {
                     for (const field of column.fields) {
                         // If field is required and value is empty, return false
+                        console.log(field,"outside");
                         if (
                             field.reqd === 1 &&
                             (!field.value || field.value.toString().trim() === "")
                         ) {
+                            console.log(field,"inside");
                             return false;
                         }
                          const rowKey = row.__row_id || row.id || JSON.stringify(row);
