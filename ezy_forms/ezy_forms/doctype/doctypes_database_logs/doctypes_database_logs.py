@@ -9,7 +9,7 @@ from frappe.utils.file_manager import get_files_path
 from calendar import month_abbr
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-
+import secrets,requests,json
 class DoctypesDatabaseLogs(Document):
 	def before_save(self):
 		# Ensure numeric fields are stored as float
@@ -99,11 +99,7 @@ def create_doctypes_db_log():
 			total_storage_sum += total_size
 
 			# --- Check if a record for this date & doctype already exists ---
-			existing_row = next(
-				(row for row in parent_doc.daily_doctypes_db_logs
-				 if row.date == today and row.doctype_name == dt["name"]),
-				None
-			)
+			existing_row = next((row for row in parent_doc.daily_doctypes_db_logs if str(row.date) == str(today) and row.doctype_name == dt["name"]),None)
 
 			if existing_row:
 				# ✅ Update existing row
@@ -158,6 +154,7 @@ def create_doctypes_db_log():
 
 		parent_doc.last_modified_on = today
 		parent_doc.save(ignore_permissions=True)
+		# generate_jwt_token(parent_doc.name)
 		frappe.db.commit()
 
 		return f" DB Logs created/updated for {site_name} — {len(doctypes)} doctypes processed"
@@ -194,17 +191,7 @@ def jwt_token_method():
 				frappe.log_error(message= "Record does not exist for the Doctypes Database Logs",title="Record does not exist")
 				return {"status": "failed", "message": "Record does not exist","status_code": 404}
 			frappe.db.set_value("Doctypes Database Logs",{"site_name": site_name},"subscribtion_stroage",subscription_storage)
-
-			business_units = frappe.get_all("Ezy Business Unit", pluck='name')
-			frappe.db.set_value(
-				"Ezy Business Unit",
-				{"name": ["in", business_units]},
-				{
-					"subscription_end_date": subscription_end_date,
-					"subscription_start_date": subscription_start_date
-				}
-			)
-
+			frappe.db.set_value("Global Site Settings",	"Global Site Settings",{"subscription_end_date": subscription_end_date,"subscription_start_date": subscription_start_date})
 			frappe.db.commit()
 			return {"status": "success", "message": "Subscription data updated successfully","status_code": 200}
 		
@@ -217,3 +204,61 @@ def jwt_token_method():
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "JWT Token Method Error")
 		return {"status": "error", "message": str(e),"status_code": 404}
+
+
+@frappe.whitelist()
+def generate_jwt_token(record):
+    site_name = "Local IP"
+    doc = frappe.get_doc("Doctypes Database Logs", record).as_dict()
+    excluded_fields = {
+        "owner", "creation", "modified", "modified_by",
+        "docstatus", "idx", "name", "parentfield",
+        "parent", "parenttype"
+    }
+    def clean_and_serialize(value):
+        """Recursively clean unwanted fields and serialize dates/times."""
+        if isinstance(value, dict):
+            return {
+                k: clean_and_serialize(v)
+                for k, v in value.items()
+                if k not in excluded_fields
+            }
+        elif isinstance(value, list):
+            return [clean_and_serialize(v) for v in value]
+        else:
+            return str(value)
+    serializable_doc = clean_and_serialize(doc)
+    secret_key = secrets.token_hex(12)
+    payload = {
+        "user_id": "caratRED",
+        "doc": serializable_doc
+    }
+
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+
+    site_url = site_name.rstrip("/") + "/"
+    url = f"{site_url}api/method/tax_deductions.tax_deductions.doctype.sites.sites.get_site_details"
+
+    data = {
+        "jwt_token": token,
+        "secret_key": secret_key,
+    }
+
+    try:
+        # Use json= to send JSON body in a GET is incorrect, so let's use POST if you expect JSON body
+        response = requests.get(url, json=data)
+        if response.status_code == 200:
+            return {
+                "status": "success",
+                "message": "JWT sent successfully",
+                "response": response.json(),
+            }
+        else:
+            frappe.log_error(
+                message=f"Failed to send payload to {site_name}\n{response.text}",
+                title="generate_jwt_token",
+            )
+            return {"status": "failed", "message": "Remote site error", "status_code": response.status_code}
+    except Exception as e:
+        frappe.log_error(message=f"JWT Send Error: {str(e)}", title="generate_jwt_token")
+        return {"status": "error", "message": str(e)}

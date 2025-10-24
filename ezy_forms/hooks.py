@@ -185,7 +185,10 @@ scheduler_events = {
 # 	"monthly": [
 # 		"ezy_forms.tasks.monthly"
 # 	],
-}
+    "cron":{
+        "0 1 * * *":["ezy_forms.ezy_forms.doctype.doctypes_database_logs.doctypes_database_logs.create_doctypes_db_log"]
+    }
+            }
 
 # Testing
 # -------
