@@ -982,8 +982,10 @@ const parsedChanges = computed(() => {
   try {
     const data = JSON.parse(selectedItem.value.field_changes);
 
-    // Normalize the structure into a uniform list
-    return data.map((entry) => {
+    // Ensure we always work with an array
+    const normalized = Array.isArray(data) ? data : [data];
+
+    return normalized.map((entry) => {
       if (entry.childTable) {
         const [tableName, tableFields] = Object.entries(entry.childTable)[0];
         return { type: "child", tableName, fields: tableFields };
