@@ -32,8 +32,8 @@
                     </div>
                 </div>
             </div>
-            <div v-else>
-                <div class="no-form">No Form</div>
+            <div class="no-form-div">
+                <span>{{ serverMessage }}</span>
             </div>
         </div>
         <div class="modal fade " id="ExportEmployeeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -95,6 +95,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 // import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { useRoute, useRouter } from "vue-router";
+import { showError, showSuccess } from "../shared/services/toast";
 
 const router = useRouter();
 const route = useRoute();
@@ -188,6 +189,7 @@ function logout() {
 }
 
 const fetchDetails=ref("");
+const serverMessage=ref("");
 
 function fetchData() {
     const data = {
@@ -225,7 +227,21 @@ function fetchData() {
         })
         .catch((error) => {
             console.error("Error fetching records:", error);
-        })
+            const serverRes = error.response?.data?._server_messages;
+            if (serverRes) {
+                try {
+                const messages = JSON.parse(serverRes);
+                messages.forEach((msg) => {
+                    const parsed = JSON.parse(msg);
+                    serverMessage.value = parsed.message?.replace(/\s*\(.*?\)\s*/g, "").trim();
+                });
+                } catch (err) {
+                console.error("Error parsing server messages:", err);
+                }
+            } else {
+                showError("Server error occurred", { transition: "zoom" });
+            }
+        });
 }
 
 watch(business_unit, (newBu, oldBu) => {
@@ -760,7 +776,7 @@ function linked_id_adding_method(name) {
     padding: 5px;
 }
 
-.no-form {
+.no-form-div {
     width: 100%;
     height: 100vh;
     display: flex;
@@ -768,6 +784,17 @@ function linked_id_adding_method(name) {
     align-items: center;
     font-size: 15px;
     font-weight: 500;
+    // background-color: #f0f0f0;
+    color: #e23434;
+    font-size: 15px;
+    animation: fadeIn 3s ease forwards;
+
+    span{
+        padding: 15px;
+        border: 1px solid #e23434;
+        border-radius: 10px;
+        box-shadow: rgba(245, 39, 39, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    }
 }
 
 .Acknowledgement-check {
