@@ -106,76 +106,76 @@ function updateOnlineStatus() {
   isOnline.value = navigator.onLine
 }
 
-function removeUserIdCookie() {
-    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    user_id.value = ""; 
-}
+// function removeUserIdCookie() {
+//     document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+//     document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+//     user_id.value = ""; 
+// }
 
 // Function to remove user-related localStorage data
-function clearLocalStorage() {
-    localStorage.clear();
-    // localStorage.removeItem("employeeData");
-    // localStorage.removeItem("Bu");
-    // localStorage.removeItem("USERROLE");
-    // console.log("Local storage cleared");
-}
+// function clearLocalStorage() {
+//     localStorage.clear();
+//     // localStorage.removeItem("employeeData");
+//     // localStorage.removeItem("Bu");
+//     // localStorage.removeItem("USERROLE");
+//     // console.log("Local storage cleared");
+// }
 // Check credentials
-function checkCredentials() {
-  // ❌ Skip check if already on login page
-  if (router.currentRoute.value.path === "/") {
-    return;
-  }
+// function checkCredentials() {
+//   // ❌ Skip check if already on login page
+//   if (router.currentRoute.value.path === "/") {
+//     return;
+//   }
 
-  const userNameRaw = sessionStorage.getItem("UserName");
-  const employeeDataRaw = localStorage.getItem("employeeData");
+//   const userNameRaw = sessionStorage.getItem("UserName");
+//   const employeeDataRaw = localStorage.getItem("employeeData");
 
-  let userName = null;
-  let employeeData = null;
+//   let userName = null;
+//   let employeeData = null;
 
-  try {
-    if (userNameRaw) userName = JSON.parse(userNameRaw);
-  } catch {
-    userName = null;
-  }
+//   try {
+//     if (userNameRaw) userName = JSON.parse(userNameRaw);
+//   } catch {
+//     userName = null;
+//   }
 
-  try {
-    if (employeeDataRaw) employeeData = JSON.parse(employeeDataRaw);
-  } catch {
-    employeeData = null;
-  }
+//   try {
+//     if (employeeDataRaw) employeeData = JSON.parse(employeeDataRaw);
+//   } catch {
+//     employeeData = null;
+//   }
 
-  // 🔹 If employeeData missing
-  if (!employeeData) {
-    sessionStorage.removeItem("UserName");
-    localStorage.clear();
-    clearLocalStorage();
-    removeUserIdCookie();
-    router.push("/");
-  }
-  // 🔹 If only UserName missing
-  else if (!userName) {
-     localStorage.removeItem("employeeData");
-    localStorage.clear();
-    clearLocalStorage();
-    removeUserIdCookie();
-    router.push("/");
-  }
-}
+//   // 🔹 If employeeData missing
+//   if (!employeeData) {
+//     sessionStorage.removeItem("UserName");
+//     localStorage.clear();
+//     clearLocalStorage();
+//     removeUserIdCookie();
+//     router.push("/");
+//   }
+//   // 🔹 If only UserName missing
+//   else if (!userName) {
+//      localStorage.removeItem("employeeData");
+//     localStorage.clear();
+//     clearLocalStorage();
+//     removeUserIdCookie();
+//     router.push("/");
+//   }
+// }
 
 
 // Set the initial value on component mount
 onMounted(() => {
-  checkCredentials();
+  // checkCredentials();
     user_id.value = getUserIdFromCookies();
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
 
     // listen to user activity 
-    window.addEventListener("click", checkCredentials); 
-    window.addEventListener("keydown", checkCredentials); 
-    window.addEventListener("mousemove", checkCredentials); 
-    window.addEventListener("scroll", checkCredentials); 
+    // window.addEventListener("click", checkCredentials); 
+    // window.addEventListener("keydown", checkCredentials); 
+    // window.addEventListener("mousemove", checkCredentials); 
+    // window.addEventListener("scroll", checkCredentials); 
 
 
 });
@@ -186,15 +186,15 @@ onBeforeUnmount(() => {
  window.removeEventListener("online", updateOnlineStatus);
   window.removeEventListener("offline", updateOnlineStatus);
 
-  window.removeEventListener("click", checkCredentials);
-  window.removeEventListener("keydown", checkCredentials);
-  window.removeEventListener("mousemove", checkCredentials);
-  window.removeEventListener("scroll", checkCredentials);
+  // window.removeEventListener("click", checkCredentials);
+  // window.removeEventListener("keydown", checkCredentials);
+  // window.removeEventListener("mousemove", checkCredentials);
+  // window.removeEventListener("scroll", checkCredentials);
 })
 
-watchEffect(() => {
-  checkCredentials();
-});
+// watchEffect(() => {
+//   checkCredentials();
+// });
 
 </script>
 

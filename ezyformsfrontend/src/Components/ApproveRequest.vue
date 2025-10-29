@@ -253,33 +253,70 @@
                 </div>
 
                 <!-- Activity Log -->
-                <div v-if="activeTab === 'activity'">
                   <!-- <div class="py-2">
                     <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
                   </div> -->
-                  <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-                    :class="{ 'last-item': index === activityData.length - 1 }">
-                    <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                      ? 'activity-log-dot'
-                      : 'activityRedDot'"></div>
+              <div v-if="activeTab === 'activity'">
+                <!-- Activity log items -->
+                <div
+                  v-for="(item, index) in activityData"
+                  :key="index"
+                  class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 && !formatApprover(tableData.assigned_to_users) }"
+                >
+                  <div
+                    :class="[
+                      item.action === 'Approved' ||
+                      item.action === 'Request Raised' ||
+                      item.action === 'Completed'
+                        ? 'activity-log-dot'
+                        : 'activityRedDot'
+                    ]"
+                  ></div>
+
+                      <div class="activity-log-content ">
+                        <div class="font-12">
+                          <span class="fw-bold">{{ formatAction(item.action) }}</span>
+                          <span class="activity_role">{{ item.role }}</span><br />
+                          <span>{{ item.user }}</span>
+                          <span class="px-1">on</span>
+                          <span class="italic_font px-1">{{ formatCreation(item.time) }}</span>
+                          <div class="activity_reason">
+                            <span class="comments_span">comments: </span>
+                            <span>{{ item.reason || 'N/A' }}</span>
+                          </div>
+                        </div>
+
+                        <div class="text-end">
+                          <button
+                            v-if="item.field_changes && item.field_changes !== 'null'"
+                            class="btn btn-sm font-13 edits_btn"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#changesOffcanvas"
+                            @click="openChanges(item)"
+                          >
+                            <i class="bi bi-pencil"></i> Edits in form
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                <!-- ✅ Next Approver Section -->
+                  <div v-if="formatApprover(tableData.assigned_to_users)" class="activity-log-item last-item">
+                    <div class="activityPendingDot"></div>
                     <div class="activity-log-content">
-                      <p class="font-12 mb-1">
-
-                        <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
-                        <span class="strong-content fw-bolder">{{ item.user }}</span><br />
-                        <span>{{ item.role }}</span><br />
-                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
-                        <button  v-if="item.field_changes && item.field_changes !== 'null'" class="btn btn-sm text-decoration-underline font-13"
-                          type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
-                          @click="openChanges(item)">
-                          Changes
-                        </button>
-
-                      </p>
+                      <span class=" fw-bold font-12">Pending</span><br/>
+                      <span class="font-12 text-muted fw-normal">
+                        Waiting for
+                        <span class="fw-semibold text-dark">
+                          {{ formatApprover(tableData.assigned_to_users) }}
+                        </span> approval
+                      </span>
                     </div>
                   </div>
-                </div>
+            </div>
+
 
                 <!-- Linked Forms -->
                 <div v-else-if="activeTab === 'linked'">
@@ -548,32 +585,65 @@
             </div>
 
             <!-- Activity Log -->
-            <div v-if="activeTab === 'activity'">
-              <!-- <div class="py-2">
-                    <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
-                  </div> -->
-              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-                :class="{ 'last-item': index === activityData.length - 1 }">
-                <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                  ? 'activity-log-dot'
-                  : 'activityRedDot'"></div>
-                <div class="activity-log-content">
-                  <p class="font-12 mb-1">
+             <div v-if="activeTab === 'activity'">
+                <!-- Activity log items -->
+                <div
+                  v-for="(item, index) in activityData"
+                  :key="index"
+                  class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 && !formatApprover(tableData.assigned_to_users) }"
+                >
+                  <div
+                    :class="[
+                      item.action === 'Approved' ||
+                      item.action === 'Request Raised' ||
+                      item.action === 'Completed'
+                        ? 'activity-log-dot'
+                        : 'activityRedDot'
+                    ]"
+                  ></div>
 
-                    <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                    <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
-                    <span class="strong-content">{{ item.user_name }}</span><br />
-                    <span>{{ item.role }}</span><br />
-                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
-                    <button v-if="item.field_changes && item.field_changes !== 'null'" class="btn btn-sm border-0 text-decoration-underline font-12 mt-2"
-                      type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
-                      @click="openChanges(item)">
-                      Changes
-                    </button>
+                      <div class="activity-log-content ">
+                        <div class="font-12">
+                          <span class="fw-bold">{{ formatAction(item.action) }}</span>
+                          <span class="activity_role">{{ item.role }}</span><br />
+                          <span>{{ item.user }}</span>
+                          <span class="px-1">on</span>
+                          <span class="italic_font px-1">{{ formatCreation(item.time) }}</span>
+                          <div class="activity_reason">
+                            <span class="comments_span">comments: </span>
+                            <span>{{ item.reason || 'N/A' }}</span>
+                          </div>
+                        </div>
 
-                  </p>
-                </div>
-              </div>
+                        <div class="text-end">
+                          <button
+                            v-if="item.field_changes && item.field_changes !== 'null'"
+                            class="btn btn-sm font-13 edits_btn"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#changesOffcanvas"
+                            @click="openChanges(item)"
+                          >
+                            <i class="bi bi-pencil"></i> Edits in form
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                <!-- ✅ Next Approver Section -->
+                  <div v-if="formatApprover(tableData.assigned_to_users)" class="activity-log-item last-item">
+                    <div class="activityPendingDot"></div>
+                    <div class="activity-log-content">
+                      <span class=" fw-bold font-12">Pending</span><br/>
+                      <span class="font-12 text-muted">
+                        Waiting for
+                        <span class="fw-semibold text-dark">
+                          {{ formatApprover(tableData.assigned_to_users) }}
+                        </span> approval
+                      </span>
+                    </div>
+                  </div>
             </div>
 
             <!-- Linked Forms -->
@@ -722,7 +792,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed,onMounted } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -861,11 +931,18 @@ function handleChildTableChanges(updatedChanges) {
 
   console.log("✅ Updated changedFields:", changedFields.value);
 }
+const attachmentViewRequired=ref("");
+
+onMounted(() => {
+  attachmentViewRequired.value = sessionStorage.getItem("attachmentViewRequired");
+});
+
+// const attachmentsReady = ref(false);
 const handleApprove = () => {
   // console.log(attachmentsReady.value);
 
   // 🧩 Check if all attachments are previewed before approval
-  if (!attachmentsReady.value) {
+  if (attachmentViewRequired.value == 1 && !attachmentsReady.value) {
     showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
@@ -945,6 +1022,27 @@ function EditformSubmission() {
     });
   }
 }
+const formatApprover = (value) => {
+  if (!value) return "";
+
+  // If it's a string that looks like an array: "['IT', 'HR']"
+  if (typeof value === "string" && value.startsWith("[")) {
+    try {
+      // Replace single quotes with double quotes and parse
+      const parsed = JSON.parse(value.replace(/'/g, '"'));
+      if (Array.isArray(parsed)) {
+        return parsed.join(", ");
+      }
+      return parsed;
+    } catch {
+      // Fallback if JSON.parse fails
+      return value.replace(/[\[\]']/g, "");
+    }
+  }
+
+  return value;
+};
+
 
 // console.log("emittedFormData", emittedFormData.value);
 watch(
@@ -982,22 +1080,29 @@ const parsedChanges = computed(() => {
   try {
     const data = JSON.parse(selectedItem.value.field_changes);
 
-    // Ensure we always work with an array
+    // Ensure it's always an array
     const normalized = Array.isArray(data) ? data : [data];
 
-    return normalized.map((entry) => {
+    // Flatten all normal + child table entries
+    return normalized.flatMap((entry) => {
+      // If entry contains child tables
       if (entry.childTable) {
-        const [tableName, tableFields] = Object.entries(entry.childTable)[0];
-        return { type: "child", tableName, fields: tableFields };
-      } else {
-        return { type: "normal", fields: entry };
+        return Object.entries(entry.childTable).map(([tableName, tableFields]) => ({
+          type: "child",
+          tableName,
+          fields: tableFields,
+        }));
       }
+
+      // For normal fields (non-child tables)
+      return { type: "normal", fields: entry };
     });
   } catch (error) {
     console.error("Invalid JSON in field_changes:", error);
     return [];
   }
 });
+
 
 
 const formatAction = (action) => {
@@ -2104,18 +2209,6 @@ watch(activityData, (newVal) => {
   position: relative;
 }
 
-/* Activity log item */
-.activity-log-item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  /* Ensure dot and text align properly */
-  gap: 10px;
-  padding-left: 15px;
-  /* Space between dot and text */
-  margin-bottom: 10px;
-  /* Space between logs */
-}
 
 .activity_height {
   height: 71vh !important;
@@ -2144,53 +2237,7 @@ watch(activityData, (newVal) => {
 }
 
 /* Activity log dot with inner padding and dotted border */
-.activity-log-dot {
-  position: relative;
-  width: 16px;
-  /* Increase size to accommodate padding */
-  height: 16px;
-  background-color: white;
-  /* Inner padding effect */
-  border-radius: 50%;
-  border: 2px dotted #ccc;
-  /* Dotted border */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 0;
-  margin-top: 3px;
-}
 
-/* Inner dot */
-.activity-log-dot::before {
-  content: "";
-  width: 8px;
-  /* Inner dot size */
-  height: 8px;
-  background-color: #2BED12;
-  /* Inner dot color */
-  border-radius: 50%;
-  display: block;
-}
-
-/* Add vertical line using ::after */
-.activity-log-dot::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  /* Position below the dot */
-  left: 50%;
-  width: 1px;
-  height: calc(100% + 50px);
-
-  /* Adjust line length */
-  background: repeating-linear-gradient(to bottom,
-      rgb(133, 133, 133),
-      rgb(133, 133, 133) 4px,
-      transparent 4px,
-      transparent 8px);
-  transform: translateX(-50%);
-}
 
 
 /* Remove line for the last item */
@@ -2198,53 +2245,11 @@ watch(activityData, (newVal) => {
   content: none;
 }
 
-.activityRedDot {
-  position: relative;
-  width: 16px;
-  /* Increase size to accommodate padding */
-  height: 16px;
-  background-color: white;
-  /* Inner padding effect */
-  border-radius: 50%;
-  border: 2px dotted #ccc;
-  /* Dotted border */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 0;
-  margin-top: 3px;
-}
 
 /* Inner dot */
-.activityRedDot::before {
-  content: "";
-  width: 8px;
-  /* Inner dot size */
-  height: 8px;
-  background-color: #ed1212;
-  /* Inner dot color */
-  border-radius: 50%;
-  display: block;
-}
 
 /* Add vertical line using ::after */
-.activityRedDot::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  /* Position below the dot */
-  left: 50%;
-  width: 1px;
-  height: calc(100% + 50px);
 
-  /* Adjust line length */
-  background: repeating-linear-gradient(to bottom,
-      rgb(133, 133, 133),
-      rgb(133, 133, 133) 4px,
-      transparent 4px,
-      transparent 8px);
-  transform: translateX(-50%);
-}
 
 /* Activity log content */
 .activity-log-content {
@@ -2252,6 +2257,116 @@ watch(activityData, (newVal) => {
   color: #333;
   flex: 1;
   /* Ensure text takes up remaining space */
+}
+.activity_role{
+  background-color: #E0E1FF;
+  padding: 1px 6px;
+  border-radius:6px;
+  margin: 0px 5px;
+}
+.activity_reason{
+  background-color: #FFFDE3;
+  padding: 6px;
+  margin: 2px 6px 2px 2px;
+  border-radius: 6px;
+}
+.edits_btn{
+  color:#1B14DF;
+}
+.activity-log-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding-bottom: 13px; /* space for line end */
+}
+
+/* Vertical dotted line for all items */
+.activity-log-item::after {
+  content: "";
+  position: absolute;
+  top: 25px; /* just below the dot */
+  left: 8px; /* align with dot center (since dot is 16px wide) */
+  width: 1px;
+  bottom: 0; /* extends till bottom of item */
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(133, 133, 133),
+    rgb(133, 133, 133) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Remove line for last item */
+.activity-log-item.last-item::after {
+  content: none;
+}
+
+/* Dots */
+.activity-log-dot,
+.activityRedDot,
+.activityPendingDot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  border: 2px dotted #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3px;
+  flex-shrink: 0;
+  z-index: 1; /* keeps dot above the line */
+}
+
+/* Inner dots */
+.activity-log-dot::before,
+.activityRedDot::before,
+.activityPendingDot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.activity-log-dot::before {
+  background-color: #2bed12;
+}
+
+.activityRedDot::before {
+  background-color: #ed1212;
+}
+.activityPendingDot::before {
+  background-color: #ffd700; /* Yellow for next approver */
+}
+/* Content styling */
+.activity-log-content {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  padding-left: 8px;
+}
+
+.activity_role {
+  background-color: #e0e1ff;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin: 0 5px;
+}
+
+.activity_reason {
+  background-color: #fffde3;
+  padding: 6px;
+  margin: 2px 6px 2px 2px;
+  border-radius: 6px;
+}
+
+.edits_btn {
+  color: #1b14df;
 }
 
 .activity-log-content strong {
@@ -2276,7 +2391,13 @@ td {
 .strong-content {
   font-weight: 500;
 }
+.italic_font{
+  font-style: italic !important;
 
+}
+.comments_span{
+  color: #DFCE14;
+}
 .status_completed {
   color: #2BED12;
   border: 2px solid #2BED12;

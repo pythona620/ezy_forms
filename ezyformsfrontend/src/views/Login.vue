@@ -33,7 +33,7 @@
         </div>
 
           <div class="text-end">
-            <span @click="openForgotpassword" class="font-12 p-0 text-end forgot-password">Forgot password?</span><br />
+            <span @click="openForgotpassword" class="font-12 p-0 text-end link-color">Forgot password?</span><br />
           </div>
 
         <button :disabled="!showPwdField" @click="Login" type="submit"
@@ -44,7 +44,7 @@
 
       </div>
       <!-- && today !== today -->
-      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span
+      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenSignUp"><span
           class="sign">Not
           a user? Sign
           Up</span></div>
@@ -204,7 +204,7 @@
           Sign Up
         </button>
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log
+      <div class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenLogin"><span class="sign">Existing user? Log
           In</span></div>
     </div>
 
@@ -232,12 +232,12 @@
         </button>
 
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin">
+      <div class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenLogin">
         <span class="sign">Back to Log In</span>
       </div>
     </div>
 
-    <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade" id="changePassword" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
@@ -463,6 +463,7 @@ export default {
       isSignup: null,
       isActivate: null,
       acknowledgementHtml: "",
+      isActive:"",
       acknowledge: false,
       acknowledgementName: "",
       isDigital: false,
@@ -476,6 +477,7 @@ export default {
       isAcknowledgeSign: "",
       LoginAcknowledge: "",
       signatureInput: null,
+      // vendorComparisonForm:"",
       subEndDate: "",
       today: "",
       selectedScore: "",
@@ -541,7 +543,6 @@ export default {
       this.confirm_password = ""
       this.passwordsMismatch = ""
       this.passwordError = ""
-      this.formdata.usr = "";
     },
     validateEmail() {
       if(this.SignUpdata.email){
@@ -909,6 +910,7 @@ export default {
             this.isSignup = res.message.is_signup;
             this.propertyDetails = res.message.business_unit.map((prty) => prty.name);
             const active = res.message.acknowledgement;
+            this.isActive = active.length > 0 ? 1 : 0;
             const firstActive = active[0];
             this.acknowledgementHtml = firstActive.acknowledgement;
             this.SignUpdata.acknowledgement = firstActive.name;
@@ -1044,8 +1046,10 @@ export default {
             this.LoginAcknowledge = res.message.login_acknowledge;
             this.subEndDate = res.message.subscription_end_date;
             this.selectedScore = res.message.minimum_password_score;
+            // this.vendorComparisonForm=res.message.vender_comparison_form;
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
+              this.clearPassword()
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
               );
@@ -1105,12 +1109,11 @@ export default {
                 this.showOtpPage = false;
                 this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                if (this.LoginAcknowledge === 1 && (this.isAcknowledge == 0 || this.isAcknowledgeSign == 0)) {
+                if (this.LoginAcknowledge === 1 && ((this.isAcknowledge == 0 && this.isActive) || this.isAcknowledgeSign == 0)) {
                   const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
                   modal.show();
                 }
                 else {
-                  console.log(res.employee_doc);
                    const employeeData = res.employee_doc;
 
                 // Extract only the required fields
@@ -1127,7 +1130,8 @@ export default {
                   responsible_units: employeeData?.responsible_units,
                   // department: employeeData.department,
                 };
-                localStorage.setItem("subEndDate", this.subEndDate)
+                localStorage.setItem("subEndDate", this.subEndDate);
+                // localStorage.setItem("vendorComparisonForm",this.vendorComparisonForm);
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
 
@@ -1697,9 +1701,10 @@ button {
   font-size: 13px;
 }
 
-.forgot-password:hover {
+ .link-color:hover {
   text-decoration: underline;
   transition: all 0.3s ease;
+  color: rgb(21, 21, 252);
 }
 
 .toggle-icon {

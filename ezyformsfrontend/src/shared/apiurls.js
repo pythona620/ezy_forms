@@ -87,7 +87,7 @@ export const apis = {
  view_only_reportee : domain + `/method/ezy_forms.api.v1.assign_to_me.pick_view_only_reportee`,
  toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`,
  deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
- repostListData: domain + `/method/frappe.desk.query_report.run`,
+ 
   ExportReport: domain + `/method/ezy_forms.api.v1.export_report.export_report_data`,
   approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`,
   ActivitySaveComment: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.save_button_commite_update`,
@@ -97,7 +97,7 @@ export const apis = {
   getReportData:  `/printview`,
   signUp:domain+`/method/ezy_forms.api.v1.sign_up.sign_up`,
   GetsignUp:domain+`/method/ezy_forms.api.v1.sign_up.get_signup_value`,
-  deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_rejection`,
+  deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.signup_employee.signup_employee.employee_rejection`,
   unablUpdateEmail:domain+`/method/ezy_forms.api.v1.sign_up.employee_update_notification`,
   DepartmentNames: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_departments.ezy_departments.side_nav_department_and_forms`,
   linked_doc_list: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_list`,
@@ -110,14 +110,15 @@ export const apis = {
   get_wf_activate_log: domain + `/method/ezy_flow.ezy_flow.doctype.wf_activity_log.wf_activity_log.get_wf_activate_log`,
   download_workorder: domain + `/method/forms_templates.api.v1.vendor_comparision.vendor_comparision_api`,
   generate_qr_code:domain + `/method/ezy_forms.api.v1.generate_qr.generate_qr_for_new_doc`,
-  getQrCodeData:domain+`/method/ezy_forms.api.v1.generate_qr.qr_code_to_new_form`,
+  getQrCodeData:domain+`/method/ezy_forms.api.v1.ezy_web_forms.qr_code_to_new_form`,
   addDesignationroles: domain + `/method/ezy_forms.api.v1.get_roles.get_role_list`,
   GetEmployeeForms:domain + `/method/ezy_forms.api.v1.get_employee_form.get_employee_forms`,
   GetAccessibleDeptForms:domain + `/method/ezy_forms.api.v1.get_employee_accessible_forms.get_employee_accessible_forms`,
   GetDoctypeData:domain + `/method/ezy_forms.api.v1.get_doc_list.get_doctype_list`,
   DataUpdate:domain + `/method/ezy_forms.api.v1.doc_operations.doc_operation`,
-  
-  // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
+  // repostListData: domain + `/method/frappe.desk.query_report.run`,
+  repostListData: domain + `/method/ezy_forms.api.v1.generate_report.generate_custom_report`,
+  getReportList: domain + `/method/ezy_forms.api.v1.get_report_list.get_reports_list`
 };
 
 // export const tokens = {

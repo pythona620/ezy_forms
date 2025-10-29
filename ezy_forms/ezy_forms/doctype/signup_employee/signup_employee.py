@@ -12,7 +12,19 @@ class SignupEmployee(Document):
 				frappe.throw(f"Ezy Employee with email {self.emp_mail_id} already exists.")
 			create_employee_record(self.emp_mail_id)
 			employee_update_notification(self.emp_mail_id)
+	def after_insert(doc):
+		if not doc.reporting_to and doc.department:
+			hod = frappe.get_value("Ezy Employee", {
+				"department": doc.department,
+				"is_hod": 1
+			}, ["name", "designation"], as_dict=True)
 
+			if hod:
+				doc.reporting_to = hod.name
+				doc.reporting_designation = hod.designation
+				doc.flags.ignore_permissions = True
+				doc.save()
+				frappe.db.commit()
 
 @frappe.whitelist()
 def create_employee_record(emp_mail_id):
@@ -41,3 +53,10 @@ def create_employee_record(emp_mail_id):
 	# Commit the changes
 	frappe.db.commit()
 	return {"status": "success", "employee": doc.name}
+ 
+@frappe.whitelist(methods=["POST"])
+def employee_rejection(empl_mail_id):
+	if frappe.db.exists("Signup Employee", empl_mail_id):
+		frappe.delete_doc("Signup Employee", empl_mail_id, force=1)
+	frappe.db.commit()
+	return "Employee Deleted Sucessfully"

@@ -12,16 +12,20 @@
   "section_break_cxwy",
   "bu_name",
   "bu_code",
-  "bu_logo",
   "column_break_fphq",
+  "bu_logo",
+  "section_break_u736w",
   "is_acknowledge",
-  "send_form_as_a_attach_through_mail",
-  "welcome_mail_to_employee",
-  "water_mark",
-  "send_form_in_email",
-  "send_daily_alerts",
   "signature_required",
+  "attachment_view_required",
+  "water_mark",
   "allow_approver_to_edit_form",
+  "column_break_gu1ao",
+  "send_form_in_email",
+  "welcome_mail_to_employee",
+  "send_form_as_a_attach_through_mail",
+  "send_daily_alerts",
+  "file_attachment_limit_for_form",
   "section_break_ftig",
   "letter_head"
  ],
@@ -117,9 +121,29 @@
   },
   {
    "default": "0",
+   "fieldname": "attachment_view_required",
+   "fieldtype": "Check",
+   "label": "Attachment View Required"
+  },
+  {
+   "default": "0",
    "fieldname": "allow_approver_to_edit_form",
    "fieldtype": "Check",
    "label": "Allow Approver to Edit Form"
+  },
+  {
+   "fieldname": "section_break_u736w",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gu1ao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "file_attachment_limit_for_form",
+   "fieldtype": "Int",
+   "label": "File Attachment Limit For Forms"
   }
  ],
  "index_web_pages_for_search": 1,

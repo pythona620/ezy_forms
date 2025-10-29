@@ -89,9 +89,15 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 			user_emails = list(set(user_emails))
 		# Get user details
 		user_name = frappe.get_value("User", frappe.get_value("WF Workflow Requests", request_id, "requested_by"), "full_name")
+		if current_status in ["Approved","Rejected"]:
+			current_status = f"Pending With {', '.join(assigned_users)}"
+		elif current_status == "Completed":
+			current_status = "Completed"
 
+		else:
+			current_status = "Request Raised"
 		user_role = frappe.get_value("Ezy Employee",frappe.get_value("WF Workflow Requests", request_id, "requested_by"),"designation")
-		
+		file_attachment_limit_for_form=int(frappe.get_value("Ezy Business Unit",property,"file_attachment_limit_for_form"))
 		# Send emails
 		if email_accounts:
 			for email in user_emails:
@@ -103,14 +109,14 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 				try:
 					email_content = generate_email_content(
 						request_id, doctype_name, user_name, user_role, email,requested_by,
-						reason, timestamp,current_status
+						reason, timestamp,current_status,property
 					)
 					
 					frappe.sendmail(
 						recipients=[email],
 						subject="ezyForms Notification",
-						message=email_content['message'],
-						content = email_content['email_template'] or '' + ("<b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else ''),
+						message=email_content['message'] if email_content['email_template'] else("<br><b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form.<br>" if  file_down and file_down['file_size'] else '')+ email_content['message'] ,
+						content = email_content['email_template'] + (f"<b>Note: </b>Since the file size is more than {file_attachment_limit_for_form}MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else '') if email_content['email_template'] else '',
 						attachments=attach_down
 					)
 				except Exception as e:
@@ -120,7 +126,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		frappe.log_error(f"Notification sending failed: {str(e)}", "Notification Error")
 
 
-def generate_email_content(request_id, doctype_name, user_name, user_role, email,requested_by,reason, timestamp,current_status):
+def generate_email_content(request_id, doctype_name, user_name, user_role, email,requested_by,reason, timestamp,current_status,property):
 	email_template = frappe.get_doc('Email Template',"ezyForms Notification")
 	if requested_by != email:
 		# token = get_ezy_forms_token(request_id,doctype_name,request_id_document,each_one_mail,reason if reason else 'Request Raised',next_level_after_raising_request,property)
@@ -137,6 +143,7 @@ def generate_email_content(request_id, doctype_name, user_name, user_role, email
 	response_data = email_template.response_html
 	if response_data:
 		rep = response_data.replace("doctypename", doctype_name)
+		rep = rep.replace("property",property)
 		rep = rep.replace("generated_request_id", request_id)
 		rep = rep.replace("--action_by--", f"{user_name if user_name else frappe.session.user}  ({user_role})")
 		rep = rep.replace("current_date_and_time", my_time)

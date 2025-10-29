@@ -21,7 +21,7 @@
                                         :key="'field-preview-' + fieldIndex">
                                         
                                         <div v-if="field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
-                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse  align-items-center  justify-content-end gap-2' : ''">
+                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse align-items-center justify-content-end gap-2' : ''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -481,8 +481,8 @@
                                             </div>
                                         </div>
                                         <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
-                                            class="font-11"><span  class="fw-semibold">Description: </span>{{
-                                                field.description }}</span>
+                                            class="font-11"><span  class="fw-semibold"></span>
+                                            <span v-html="field.description.replace(/\n/g, '<br>')"></span></span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
@@ -560,9 +560,8 @@
                                                                    
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Date'">
-                                                                        
                                                                         <input :min="field.fieldname === 'expense_date' ? null : null"
-                                                                                :max="field.fieldname === 'expense_date' ? null : null"
+                                                                                :max="field.fieldname === 'expense_date' ? today : null"
                                                                             :title="row[fieldItem.fieldname]"
                                                                             type="date" class="form-control font-12"
                                                                             v-model="row[fieldItem.fieldname]" />
@@ -1797,7 +1796,10 @@ const updateDateTimeFields = () => {
 const emp_dep = ref('')
 // Initialize datetime fields on component mount
 onMounted(async() => {
+    const ftid = route.query.ftid;
+    if (!ftid) {
      await getEmploye()
+    }
     // console.log(props.LinkedChildTableData , "LinkedChildTableData");
     // if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
     // for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
@@ -1989,10 +1991,12 @@ const allFieldsFilled = computed(() => {
                 for (const column of row.columns) {
                     for (const field of column.fields) {
                         // If field is required and value is empty, return false
+                        console.log(field,"outside");
                         if (
                             field.reqd === 1 &&
                             (!field.value || field.value.toString().trim() === "")
                         ) {
+                            console.log(field,"inside");
                             return false;
                         }
                          const rowKey = row.__row_id || row.id || JSON.stringify(row);

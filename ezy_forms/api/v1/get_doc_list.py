@@ -29,7 +29,7 @@ def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, li
     # Fetch by doc_id
     if doc_id:
         doc = frappe.get_doc(doctype, doc_id).as_dict()
-        frappe.log_error("doc",doc)
+        
         # data = [doc.as_dict()] if fields == ["*"] else [{field: doc.get(field) for field in fields}]
         # frappe.log_error("data",data)
         return {

@@ -153,8 +153,10 @@ def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup:
         
         # Optimize form definition update
         workflow_from_defs = frappe.db.get_value("Ezy Form Definitions", doctype, "form_json")
-        fields_from_defs = literal_eval(workflow_from_defs)["fields"]
-        child_table_fields = literal_eval(workflow_from_defs)["child_table_fields"]
+        parsed_defs = literal_eval(workflow_from_defs)
+
+        fields_from_defs = parsed_defs.get("fields", [])
+        child_table_fields = parsed_defs.get("child_table_fields", {})
         
         field_with_workflow = {
             "fields": fields_from_defs,

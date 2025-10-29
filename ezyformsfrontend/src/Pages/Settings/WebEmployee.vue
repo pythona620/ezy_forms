@@ -325,7 +325,14 @@
             <div class="container-fluid">
               <div class="row">
                 <div class="col">
-                  <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
+                  </div>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter Emp Name" v-model="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
@@ -378,8 +385,15 @@
                       {{ emailError }}
                     </p>
                   </div>
+                  <div class="d-flex justify-content-between">
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                        class="form-check-input mt-1 input-border border-1" />
+                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                  </div>
 
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"  @update:modelValue="onDepartmentChange"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="false"
@@ -390,10 +404,6 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                   <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
-                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                  </div>
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -439,7 +449,14 @@
 
                     </div>
                   </div>
-                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                    </div>
+                  </div>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
@@ -615,7 +632,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
-import { showError, showSuccess, showWarning } from "../../shared/services/toast";
+import { showError, showSuccess, showWarning,showDefault } from "../../shared/services/toast";
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -1623,10 +1640,10 @@ function fetchingIsHod(department) {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
     limit_page_length: "none",
-    order_by: "`tabSignup Employee`.`enable` DESC,`tabSignup Employee`.`creation` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
   };
   axiosInstance
-    .get(apis.resource + doctypes.SignUpEmployee, { params: queryParams })
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
      createEmployee.value.reporting_to = res.data[0].name;
      createEmployee.reporting_designation = res.data[0].designation;
@@ -1651,8 +1668,12 @@ function toggleFunction(rowData) {
   document.getElementById('empActionText').innerText = empActionText.value;
   document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-  modal.show();
+  if ((selectedEmpRow.value.reporting_to !== '' && selectedEmpRow.value.reporting_to !== null) || selectedEmpRow.value.is_high_level === 1) {
+      const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      modal.show();
+  } else {
+    showDefault('Please Add the Reports To before Enable employee.');
+  }
 }
 
 function confirmEmployeeToggle() {
@@ -1924,7 +1945,7 @@ function employeeData(data) {
 
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -1970,11 +1991,11 @@ const employeeEmails = ref([]);
 function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
-    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
-    doctype:doctypes.SignUpEmployee,
-    order_by: "`tabSignup Employee`.`modified` desc",
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`],["enable","=",1]]),
+    doctype:doctypes.EzyEmployeeList,
+    order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
@@ -2056,6 +2077,13 @@ function createEmpl() {
     showError("Employee Email Id already exists");
     return;
   }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     showError("Please Add the Reports To before updating employee.", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
 
   createEmployee.value.company_field = businessUnit.value;
 
@@ -2111,6 +2139,13 @@ function SaveEditEmp() {
      showError("Please Add the designation before updating employee.");
     return;
   }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     showError("Please Add the Reports To before updating employee.", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
   if (!createEmployee.value.designation && searchText.value) {
     createEmployee.value.designation = searchText.value;
   }
@@ -2124,7 +2159,7 @@ function SaveEditEmp() {
       createEmployee.value.reporting_designation = selectedReportee.designation;
     }
   } else {
-    createEmployee.value.reporting_designation = ""; // Clear if reporting_to is empty
+    createEmployee.value.reporting_designation = ""; 
   }
 
   const payload = {

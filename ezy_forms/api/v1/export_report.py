@@ -33,10 +33,10 @@ def export_report_data(report_name=None, file_format_type=None, form_params=None
 	# Safe defaults
 	visible_idx = []  # Fix: must be a list, not None
 	include_indentation = False
-	include_filters = False
+	
 
 	xlsx_data, column_widths = build_xlsx_data(
-		data, visible_idx, include_indentation, include_filters=include_filters
+		data, visible_idx, include_indentation
 	)
 
 	if file_format_type == "Csv":

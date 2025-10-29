@@ -62,7 +62,17 @@ def import_bulk_data(file: str | None, doctype: str | None):
 
         # ----- Normalize Department using Company ONLY for Ezy Employee -----
         if doctype == "Ezy Employee":
+            column_map = {
+                "department code": "Department",
+                # You can add more mappings here if needed
+            }
+
+            # Lowercase the Excel columns for matching
+            df_columns_lower = {c.lower(): c for c in df.columns}
+            rename_map = {df_columns_lower[k]: v for k, v in column_map.items() if k in df_columns_lower}
+            df.rename(columns=rename_map, inplace=True)
             cols_lower = {c.lower().strip(): c for c in df.columns}
+
             company_col, department_col = None, None
 
             for key in ("company", "company name", "company_field", "company field"):
@@ -109,7 +119,10 @@ def import_bulk_data(file: str | None, doctype: str | None):
         except Exception as e:
             frappe.response["data"] = {"message": _("Failed to save normalized file: ") + str(e), "success": False}
             return
-
+        template_warnings = [
+    w["message"] for w in templet.get("warnings", [])
+    if "Department Code" not in w.get("message", "")
+]
         # ----- Run import -----
         try:
             start_import(data_import_doc.name)

@@ -110,23 +110,57 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="font-13">Select the fields you want to include in the report:</p>
-        <div class="report-fields row">
-          <div 
-            v-for="(field, index) in reportFields" 
-            :key="index" 
-            class="col-md-4 mb-3 d-flex align-items-center"
-          >
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
+
+          <div class="form-check m-0">
             <input
-              :id="'field-' + index"
+              id="select-all-fields"
               type="checkbox"
-              class="form-check-input me-2"
-              v-model="field.selected"
+              class="form-check-input me-1"
+              v-model="selectAll"
+              @change="toggleSelectAll"
             />
-            <label :for="'field-' + index" class="form-label font-12 mb-0">
-              {{ field.label }}
-            </label>
-          </div>  
+            <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
+          </div>
+        </div>
+
+        <!-- Normal Fields -->
+        <div class="report-fields row mb-2 pb-2">
+          <!-- <h6 class="font-13 fw-bold mb-2">Main Fields</h6> -->
+          <div v-for="(field, index) in reportFields.filter(f => !f.isChild)" :key="index" class="col-md-4 mb-2">
+            <div class="d-flex align-items-center">
+              <input
+                :id="'field-' + index"
+                type="checkbox"
+                class="form-check-input me-2"
+                v-model="field.selected"
+              />
+              <label :for="'field-' + index" class="form-label font-12 mb-0">
+                {{ getDisplayLabel(field) }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Child Table Fields -->
+        <div v-for="(group, tableName) in groupByTable(reportFields)" :key="tableName" class="mb-3">
+          <h6 class="font-13 mb-2">{{ tableName }} (Child Table)</h6>
+          <div class="row">
+            <div v-for="(field, index) in group" :key="index" class="col-md-4 mb-2">
+              <div class="d-flex align-items-center">
+                <input
+                  :id="'child-' + tableName + '-' + index"
+                  type="checkbox"
+                  class="form-check-input me-2"
+                  v-model="field.selected"
+                />
+                <label :for="'child-' + tableName + '-' + index" class="form-label font-12 mb-0">
+                  {{ getDisplayLabel(field) }}
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -178,7 +212,7 @@ const is_admin = ref('');
 const isEnable = ref("");
 const reportFields = ref([])
 const responcedata = ref([]);
-
+const selectAll = ref(false);
 // Toggle function triggered when a checkbox is clicked
 const selectedRowData = ref(null);
 const selectedActionText = ref('');
@@ -315,12 +349,50 @@ function actionClickedDropDown(row) {
   if (is_admin.value == 1) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
   }
-  // if (is_admin.value == 1) {
-  //   baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
-  // }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
+   }  
 
   actions.value = baseActions;
 
+}
+
+function toggleSelectAll() {
+  reportFields.value.forEach(field => {
+    field.selected = selectAll.value;
+  });
+}
+
+// ✅ Watch for manual changes
+watch(
+  () => reportFields.value.map(f => f.selected),
+  (newVals) => {
+    // If every field is selected -> selectAll = true
+    if (newVals.every(v => v)) {
+      selectAll.value = true;
+    } else {
+      // If even one field is unselected -> selectAll = false
+      selectAll.value = false;
+    }
+  },
+  { deep: true }
+);
+
+function getDisplayLabel(field) {
+  const suffixMatch = field.fieldname.match(/_(\d+)$/);
+  const suffixNumber = suffixMatch ? parseInt(suffixMatch[1]) + 1 : null;
+
+  // Check if this field belongs to the "Approver" group
+  const approverGroup = ["approver", "approved_on", "approved_by"];
+  const baseField = field.fieldname.replace(/_\d+$/, "");
+
+  if (approverGroup.includes(baseField)) {
+    // Add number: if has suffix (_1) → 2, else → 1
+    return suffixNumber ? `${field.label} ${suffixNumber}` : `${field.label} 1`;
+  }
+
+  // For all other fields, just show the label
+  return field.label;
 }
 
 // function actionClickedDropDown(row){
@@ -344,6 +416,19 @@ function actionClickedDropDown(row) {
 
 //   return baseActions
 // })
+
+const groupByTable = (fields) => {
+  const groups = {};
+  fields.forEach(f => {
+    if (f.isChild) {
+      if (!groups[f.parentTable]) groups[f.parentTable] = [];
+      groups[f.parentTable].push(f);
+    }
+  });
+  return groups;
+};
+
+
 const reportShortCode = ref('');
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
@@ -458,30 +543,50 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'In-active this form') {
     toggleFunction(rowData, null, null);
   }
-if (actionEvent.name === 'Create Report') {
+
+  if (actionEvent.name === 'Create Report') {
   console.log(rowData, "rowData");
 
-  // Store document name for PUT request
   reportShortCode.value = rowData.name;
 
-  // Parse all available fields from form_json
-  const fields = JSON.parse(rowData?.form_json)?.fields || [];
+  const parsed = JSON.parse(rowData?.form_json || "{}");
+  const fields = parsed.fields || [];
+  const childTables = parsed.child_table_fields || {};
 
-  // Convert saved report_fields string into an array of fieldnames
+  // already selected fields
   let alreadySelected = [];
   if (rowData.report_fields) {
     alreadySelected = rowData.report_fields
       .split(",")
-      .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
+      .map(item => item.trim().split(" as ")[0]);
   }
 
-  // Filter valid fields and mark them as selected if previously saved
-  reportFields.value = fields
+  // Normal fields
+  const normalFields = fields
     .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
     .map(f => ({
       ...f,
-      selected: alreadySelected.includes(f.fieldname) // pre-check
+      isChild: false,
+      parentTable: null,
+      fullName: f.fieldname, // Used when generating report
+      displayLabel: f.label,
+      selected: alreadySelected.includes(f.fieldname)
     }));
+
+  // Child table fields
+  const childTableFields = Object.entries(childTables).flatMap(([tableName, tableFields]) => {
+    return tableFields.map(f => ({
+      ...f,
+      isChild: true,
+      parentTable: tableName,
+      fullName: `${tableName}.${f.fieldname}`, // <-- used in report generation
+      displayLabel: f.label, // show just field label in UI
+      selected: alreadySelected.includes(`${tableName}.${f.fieldname}`)
+    }));
+  });
+
+  // merge both
+  reportFields.value = [...normalFields, ...childTableFields];
 
   // Open the modal
   const modal = new bootstrap.Modal(document.getElementById("reportmodal"), {});
@@ -491,12 +596,19 @@ if (actionEvent.name === 'Create Report') {
 }
 async function generateReport() {
   // collect only selected fields
-  // collect selected fields
   const selectedFields = reportFields.value
     .filter(f => f.selected)
-    .map(f => `${f.fieldname} as '${f.label}'`);
+    .map(f => {
+      // ✅ If it's a child table field, prefix with table name
+      const fieldPath = f.isChild ? `${f.parentTable}.${f.fieldname}` : f.fieldname;
+      return `${fieldPath} as '${f.label}'`;
+    });
 
-  const payload = selectedFields.join(","); // comma separated string
+  // ✅ Add static "name" field (at the start)
+  selectedFields.unshift("name as Name");
+
+ // Join fields into comma-separated string
+  const payload = selectedFields.join(",");
 
   const data = {};
   if (payload) {
@@ -516,13 +628,13 @@ async function generateReport() {
     if (modal) modal.hide();
 
     // show success toast
-    showSuccess("Report Fields Updated Successfully");
+    showSuccess("Report Created Successfully");
   } catch (error) {
     console.error("Error updating report fields:", error);
     showError("Failed to update report fields");
   }
-   
 }
+
 
 
 function downloadPdf() {
