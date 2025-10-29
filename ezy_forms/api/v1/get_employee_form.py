@@ -149,7 +149,7 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
             "name", "requested_by", "role", "current_level", "total_levels", "employee_id",
             "json_columns", "requested_on", "action", "status", "assigned_to_users",
             "is_linked", "is_linked_form", "linked_form_id", "department_name",
-            "requester_name", "doctype_name",
+            "requester_name", "doctype_name","modified"
         ],
         order_by="creation desc"
     )
