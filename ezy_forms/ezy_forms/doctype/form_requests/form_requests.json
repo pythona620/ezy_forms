@@ -12,7 +12,8 @@
   "section_break_fo6qo",
   "form_approved",
   "in_progress",
-  "form_rejected"
+  "form_rejected",
+  "total_forms"
  ],
  "fields": [
   {
@@ -22,6 +23,15 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Form Name",
+   "read_only": 1
+  },
+    {
+   "fieldname": "total_forms",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Total Forms",
    "read_only": 1
   },
   {

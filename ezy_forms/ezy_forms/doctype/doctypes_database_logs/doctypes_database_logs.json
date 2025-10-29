@@ -21,6 +21,10 @@
   "over_due_on",
   "tab_break_mgotl",
   "data_base_logs_section",
+  "db_size_mb",
+  "column_break_tpnpm",
+  "file_size",
+  "section_break_ppsrh",
   "daily_doctypes_db_logs",
   "record_logs_tab",
   "form_requests"
@@ -52,7 +56,7 @@
   {
    "fieldname": "total_storage",
    "fieldtype": "Data",
-   "label": "Total Storage Used",
+   "label": "Total Storage Used (MB)",
    "read_only": 1
   },
   {
@@ -96,15 +100,15 @@
    "label": "Storage "
   },
   {
+   "default": "700",
    "fieldname": "subscribtion_stroage",
    "fieldtype": "Data",
-   "label": "Subscribtion Stroage",
-   "default":"700"
+   "label": "Subscribtion Stroage (MB)"
   },
   {
    "fieldname": "free_stroage",
    "fieldtype": "Data",
-   "label": "Free Stroage"
+   "label": "Free Stroage (MB)"
   },
   {
    "fieldname": "column_break_a0btp",
@@ -114,6 +118,28 @@
    "fieldname": "over_due_on",
    "fieldtype": "Datetime",
    "label": "Over Due On"
+  },
+  {
+   "fieldname": "file_size",
+   "fieldtype": "Float",
+   "label": "File Size (MB)",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "db_size_mb",
+   "fieldtype": "Float",
+   "label": "DB Size (MB)",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_tpnpm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ppsrh",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,

@@ -9,13 +9,31 @@ from frappe.utils.file_manager import get_files_path
 from calendar import month_abbr
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-import secrets,requests,json
+import secrets,requests,json, os
 class DoctypesDatabaseLogs(Document):
 	def before_save(self):
 		# Ensure numeric fields are stored as float
 		self.total_storage = float(self.total_storage or 0)
 		self.free_stroage = float(self.free_stroage or 0)
 		self.subscribtion_stroage = float(self.subscribtion_stroage or 0)
+
+
+def get_folder_size_with_ezyforms(path):
+    """Calculate total size (MB) of files having 'ezyForms' in their filename."""
+    total_size = 0
+    keyword = "ezyforms"  # case-insensitive match
+
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            if keyword in f.lower():  # match if 'ezyForms' is in filename
+                fp = os.path.join(dirpath, f)
+                if not os.path.islink(fp):  # skip symlinks
+                    try:
+                        total_size += os.path.getsize(fp)
+                    except FileNotFoundError:
+                        pass  # skip deleted files
+
+    return round(total_size / 1024 / 1024, 2)
 
 
 @frappe.whitelist()
@@ -28,7 +46,7 @@ def create_doctypes_db_log():
 		month = month_abbr[month_num].upper()
 		creation_time = nowtime()
 
-		# ✅ Modules to track
+		# ✅ Target modules to track
 		target_modules = [
 			"User Forms",
 			"ezy_custom_forms",
@@ -42,7 +60,7 @@ def create_doctypes_db_log():
 		doctypes = frappe.get_all(
 			"DocType",
 			filters={"module": ["in", target_modules]},
-			fields=["name", "module"]
+			fields=["name"]
 		)
 
 		# --- Get or create parent record ---
@@ -51,6 +69,7 @@ def create_doctypes_db_log():
 			"year": year,
 			"month": month
 		})
+
 		if parent_name:
 			parent_doc = frappe.get_doc("Doctypes Database Logs", parent_name)
 		else:
@@ -61,17 +80,18 @@ def create_doctypes_db_log():
 				"month": month,
 				"last_modified_on": today,
 				"total_storage": 0,
-				"subscribtion_stroage":10240
+				"subscribtion_stroage": float(frappe.get_value(
+					"Global Site Settings",
+					"Global Site Settings",
+					"subscription_storage"
+				))
 			})
 			parent_doc.insert(ignore_permissions=True)
 
-		total_storage_sum = 0
-
-		# --- Loop through each doctype and calculate DB + File size ---
+		# --- Calculate total DB size ---
+		total_db_size = 0
 		for dt in doctypes:
 			table_name = f"tab{dt['name']}"
-
-			# --- DB size per doctype ---
 			db_result = frappe.db.sql(
 				"""
 				SELECT ROUND(SUM(data_length + index_length)/1024/1024, 2) AS db_size
@@ -82,46 +102,35 @@ def create_doctypes_db_log():
 				as_dict=True
 			)
 			db_size = db_result[0]["db_size"] if db_result and db_result[0]["db_size"] else 0
+			total_db_size += db_size
 
-			# --- File size per doctype (attached files only) ---
-			file_result = frappe.db.sql(
-				"""
-				SELECT ROUND(SUM(file_size)/1024/1024,2) AS file_size
-				FROM `tabFile`
-				WHERE attached_to_doctype = %s
-				""",
-				dt['name'],
-				as_dict=True
-			)
-			file_size = file_result[0]["file_size"] if file_result and file_result[0]["file_size"] else 0
+		# --- Calculate public folder size ---
+		site_path = frappe.utils.get_site_path()
+		public_folder = os.path.join(site_path, "public")
+		public_size = get_folder_size_with_ezyforms(public_folder)
 
-			total_size = round(db_size + file_size, 2)
-			total_storage_sum += total_size
+		# --- Total for this date ---
+		total_size = round(total_db_size + public_size, 2)
 
-			# --- Check if a record for this date & doctype already exists ---
-			existing_row = next((row for row in parent_doc.daily_doctypes_db_logs if str(row.date) == str(today) and row.doctype_name == dt["name"]),None)
+		# --- Check if record for this date already exists ---
+		existing_row = next(
+			(row for row in parent_doc.daily_doctypes_db_logs if str(row.date) == str(today)),
+			None
+		)
 
-			if existing_row:
-				# ✅ Update existing row
-				existing_row.db_size = db_size
-				existing_row.file_size = file_size
-				existing_row.total_size = total_size
-				existing_row.creation_time = creation_time
-				existing_row.subscribtion_end = 0 if total_storage_sum - int(parent_doc.subscribtion_stroage) < 0 else 1
-			else:
-				# ✅ Add new row
-				parent_doc.append("daily_doctypes_db_logs", {
-					"date": today,
-					"module": dt["module"],
-					"doctype_name": dt["name"],
-					"db_size": db_size,
-					"file_size": file_size,
-					"total_size": total_size,
-					"creation_time": creation_time,
-					"subscribtion_end": 0 if total_storage_sum - int(parent_doc.subscribtion_stroage) < 0 else 1
-				})
-
-		# --- Workflow summary data ---
+		if existing_row:
+			existing_row.db_size = round(total_db_size, 2)
+			existing_row.file_size = round(public_size, 2)
+			existing_row.total_size = total_size
+			existing_row.creation_time = creation_time
+		else:
+			parent_doc.append("daily_doctypes_db_logs", {
+				"date": today,
+				"db_size": round(total_db_size, 2),
+				"file_size": round(public_size, 2),
+				"total_size": total_size,
+				"creation_time": creation_time
+			})
 		data = frappe.db.sql("""
 			SELECT
 				doctype_name AS form_name,
@@ -141,27 +150,28 @@ def create_doctypes_db_log():
 				"property": row.property,
 				"in_progress": row.in_progress or 0,
 				"form_approved": row.form_approved or 0,
-				"form_rejected": row.form_rejected or 0
+				"form_rejected": row.form_rejected or 0,
+				"total_forms": round(int(row.in_progress)+int(row.form_approved)+int(row.form_rejected))
 			})
 
-		# --- Compute total & free storage ---
-		parent_doc.total_storage = round(sum([float(d.total_size or 0) for d in parent_doc.daily_doctypes_db_logs]),2)
-		parent_doc.free_stroage = round((float(parent_doc.subscribtion_stroage) - float(parent_doc.total_storage)), 2)
+		# --- Compute totals ---
+		parent_doc.db_size_mb = round(sum([float(d.db_size or 0) for d in parent_doc.daily_doctypes_db_logs]), 2)
+		parent_doc.file_size = round(public_size, 2)
+		parent_doc.total_storage = round(float(parent_doc.file_size) + float(parent_doc.db_size_mb), 2)
+		parent_doc.free_stroage = round(float(parent_doc.subscribtion_stroage) - float(parent_doc.total_storage), 2)
 
-		# --- Mark overdue if exceeded ---
 		if parent_doc.free_stroage < 0:
 			parent_doc.over_due_on = today
 
 		parent_doc.last_modified_on = today
 		parent_doc.save(ignore_permissions=True)
-		# generate_jwt_token(parent_doc.name)
 		frappe.db.commit()
 
-		return f" DB Logs created/updated for {site_name} — {len(doctypes)} doctypes processed"
+		return f"DB Logs created/updated for {site_name}  total DB {round(total_db_size,2)} MB, files {round(public_size,2)} MB"
 
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Database Log Scheduler Error")
-		return " Error while creating logs"
+		return "Error while creating logs"
 
 
 
@@ -208,57 +218,57 @@ def jwt_token_method():
 
 @frappe.whitelist()
 def generate_jwt_token(record):
-    site_name = "Local IP"
-    doc = frappe.get_doc("Doctypes Database Logs", record).as_dict()
-    excluded_fields = {
-        "owner", "creation", "modified", "modified_by",
-        "docstatus", "idx", "name", "parentfield",
-        "parent", "parenttype"
-    }
-    def clean_and_serialize(value):
-        """Recursively clean unwanted fields and serialize dates/times."""
-        if isinstance(value, dict):
-            return {
-                k: clean_and_serialize(v)
-                for k, v in value.items()
-                if k not in excluded_fields
-            }
-        elif isinstance(value, list):
-            return [clean_and_serialize(v) for v in value]
-        else:
-            return str(value)
-    serializable_doc = clean_and_serialize(doc)
-    secret_key = secrets.token_hex(12)
-    payload = {
-        "user_id": "caratRED",
-        "doc": serializable_doc
-    }
+	site_name = "Local IP"
+	doc = frappe.get_doc("Doctypes Database Logs", record).as_dict()
+	excluded_fields = {
+		"owner", "creation", "modified", "modified_by",
+		"docstatus", "idx", "name", "parentfield",
+		"parent", "parenttype"
+	}
+	def clean_and_serialize(value):
+		"""Recursively clean unwanted fields and serialize dates/times."""
+		if isinstance(value, dict):
+			return {
+				k: clean_and_serialize(v)
+				for k, v in value.items()
+				if k not in excluded_fields
+			}
+		elif isinstance(value, list):
+			return [clean_and_serialize(v) for v in value]
+		else:
+			return str(value)
+	serializable_doc = clean_and_serialize(doc)
+	secret_key = secrets.token_hex(12)
+	payload = {
+		"user_id": "caratRED",
+		"doc": serializable_doc
+	}
 
-    token = jwt.encode(payload, secret_key, algorithm="HS256")
+	token = jwt.encode(payload, secret_key, algorithm="HS256")
 
-    site_url = site_name.rstrip("/") + "/"
-    url = f"{site_url}api/method/tax_deductions.tax_deductions.doctype.sites.sites.get_site_details"
+	site_url = site_name.rstrip("/") + "/"
+	url = f"{site_url}api/method/tax_deductions.tax_deductions.doctype.sites.sites.get_site_details"
 
-    data = {
-        "jwt_token": token,
-        "secret_key": secret_key,
-    }
+	data = {
+		"jwt_token": token,
+		"secret_key": secret_key,
+	}
 
-    try:
-        # Use json= to send JSON body in a GET is incorrect, so let's use POST if you expect JSON body
-        response = requests.get(url, json=data)
-        if response.status_code == 200:
-            return {
-                "status": "success",
-                "message": "JWT sent successfully",
-                "response": response.json(),
-            }
-        else:
-            frappe.log_error(
-                message=f"Failed to send payload to {site_name}\n{response.text}",
-                title="generate_jwt_token",
-            )
-            return {"status": "failed", "message": "Remote site error", "status_code": response.status_code}
-    except Exception as e:
-        frappe.log_error(message=f"JWT Send Error: {str(e)}", title="generate_jwt_token")
-        return {"status": "error", "message": str(e)}
+	try:
+		# Use json= to send JSON body in a GET is incorrect, so let's use POST if you expect JSON body
+		response = requests.get(url, json=data)
+		if response.status_code == 200:
+			return {
+				"status": "success",
+				"message": "JWT sent successfully",
+				"response": response.json(),
+			}
+		else:
+			frappe.log_error(
+				message=f"Failed to send payload to {site_name}\n{response.text}",
+				title="generate_jwt_token",
+			)
+			return {"status": "failed", "message": "Remote site error", "status_code": response.status_code}
+	except Exception as e:
+		frappe.log_error(message=f"JWT Send Error: {str(e)}", title="generate_jwt_token")
+		return {"status": "error", "message": str(e)}
