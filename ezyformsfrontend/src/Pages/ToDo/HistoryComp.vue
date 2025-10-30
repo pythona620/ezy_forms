@@ -41,6 +41,7 @@ const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Requester Name", td_key: "requester_name" },
   { th: "Requester Department", td_key: "department_name" },
+  { th: "Last Action On", td_key: "modified" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
