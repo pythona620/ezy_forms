@@ -7,9 +7,11 @@ import json
 import uuid
 import random
 import string
-from frappe.utils import add_to_date
+from frappe.utils import add_to_date,get_datetime, now_datetime
+from ezy_forms.api.v1.send_an_email import sending_mail_api  
 
-def create_qr_for_web_view(form_name):
+
+def create_qr_for_web_view(form_name,form_valid_form=None,form_valid_to=None):
     # Generate a unique token
     action_token = str(uuid.uuid4())
 
@@ -17,7 +19,9 @@ def create_qr_for_web_view(form_name):
     frappe.get_doc({
         "doctype": "EzyForm QR Code",
         "form_name": form_name,
-        "token": action_token
+        "token": action_token,
+        "form_valid_form":form_valid_form,
+        "form_valid_to":form_valid_to,
     }).insert(ignore_permissions=True)
 
     # Build the QR link
@@ -33,9 +37,27 @@ def create_qr_for_web_view(form_name):
 @frappe.whitelist(allow_guest=True)
 def qr_code_to_new_form(token, save_doc=None):
     # Get form_name from QR token
-    form_name = frappe.db.get_value("EzyForm QR Code", {"token": token}, "form_name")
+    form_name,form_valid_from,form_valid_to = frappe.db.get_value("EzyForm QR Code", {"token": token}, ["form_name","form_valid_form","form_valid_to"])
     if not form_name:
         frappe.throw("Invalid token")
+
+    now = now_datetime()  # Current date + time (as datetime)
+    form_from = get_datetime(form_valid_from) if form_valid_from else now
+    form_to = get_datetime(form_valid_to) if form_valid_to else None
+
+    # Check not yet active
+    if form_from and form_from > now:
+        diff = form_from - now
+        hours, remainder = divmod(diff.total_seconds(), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        frappe.throw(
+            f"This form will start in {int(hours)} hour(s) and {int(minutes)} minute(s) at {form_from}."
+        )
+
+    # Check expired
+    if form_to and form_to < now:
+        frappe.throw("This form is expired.")
+    
  
     # Get form definition details
     data = frappe.get_doc("Ezy Form Definitions", {"name": form_name}).as_dict()
@@ -127,6 +149,9 @@ def qr_code_to_new_form(token, save_doc=None):
     new_activate_log.insert(ignore_permissions=True)
     frappe.db.commit()
     new_activate_log.reload()
+    
+    sending_mail_api(request_id=new_wf_work_flow_requests.name, doctype_name=doctype_name,Qr_form_mali_id=data.get("mail_id"),property= data.get("business_unit"),cluster=None,timestamp=None,reason= reason,skip_user_role= None,user=None,field_changes=None,current_level=None,current_status = "Request Raised Via QR Code" )
+
     
     
     

@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "form_name",
-  "token"
+  "token",
+  "form_valid_form",
+  "form_valid_to"
  ],
  "fields": [
   {
@@ -19,11 +21,21 @@
    "fieldname": "token",
    "fieldtype": "Data",
    "label": "Token"
+  },
+  {
+   "fieldname": "form_valid_form",
+   "fieldtype": "Datetime",
+   "label": "Form valid Form"
+  },
+  {
+   "fieldname": "form_valid_to",
+   "fieldtype": "Datetime",
+   "label": "Form valid To"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-08 17:23:30.032548",
+ "modified": "2025-10-29 14:12:45.844796",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "EzyForm QR Code",
@@ -41,8 +53,6 @@
    "share": 1,
    "write": 1
   }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+]
 }
+  

@@ -206,18 +206,6 @@
           openDirection="top"
         />
         <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
-
-        <FormFields
-          v-if="filterObj.as_web_view===1"
-          labeltext="Form Submit Response"
-          class="formHeight mt-2"
-          type="text"
-          tag="input"
-          name="Value"
-          id="formNameSeries"
-          placeholder="Form Submit Response"
-          v-model="filterObj.public_form_response"
-        />
       </div>
 
       <!-- Has Workflow -->
@@ -233,9 +221,70 @@
         />
       </div>
 
+      <!-- Form Submit Response -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+      <label>Form Submit Response <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+      <FormFields
+        class="formHeight mt-2"
+        type="text"
+        tag="input"
+        name="Value"
+        id="formNameSeries"
+        placeholder="Form Submit Response"
+        v-model="filterObj.public_form_response"
+        />
+      </div>
+ 
+      <!-- Form Submit Send Mail -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+        <label>Form Submit Mail <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <!-- <FormFields
+          class="formHeight mt-2"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Submit mail"
+          v-model="filterObj.mail_id"
+        /> -->
+        <Multiselect
+          @open="EmployeeData"
+          :options="EmpMailsList"
+          v-model="filterObj.mail_id"
+          placeholder="Select Mail Id"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+          openDirection="top"
+          />
+      </div>
+
+      <!-- Form Valid from -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+        <label>Form Valid From <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <input
+          class="form-control shadow-none mt-2"
+          type="datetime-local"
+          name="Value"
+          id="formNameSeries"
+          v-model="filterObj.form_valid_form"
+        />
+      </div>
+      <!-- Form Valid to -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+        <label>Form Valid to <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <input
+          class="form-control shadow-none mt-2"
+          type="datetime-local"
+          name="Value"
+          id="formNameSeries"
+          v-model="filterObj.form_valid_to"
+        />
+      </div>
+
       <!-- Linked Checkbox and Linked Form -->
-      <div class="col-md-6">
-        <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
+      <div class="col-md-6" v-if="route.query.preId">
+        <div class="form-check d-flex align-items-center p-0 pe-3">
           <input
             class="form-check-input linketoCheck p-1"
             :disabled="filterObj.is_predefined_doctype == 1"
@@ -3863,6 +3912,29 @@ function deptData() {
       console.error("Error fetching department data:", error);
     });
 }
+
+const EmpMailsList=ref("")
+ 
+function EmployeeData() {
+  const queryParams = {
+    fields: JSON.stringify(["name"]),
+    limit_page_length: "none",
+    filters: JSON.stringify([["company_field", "=", `${selectedData.value.business_unit || route.query.business_unit}`],["enable", "=", "1"]]),
+    doctype:doctypes.EzyEmployeeList,
+  };
+ 
+  axiosInstance
+    .get(apis.GetDoctypeData, { params: queryParams })
+    .then((res) => {
+      if (res?.message.data?.length) {
+        EmpMailsList.value = res.message.data.map((emp) => emp.name);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
+
 watch(
   () => filterObj.value.owner_of_the_form,
   (newVal) => {
