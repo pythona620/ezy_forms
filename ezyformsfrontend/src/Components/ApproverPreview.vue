@@ -1232,7 +1232,7 @@
                                         <template v-if="field.fieldtype === 'Attach'">
                                           <!-- File Input (unchanged) -->
                                           <input
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
+                                             v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
                                             type="file"  multiple
                                             class="form-control font-12" style="display: none"
                                             :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
@@ -1240,7 +1240,10 @@
 
                                           <!-- Custom Label Button -->
                                           <label
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
+                                          :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white d-none border-0' : null"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                            :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                            v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
                                             :for="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
                                             class="btn btn-sm btn-light font-10 mb-1 mt-1">
                                             <i class="bi bi-paperclip me-1"></i> Attach
@@ -1337,12 +1340,21 @@
 
                                         <template v-if="field.fieldtype === 'Data'">
                                           <input
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
                                             type="text"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            v-if="!isEditable || (props.readonlyFor !== 'true'  || blockIndex <= currentLevel)"
+                                            :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                            :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
                                             class="form-control form-control-sm font-12 text-center"
-                                            v-model="row[field.fieldname]" />
+                                            v-model="row[field.fieldname]"
+                                            @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                            @change="handleFieldChange(
+                                              tableName,
+                                              field.fieldname,
+                                              oldValues[field.fieldname],
+                                              row[field.fieldname]
+                                            )"
+                                             />
                                           <span v-else>
                                             {{ row[field.fieldname] }}
 
@@ -1364,92 +1376,116 @@
 
 
 
-                                        <template v-if="field.fieldtype === 'Datetime'">
-                                          <input
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                            type="datetime-local"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                            class="form-control form-control-sm font-12 text-center"
-                                            v-model="row[field.fieldname]" />
-                                          <span v-else>
-                                            {{ row[field.fieldname] }}
+                                        
 
-                                          </span>
-                                        </template>
-                                        <template v-if="field.fieldtype === 'Text'">
-                                          <textarea
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                            type="text"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                       <template v-if="field.fieldtype === 'Text'">
+                                        <textarea
+                                          v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                          class="form-control form-control-sm font-12 text-center"
+                                          v-model="row[field.fieldname]"
+                                          :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+                                          @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                          :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                            :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                          @change="handleFieldChange(
+                                            tableName,
+                                            field.fieldname,
+                                            oldValues[field.fieldname],
+                                            row[field.fieldname]
+                                          )"
+                                          @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)"
+                                        />
+                                        <span v-else>
+                                          {{ row[field.fieldname] }}
+                                        </span>
+                                      </template>
+
+                                       <template v-if="field.fieldtype === 'Int'">
+                                        <input
+                                          v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                          type="number"
+                                          class="form-control text-center font-12"
+                                          v-model.number="row[field.fieldname]"
+                                          :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                      :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                      :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                          @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                          @change="handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], row[field.fieldname])"
+                                        />
+                                        <span v-else>{{ row[field.fieldname] }}</span>
+                                      </template>
+
+
+
+                                       <template v-if="field.fieldtype === 'Date'">
+                                      <input
+                                        v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                        type="date"
+                                        class="form-control form-control-sm font-12 text-center"
+                                        v-model="row[field.fieldname]"
+                                        :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                                                          :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                                                          :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                        @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                        @change="handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], row[field.fieldname])"
+                                      />
+                                      <span v-else>{{ row[field.fieldname] }}</span>
+                                    </template>
+                                    <template v-if="field.fieldtype === 'Datetime'">
+                                          <input
+                                            v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                            type="datetime-local"
                                             class="form-control form-control-sm font-12 text-center"
                                             v-model="row[field.fieldname]"
-                                            :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
-                                            @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
-                                          <span v-else>
-                                            {{ row[field.fieldname] }}
-
-                                          </span>
-                                        </template>
-                                        <template v-if="field.fieldtype === 'Int'">
-                                          <!-- Expression based field -->
-                                          <!-- <template v-if="field.description && /[+\-*/]/.test(field.description)">
-                                          <input disabled type="number" class="form-control text-center font-12"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
-                                            :value="calculateFieldExpression(row, field.description, headers)"
-                                            readonly />
-                                        </template> -->
-
-                                          <!-- Editable input -->
-                                          <template v-if="!(blockIndex === 0 || props.readonlyFor === 'true')">
-                                            <input type="number" class="form-control text-center font-12"
-                                              :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
-                                              v-model.number="row[field.fieldname]" />
-                                          </template>
-
-                                          <!-- Read-only display -->
-                                          <!-- v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')" -->
-                                          <template v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')">
-                                            <span>
-                                              {{ row[field.fieldname] ? row[field.fieldname] : '' }}
-                                            </span>
-                                          </template>
-                                        </template>
-
-
-                                        <template v-if="field.fieldtype === 'Date'">
-                                          <input
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                            type="date" class="form-control form-control-sm font-12 text-center"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                            :max="field.fieldname === 'RetrunDate' ? today : null"
-                                            :min="field.fieldname === 'RetrunDate' ? oneWeekAgo : null"
-                                            v-model="row[field.fieldname]" />
-                                          <span v-else>
-                                            {{ row[field.fieldname] }}
-
-                                          </span>
+                                            :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                            :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                            @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                            @change="handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], row[field.fieldname])"
+                                          />
+                                          <span v-else>{{ row[field.fieldname] }}</span>
                                         </template>
 
 
 
-                                        <template v-else-if="field.fieldtype === 'Select'">
 
-                                          <div
-                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel">
-                                            <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
-                                              :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                                              :model-value="row[field.fieldname]" placeholder="Select"
-                                              @update:model-value="val => row[field.fieldname] = val"
-                                              class="font-11 multiselect" />
-                                          </div>
-                                          <span v-else>
-                                            {{ row[field.fieldname] }}
-
-                                          </span>
+                                          <!-- <Multiselect
+                                            v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                            :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                            :model-value="row[field.fieldname]"
+                                            placeholder="Select"
+                                            :class="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel ) ? 'bg-white border-0' : null"
+                                            :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex<= currentLevel )"
+                                            :readOnly="!isEditable && (props.readonlyFor === 'true' || blockIndex <= currentLevel)"
+                                            class="font-11 multiselect"
+                                            @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                            @update:model-value="val => {
+                                              handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], val);
+                                              row[field.fieldname] = val;
+                                            }"
+                                          /> -->
+                                        <template v-if="field.fieldtype === 'Select'">
+                                          
+                                          <Vue3Select v-if="isEditable && (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                              
+                              style="min-width: 200px;"
+                              :append-to-body="true"
+                              :multiple="field.fieldtype === 'Table MultiSelect'"
+                              :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                            :model-value="row[field.fieldname]"
+                                            placeholder="Select"
+                                            
+                                            class="font-11 multiselect"
+                                            @focus="oldValues[field.fieldname] = row[field.fieldname]"
+                                            @update:model-value="val => {
+                                              handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], val);
+                                              row[field.fieldname] = val;
+                                            }"
+                            />
+                                          <span v-else>{{ row[field.fieldname] }}</span>
                                         </template>
+
 
 
 
@@ -1612,11 +1648,9 @@ const linkSearchResults = ref([]);
 // let timer = null;
 const isEditable = computed(() => props.isEditable);
 const fieldChanges = ref({}) 
-// // Example function to toggle edit mode
-function toggleEdit() {
-  isEditable.value = !isEditable.value;
-}  
 
+const childfieldChanges = ref({}); // structured changes object
+const oldValues = {}; 
 // function updateTime() {
 //   currentTime.value = new Date()
 //     .toLocaleString("en-CA", {
@@ -1632,6 +1666,29 @@ function toggleEdit() {
 //     .replace(/,/, "")
 //     .replace(/\//g, "-");
 // }
+function handleFieldChange(tableName, fieldName, oldValue, newValue) {
+  if (oldValue === newValue || oldValue === undefined) return;
+
+  // Initialize table if not exists
+  if (!childfieldChanges.value[tableName]) {
+    childfieldChanges.value[tableName] = {};
+  }
+
+  // Initialize or update field entry
+  if (!childfieldChanges.value[tableName][fieldName]) {
+    childfieldChanges.value[tableName][fieldName] = {
+      old_value: oldValue,
+      new_value: newValue,
+    };
+  } else {
+    childfieldChanges.value[tableName][fieldName].new_value = newValue;
+  }
+
+  // ✅ Emit to parent component every time changes occur
+  emit('childTableFieldChanges', childfieldChanges.value);
+}
+
+
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
 };

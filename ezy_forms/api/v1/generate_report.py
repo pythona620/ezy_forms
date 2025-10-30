@@ -5,15 +5,8 @@ import re
 @frappe.whitelist(methods=["GET"])
 def generate_custom_report(doctype_name, source, filters=None):
     """
-    Generates a dynamic report based on Ezy Form Definitions configuration.
-    Supports multiple filters, AND/OR groups:
-    
-    Example for OR groups:
-    filters = [
-        {"creation": ["2025-10-10", "2025-10-17"], "status": "Active"},  # Group 1
-        {"employee_name": ["LIKE", "%John%"]}  # Group 2
-    ]
-    This translates to: (creation BETWEEN ... AND status='Active') OR (employee_name LIKE '%John%')
+    Dynamically generates a report based on Ezy Form Definitions configuration.
+    Supports parent + child table fields and multiple filters.
     """
 
     # Case 1: Run normal frappe report
@@ -27,29 +20,68 @@ def generate_custom_report(doctype_name, source, filters=None):
     if not doctype_name or not report_fields:
         frappe.throw("Please specify both Doctype and Report Fields in the configuration")
 
-    # Parse fields to map aliases
+    frappe.log_error("Report Field Configuration", report_fields)
+    # Parse fields 
     field_mappings = []
     parsed_fields = []
+    child_tables = {}  # {alias: child_doctype}
+    parent_meta = frappe.get_meta(doctype_name)
+
     for field_expr in report_fields.split(","):
         field_expr = field_expr.strip()
+        if not field_expr:
+            continue
+
         match = re.match(r"([\w\.]+)\s+as\s+['\"]?(.+?)['\"]?$", field_expr, re.IGNORECASE)
         if match:
             fieldname, label = match.groups()
-            parsed_fields.append(f"{fieldname} as `{fieldname}`")
-            field_mappings.append({"fieldname": fieldname, "label": label})
         else:
-            fieldname = field_expr
-            parsed_fields.append(fieldname)
-            field_mappings.append({
-                "fieldname": fieldname,
-                "label": frappe.unscrub(fieldname).title()
-            })
+            fieldname, label = field_expr, frappe.unscrub(field_expr).title()
 
-    # Build base query
+        # --- Child table field handling ---
+        if "." in fieldname:
+            parent_field, child_field = fieldname.split(".", 1)
+            parent_df = parent_meta.get_field(parent_field)
+
+            if not parent_df:
+                frappe.log_error(f"Invalid field '{parent_field}' in {doctype_name}", "Invalid Field")
+                continue
+
+            if parent_df.fieldtype != "Table":
+                frappe.log_error(f"Field '{parent_field}' exists but is not a Table field (type: {parent_df.fieldtype})", "Invalid Child Table")
+                continue
+
+            if parent_field not in child_tables:
+                child_tables[parent_field] = parent_df.options
+
+            parsed_fields.append(f"`{parent_field}`.`{child_field}` AS `{fieldname}`")
+
+        else:
+            # Skip Table-type fields (cannot be directly queried)
+            parent_df = parent_meta.get_field(fieldname)
+            if parent_df and parent_df.fieldtype == "Table":
+                frappe.log_error(f"Skipping table field '{fieldname}' in {doctype_name} (must specify a child field like '{fieldname}.some_child_field')", "Skipped Field")
+                continue
+
+            parsed_fields.append(f"`tab{doctype_name}`.`{fieldname}` AS `{fieldname}`")
+
+        field_mappings.append({"fieldname": fieldname, "label": label})
+
+    if not parsed_fields:
+        frappe.throw("No valid fields found to build report. Check report_fields configuration.")
+
+    # -----------------------
+    # Build Query
+    # -----------------------
     query = f"SELECT {', '.join(parsed_fields)} FROM `tab{doctype_name}`"
 
-    # --- 🔹 Filter Handling (OR groups) ---
-    or_conditions = []
+    for child_alias, child_doctype in child_tables.items():
+        query += f" LEFT JOIN `tab{child_doctype}` AS `{child_alias}` ON `{child_alias}`.parent = `tab{doctype_name}`.name"
+
+    # -----------------------
+    # Apply Filters
+    # -----------------------
+    conditions = []
     values = {}
 
     if filters:
@@ -57,78 +89,59 @@ def generate_custom_report(doctype_name, source, filters=None):
             try:
                 filters = frappe.parse_json(filters)
             except Exception:
-                frappe.throw("Invalid filters format. Must be a JSON object or list of objects.")
+                frappe.throw("Invalid filters format. Must be a valid JSON object.")
 
-        if isinstance(filters, dict):
-            filters = [filters]  # Convert single dict to list for uniform processing
+        for key, val in filters.items():
+            if val in (None, ""):
+                continue
 
-        if not isinstance(filters, list):
-            frappe.throw("Filters must be a dictionary or a list of dictionaries.")
+            param_key = key.replace('.', '_')
+            if "." in key:
+                parent_field, child_field = key.split(".", 1)
+                field_ref = f"`{parent_field}`.`{child_field}`"
+            else:
+                field_ref = f"`tab{doctype_name}`.`{key}`"
 
-        for group_index, f_group in enumerate(filters):
-            if not isinstance(f_group, dict):
-                frappe.throw("Each filter group must be a dictionary.")
-
-            group_conditions = []
-
-            for key, val in f_group.items():
-                if val is None or val == "":
-                    continue
-
-                param_key = f"{key.replace('.', '_')}_{group_index}"
-
-                # Date range / BETWEEN
-                if isinstance(val, (list, tuple)) and len(val) == 2 and all(isinstance(v, str) for v in val):
-                    group_conditions.append(f"`{key}` BETWEEN %({param_key}_from)s AND %({param_key}_to)s")
-                    values[f"{param_key}_from"] = val[0]
-                    values[f"{param_key}_to"] = val[1]
-
-                # Operator-based filter ["<", value] or [">=", value]
-                elif isinstance(val, (list, tuple)) and len(val) == 2 and val[0] in [">", "<", ">=", "<="]:
-                    operator = val[0]
-                    group_conditions.append(f"`{key}` {operator} %({param_key})s")
+            if isinstance(val, (list, tuple)) and len(val) == 2:
+                op = val[0].upper()
+                if op in [">", "<", ">=", "<=", "LIKE"]:
+                    conditions.append(f"{field_ref} {op} %({param_key})s")
                     values[param_key] = val[1]
-
-                # LIKE operator
-                elif isinstance(val, (list, tuple)) and len(val) == 2 and val[0].upper() == "LIKE":
-                    group_conditions.append(f"`{key}` LIKE %({param_key})s")
-                    values[param_key] = val[1]
-
-                # IN / NOT IN operator
-                elif isinstance(val, (list, tuple)) and len(val) == 2 and val[0].upper() in ["IN", "NOT IN"]:
-                    operator = val[0].upper()
-                    in_values = val[1]
-                    if not isinstance(in_values, (list, tuple)):
-                        frappe.throw(f"Values for {operator} filter on {key} must be a list or tuple.")
-                    placeholders = ", ".join([f"%({param_key}_{i})s" for i in range(len(in_values))])
-                    group_conditions.append(f"`{key}` {operator} ({placeholders})")
-                    for i, v in enumerate(in_values):
+                elif op in ["IN", "NOT IN"]:
+                    placeholders = ", ".join([f"%({param_key}_{i})s" for i, _ in enumerate(val[1])])
+                    conditions.append(f"{field_ref} {op} ({placeholders})")
+                    for i, v in enumerate(val[1]):
                         values[f"{param_key}_{i}"] = v
+                else:
+                    # Range (between)
+                    conditions.append(f"{field_ref} BETWEEN %({param_key}_from)s AND %({param_key}_to)s")
+                    values[f"{param_key}_from"], values[f"{param_key}_to"] = val
+            else:
+                conditions.append(f"{field_ref} = %({param_key})s")
+                values[param_key] = val
 
-                # Simple equality
-                elif not isinstance(val, (list, tuple)):
-                    group_conditions.append(f"`{key}` = %({param_key})s")
-                    values[param_key] = val
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
 
-            if group_conditions:
-                or_conditions.append("(" + " AND ".join(group_conditions) + ")")
+    frappe.log_error("Final SQL Query", query)
+    frappe.log_error("Query Values", str(values))
 
-    # Add WHERE clause if OR conditions exist
-    if or_conditions:
-        query += " WHERE " + " OR ".join(or_conditions)
+    # -----------------------
+    # Execute Query
+    # -----------------------
+    try:
+        result = frappe.db.sql(query, values, as_dict=True)
+    except Exception as e:
+        frappe.log_error(f"SQL Execution Failed\nQuery: {query}\nValues: {values}\nError: {str(e)}", "Custom Report Error")
+        frappe.throw("There was an error executing the report. Check Error Logs for details.")
 
-    # Execute query safely
-    result = frappe.db.sql(query, values, as_dict=True)
-
-    # Prepare columns
-    columns = []
-    for f in field_mappings:
-        columns.append({
-            "label": f["label"],
-            "fieldname": f["fieldname"],
-            "fieldtype": "Data",
-            "width": 150
-        })
+    # -----------------------
+    # Build Columns
+    # -----------------------
+    columns = [
+        {"label": f["label"], "fieldname": f["fieldname"], "fieldtype": "Data", "width": 150}
+        for f in field_mappings
+    ]
 
     return {
         "columns": columns,

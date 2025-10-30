@@ -1625,8 +1625,13 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
+          
+          
+          <div>
+
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
             :name="selectedBlockIndex === 0 ? 'Add Requestor':'Add Approvers'" />
+        </div>
         </div>
       </div>
     </div>
