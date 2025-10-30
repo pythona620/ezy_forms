@@ -417,7 +417,7 @@ def _create_form_definitions(
     form_short_name: str, form_status: str, owner_of_the_form: str,
     naming_series: str, business_unit: str, has_workflow: Optional[str],
     is_linked_form: Optional[str], is_linked: Optional[int],
-    is_predefined_doctype: Optional[int],public_form_response:Optional[str],mail_id:Optional[str], as_web_view
+    is_predefined_doctype: Optional[int],public_form_response:Optional[str],as_web_view:Optional[int],mail_id:Optional[str],
 ):
     """Create form definitions efficiently."""
     form_defs = frappe.get_doc({
