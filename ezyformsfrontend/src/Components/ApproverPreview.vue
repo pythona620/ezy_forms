@@ -1231,12 +1231,17 @@
                                       </template> -->
                                         <template v-if="field.fieldtype === 'Attach'">
                                           <!-- File Input (unchanged) -->
-                                          <input
-                                             v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
-                                            type="file"  multiple
-                                            class="form-control font-12" style="display: none"
-                                            :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
-                                            @change="handleFileUpload($event, row, field.fieldname)" />
+                                         <input
+                                              v-if="!isEditable || (props.readonlyFor !== 'true' || blockIndex <= currentLevel)"
+                                              type="file"
+                                              multiple
+                                              class="form-control font-12"
+                                              style="display: none"
+                                              :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
+                                              @click="oldValues[field.fieldname] = row[field.fieldname]" 
+                                              @change="handleFileUpload($event, row, field.fieldname, tableName)"
+                                            />
+
 
                                           <!-- Custom Label Button -->
                                           <label
@@ -1477,11 +1482,8 @@
                                             placeholder="Select"
                                             
                                             class="font-11 multiselect"
-                                            @focus="oldValues[field.fieldname] = row[field.fieldname]"
-                                            @update:model-value="val => {
-                                              handleFieldChange(tableName, field.fieldname, oldValues[field.fieldname], val);
-                                              row[field.fieldname] = val;
-                                            }"
+                                              @mousedown="oldValues[field.fieldname] = row[field.fieldname]"
+                                              @update:model-value="(val) => onSelectChange(val, tableName, field, row)"
                             />
                                           <span v-else>{{ row[field.fieldname] }}</span>
                                         </template>
@@ -1688,6 +1690,29 @@ function handleFieldChange(tableName, fieldName, oldValue, newValue) {
   emit('childTableFieldChanges', childfieldChanges.value);
 }
 
+function onSelectChange(val, tableName, field, row) {
+  const fieldName = field.fieldname;
+  const oldValue = oldValues[fieldName] ?? row[fieldName];
+  const newValue = val;
+
+  if (oldValue === newValue) return;
+
+  // Update row value
+  row[fieldName] = newValue;
+
+  if (!childfieldChanges.value[tableName]) {
+    childfieldChanges.value[tableName] = {};
+  }
+
+  childfieldChanges.value[tableName][fieldName] = {
+    old_value: oldValue,
+    new_value: newValue,
+  };
+
+  console.log("childfieldChanges.value",childfieldChanges.value);
+  emit('childTableFieldChanges', childfieldChanges.value);
+}
+
 
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
@@ -1809,7 +1834,7 @@ const normalizeFileList = (value) => {
   if (typeof value === 'string') return value.split('|').map(f => f.trim());
   return [];
 };
-const handleFileUpload = async (event, row, fieldname) => {
+const handleFileUpload = async (event, row, fieldname, tableName) => {
   let selectedFiles = Array.from(event.target.files);
   if (!selectedFiles.length) return;
 
@@ -1826,11 +1851,30 @@ const handleFileUpload = async (event, row, fieldname) => {
     selectedFiles = selectedFiles.slice(0, remainingSlots);
   }
 
-  // Upload files sequentially to preserve order
+  // ✅ Capture old value before upload
+  const oldValue = oldValues[fieldname] ?? row[fieldname];
+
+  // Upload sequentially
   for (const file of selectedFiles) {
     await tableFileUpload(file, row, fieldname);
   }
 
+  // ✅ Capture new value after upload
+  const newValue = row[fieldname];
+
+  // ✅ Track changes
+  if (!childfieldChanges.value[tableName]) {
+    childfieldChanges.value[tableName] = {};
+  }
+
+  childfieldChanges.value[tableName][fieldname] = {
+    old_value: oldValue || '',
+    new_value: newValue || '',
+  };
+  // ✅ Emit changes to parent
+  emit('childTableFieldChanges', childfieldChanges.value);
+
+  // ✅ Clear input
   event.target.value = null;
 };
 
