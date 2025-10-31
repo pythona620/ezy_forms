@@ -89,20 +89,121 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="text-center">
-              <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
-            </div>
-            <div class="input-group my-3">
-              <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
-              <button class="btn bg-secondary text-white shadow-none" @click="copyToClipboard"><i class="bi bi-copy h-100"></i></button>
-            </div>
-            <div>
-              <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
-                <i class="bi bi-download me-2"></i> Download
-              </button>
-            </div>
+    <!-- Tabs Header -->
+    <ul class="nav nav-tabs mb-3" id="qrTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link active text-black"
+          id="static-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#staticQR"
+          type="button"
+          role="tab"
+          aria-controls="staticQR"
+          aria-selected="true"
+        >
+          Static QR
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link text-black"
+          id="dynamic-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#dynamicQR"
+          type="button"
+          role="tab"
+          aria-controls="dynamicQR"
+          aria-selected="false"
+        >
+          Dynamic QR
+        </button>
+      </li>
+    </ul>
 
+    <!-- Tabs Content -->
+    <div class="tab-content" id="qrTabsContent">
+      <!-- Static QR Tab -->
+      <div
+        class="tab-pane fade show active"
+        id="staticQR"
+        role="tabpanel"
+        aria-labelledby="static-tab"
+      >
+        <div class="text-center">
+          <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
+        </div>
+        <div class="input-group my-3">
+          <input
+            type="text"
+            class="form-control shadow-none font-12"
+            :value="formName.qr_url"
+            readonly
+          />
+          <button
+            class="btn bg-secondary text-white shadow-none"
+            @click="copyQR('static')"
+          >
+            <i class="bi bi-copy h-100"></i>
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn download-btn font-14 w-100 shadow-none"
+            @click="downloadQR('static')"
+          >
+            <i class="bi bi-download me-2"></i> Download
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic QR Tab -->
+      <div class="tab-pane fade" id="dynamicQR" role="tabpanel" aria-labelledby="dynamic-tab">
+        <div class="text-center">
+          <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" class="qrCodeDiv"/>
+        </div>
+        <div class="d-flex gap-2">
+          <div class="w-100">
+            <label class="font-13 ms-1">Form Valid From</label>
+            <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
+              v-model="dynamicQrData.form_valid_from" />
           </div>
+          <div class="w-100">
+            <label class="font-13 ms-1">Form Valid To</label>
+            <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
+              v-model="dynamicQrData.form_valid_to" />
+          </div>
+        </div>
+        <button class="btn btn-secondary font-14 w-100 shadow-none my-3" @click="generateDynamicQR">
+          <i class="bi bi-qr-code-scan me-2"></i>
+         Generate QR Code
+        </button>
+        <!-- <div class="input-group my-3">
+          <input
+            type="text"
+            class="form-control shadow-none font-12"
+            :value="dynamicQrData.dynamic_link"
+            readonly
+          />
+          <button
+            class="btn bg-secondary text-white shadow-none"
+            @click="copyQR('dynamic')"
+          >
+            <i class="bi bi-copy h-100"></i>
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn download-btn font-14 w-100 shadow-none"
+            @click="downloadQR('dynamic')"
+          >
+            <i class="bi bi-download me-2"></i> Download
+          </button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
         </div>
       </div>
     </div>
@@ -195,27 +296,59 @@ const actions = computed(() => {
 const formName = ref("");
 
 
-// Copy QR ID
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(formName.value.qr_url);
-  toast.success(`Copied QR for ${formName.value.form_name}`, { autoClose: 600 });
+/**
+ * Copy QR URL to clipboard
+ * @param {string} type - 'static' or 'dynamic'
+ */
+const copyQR = (type) => {
+  const url =
+    type === "dynamic" ? dynamicQrData.value.dynamic_link : formName.value.qr_url;
+  navigator.clipboard.writeText(url);
+  toast.success(
+    `Copied ${type === "dynamic" ? "Dynamic" : "Static"} QR for ${formName.value.form_name}`,
+    { autoClose: 600 }
+  );
 };
 
-// downloadQR
-const downloadQR = () => {
-  const canvas = document.querySelector("canvas");
+/**
+ * Download QR code image
+ * @param {string} type - 'static' or 'dynamic'
+ */
+const downloadQR = (type) => {
+  const canvasSelector = type === "dynamic" ? "#dynamicQR canvas" : "#staticQR canvas";
+  const canvas = document.querySelector(canvasSelector);
+  if (!canvas) return;
+
   const url = canvas.toDataURL("image/png");
   const a = document.createElement("a");
-
-  // Use form name or fallback
+  const suffix = type === "dynamic" ? "_dynamic" : "_static";
   const fileName = formName.value.form_name
-    ? `${formName.value.form_name}.png`
-    : "qrcode.png";
+    ? `${formName.value.form_name}${suffix}.png`
+    : `qrcode${suffix}.png`;
 
   a.href = url;
   a.download = fileName;
   a.click();
 };
+
+const dynamicQrData = ref({});
+
+function generateDynamicQR(){
+  const dataObj = {
+      "form_name": formName.value.form_short_name,
+      "form_valid_from": dynamicQrData.value.form_valid_from,
+      "form_valid_to": dynamicQrData.value.form_valid_to
+  };
+
+  axiosInstance.post(apis.generate_qr_code, dataObj)
+    .then((response) => {
+      const res=response.message;
+      showSuccess("Dynamic QR Code Generated Successfully");
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 
 // const showShareOptions = ref(false);
 
@@ -299,6 +432,19 @@ function viewPreview(data, index, type) {
   }
   if (type === "QR Code") {
     formName.value = data;
+
+    const dataObj = {
+      "form_name": formName.value.form_short_name,
+    };
+
+  axiosInstance.post(apis.generate_qr_code, dataObj)
+    .then((response) => {
+      dynamicQrData.value = response.message;
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
     if(formName.value.qr_url && data.as_web_view===1){
       const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
       modal.show();
@@ -712,6 +858,7 @@ const queryParams = {
     "workflow_check",
     "qr_url",
     "as_web_view",
+    "dynamic_link",
   ]),
 };
 
