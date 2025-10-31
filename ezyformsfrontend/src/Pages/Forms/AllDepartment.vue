@@ -927,7 +927,6 @@ function fetchDepartmentDetails() {
       "workflow_check",
       "qr_url",
       "as_web_view",
-      "dynamic_link",
     ]),
   };
 
