@@ -182,7 +182,7 @@ def qr_code_to_new_form(token, save_doc=None):
     
     
 @frappe.whitelist()
-def dynamic_link_creation(form_name,form_valid_from=None,form_valid_to=None):
+def get_dynamic_Qr_data(form_name,form_valid_from=None,form_valid_to=None):
     existing_data_for_qr = frappe.db.get_list("EzyForm QR Code", {"form_name": form_name,"is_dynamic_qr": 1,"token_status":"Active"}, ["form_valid_from","form_valid_to","dynamic_link","token_status"])
     
     if existing_data_for_qr:
@@ -200,13 +200,17 @@ def dynamic_link_creation(form_name,form_valid_from=None,form_valid_to=None):
 
 @frappe.whitelist()
 def create_dynamic_qr_link(form_name,form_valid_from=None,form_valid_to=None,status=None):
-    existing_data_for_qr = frappe.db.get_list("EzyForm QR Code", {"form_name": form_name,"is_dynamic_qr": 1,"token_status":"Active"}, ["form_valid_from","form_valid_to","dynamic_link","token_status"])
-    
+    existing_data_for_qr = frappe.db.get_list("EzyForm QR Code", {"form_name": form_name,"is_dynamic_qr": 1,"token_status":"Active"}, ["name","form_valid_from","form_valid_to","dynamic_link","is_dynamic_qr","token_status"])
+    print(existing_data_for_qr,"maimamainamainamainamainm")
     if existing_data_for_qr:
-       frappe.db.set_value("EzyForm QR Code", {existing_data_for_qr[0]["name"]}, {"token_status":status,"form_valid_from":form_valid_from,"form_valid_to":form_valid_to})
-       frappe.db.commit()
-       return {
-                "message": "Existing dynamic QR link updated successfully.",
+        print(existing_data_for_qr,"aftemainafteemaiafateafter")
+        frappe.db.set_value("EzyForm QR Code", {existing_data_for_qr[0]["name"]}, {"form_valid_from":form_valid_from,"form_valid_to":form_valid_to})
+        frappe.db.commit()
+        return {
+                "message": "Dynamic QR Code updated successfully.",
+                "dynamic_link": existing_data_for_qr[0]["dynamic_link"],
+                "form_valid_from": form_valid_from,
+                "form_valid_to": form_valid_to
           }
     else:
         # Generate new token
@@ -228,6 +232,7 @@ def create_dynamic_qr_link(form_name,form_valid_from=None,form_valid_to=None,sta
         qr_doc.insert(ignore_permissions=True)
             
         return {
+            "message": "Dynamic QR Code Created successfully.",
             "dynamic_link": qr_link,
             "token_status": "Active",
             "form_valid_from": form_valid_from,

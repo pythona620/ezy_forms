@@ -89,120 +89,95 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-    <!-- Tabs Header -->
-    <ul class="nav nav-tabs mb-3" id="qrTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link active text-black"
-          id="static-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#staticQR"
-          type="button"
-          role="tab"
-          aria-controls="staticQR"
-          aria-selected="true"
-        >
-          Static QR
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link text-black"
-          id="dynamic-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#dynamicQR"
-          type="button"
-          role="tab"
-          aria-controls="dynamicQR"
-          aria-selected="false"
-        >
-          Dynamic QR
-        </button>
-      </li>
-    </ul>
+            <!-- Tabs Header -->
+            <ul class="nav nav-tabs mb-3" id="qrTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active text-black"
+                  id="static-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#staticQR"
+                  type="button"
+                  role="tab"
+                  aria-controls="staticQR"
+                  aria-selected="true"
+                >
+                  Static QR
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link text-black"
+                  id="dynamic-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#dynamicQR"
+                  type="button"
+                  role="tab"
+                  aria-controls="dynamicQR"
+                  aria-selected="false"
+                >
+                  Dynamic QR
+                </button>
+              </li>
+            </ul>
 
-    <!-- Tabs Content -->
-    <div class="tab-content" id="qrTabsContent">
-      <!-- Static QR Tab -->
-      <div
-        class="tab-pane fade show active"
-        id="staticQR"
-        role="tabpanel"
-        aria-labelledby="static-tab"
-      >
-        <div class="text-center">
-          <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
-        </div>
-        <div class="input-group my-3">
-          <input
-            type="text"
-            class="form-control shadow-none font-12"
-            :value="formName.qr_url"
-            readonly
-          />
-          <button
-            class="btn bg-secondary text-white shadow-none"
-            @click="copyQR('static')"
-          >
-            <i class="bi bi-copy h-100"></i>
-          </button>
-        </div>
-        <div>
-          <button
-            class="btn download-btn font-14 w-100 shadow-none"
-            @click="downloadQR('static')"
-          >
-            <i class="bi bi-download me-2"></i> Download
-          </button>
-        </div>
-      </div>
+            <!-- Tabs Content -->
+            <div class="tab-content" id="qrTabsContent">
+              <!-- Static QR Tab -->
+              <div class="tab-pane fade show active" id="staticQR" role="tabpanel" aria-labelledby="static-tab">
+                <div class="text-center">
+                  <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
+                </div>
+                <div class="input-group my-3">
+                  <input
+                    type="text"
+                    class="form-control shadow-none font-12"
+                    :value="formName.qr_url"
+                    readonly
+                  />
+                  <button
+                    class="btn bg-secondary text-white shadow-none"
+                    @click="copyQR('static')"
+                  >
+                    <i class="bi bi-copy h-100"></i>
+                  </button>
+                </div>
+                <div>
+                  <button
+                    class="btn download-btn font-14 w-100 shadow-none"
+                    @click="downloadQR('static')"
+                  >
+                    <i class="bi bi-download me-2"></i> Download
+                  </button>
+                </div>
+              </div>
 
-      <!-- Dynamic QR Tab -->
-      <div class="tab-pane fade" id="dynamicQR" role="tabpanel" aria-labelledby="dynamic-tab">
-        <div class="text-center">
-          <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" class="qrCodeDiv"/>
-        </div>
-        <div class="d-flex gap-2">
-          <div class="w-100">
-            <label class="font-13 ms-1">Form Valid From</label>
-            <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
-              v-model="dynamicQrData.form_valid_from" />
+              <!-- Dynamic QR Tab -->
+              <div class="tab-pane fade" id="dynamicQR" role="tabpanel" aria-labelledby="dynamic-tab">
+                <div>
+                  <div v-if="dynamicQrData.dynamic_link" class="text-center">
+                  <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" class="qrCodeDiv"/>
+                  </div>
+                <div class="d-flex gap-2 mt-4">
+                  <div class="w-100">
+                    <label class="font-13 ms-1">Form Valid From</label>
+                    <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
+                      v-model="dynamicQrData.form_valid_from" />
+                  </div>
+                  <div class="w-100">
+                    <label class="font-13 ms-1">Form Valid To</label>
+                    <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
+                      v-model="dynamicQrData.form_valid_to" />
+                  </div>
+                </div>
+                <button class="btn CreateQrBtn font-14 w-100 shadow-none my-3" @click="generateDynamicQR">
+                     <i class="bi bi-qr-code-scan me-2"></i>
+                      {{ dynamicQrData.dynamic_link ? 'Update QR Code' : 'Generate QR Code' }}
+                </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="w-100">
-            <label class="font-13 ms-1">Form Valid To</label>
-            <input class="form-control shadow-none mt-2 font-13" type="datetime-local" name="Value" id="formNameSeries"
-              v-model="dynamicQrData.form_valid_to" />
-          </div>
-        </div>
-        <button class="btn btn-secondary font-14 w-100 shadow-none my-3" @click="generateDynamicQR">
-          <i class="bi bi-qr-code-scan me-2"></i>
-         Generate QR Code
-        </button>
-        <!-- <div class="input-group my-3">
-          <input
-            type="text"
-            class="form-control shadow-none font-12"
-            :value="dynamicQrData.dynamic_link"
-            readonly
-          />
-          <button
-            class="btn bg-secondary text-white shadow-none"
-            @click="copyQR('dynamic')"
-          >
-            <i class="bi bi-copy h-100"></i>
-          </button>
-        </div>
-        <div>
-          <button
-            class="btn download-btn font-14 w-100 shadow-none"
-            @click="downloadQR('dynamic')"
-          >
-            <i class="bi bi-download me-2"></i> Download
-          </button>
-        </div> -->
-      </div>
-    </div>
-  </div>
 
         </div>
       </div>
@@ -337,13 +312,13 @@ function generateDynamicQR(){
   const dataObj = {
       "form_name": formName.value.form_short_name,
       "form_valid_from": dynamicQrData.value.form_valid_from,
-      "form_valid_to": dynamicQrData.value.form_valid_to
+      "form_valid_to": dynamicQrData.value.form_valid_to,
   };
 
-  axiosInstance.post(apis.generate_qr_code, dataObj)
+  axiosInstance.post(apis.generate_dynamic_qr_code, dataObj)
     .then((response) => {
-      const res=response.message;
-      showSuccess("Dynamic QR Code Generated Successfully");
+      dynamicQrData.value=response.message;
+      showSuccess(dynamicQrData.value.message);
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
@@ -437,7 +412,7 @@ function viewPreview(data, index, type) {
       "form_name": formName.value.form_short_name,
     };
 
-  axiosInstance.post(apis.generate_qr_code, dataObj)
+  axiosInstance.post(apis.fetchDynamicQrData, dataObj)
     .then((response) => {
       dynamicQrData.value = response.message;
     })
@@ -1139,5 +1114,51 @@ onMounted(() => {
   border: 1px solid black;
   padding: 10px;
   border-radius: 6px;
+}
+.CreateQrBtn{
+  background-color: #343a40;
+  color: white;
+}
+
+.CreateQrBtn:hover{
+  border:1px solid #6c757d;
+  color: black;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  justify-content: center;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  background: transparent;
+  color: #555;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.nav-tabs .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 3px;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-tabs .nav-link.active {
+  color: #007bff;
+}
+
+.nav-tabs .nav-link.active::after {
+  width: 100%;
 }
 </style>
