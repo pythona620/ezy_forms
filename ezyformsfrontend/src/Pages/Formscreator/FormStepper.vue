@@ -259,29 +259,6 @@
           />
       </div>
 
-      <!-- Form Valid from -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Form Valid From <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <input
-          class="form-control shadow-none mt-2"
-          type="datetime-local"
-          name="Value"
-          id="formNameSeries"
-          v-model="filterObj.form_valid_form"
-        />
-      </div>
-      <!-- Form Valid to -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Form Valid to <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <input
-          class="form-control shadow-none mt-2"
-          type="datetime-local"
-          name="Value"
-          id="formNameSeries"
-          v-model="filterObj.form_valid_to"
-        />
-      </div>
-
       <!-- Linked Checkbox and Linked Form -->
       <div class="col-md-6" v-if="route.query.preId">
         <div class="form-check d-flex align-items-center p-0 pe-3">

@@ -148,8 +148,6 @@ def add_dynamic_doctype(
     series: Optional[str] = None,
     as_web_view:Optional[int] = None,
     mail_id:Optional[str] = None,
-    form_valid_form=None,
-    form_valid_to=None,
     public_form_response:Optional[str] = None,
     **kwargs  # Accept additional parameters gracefully
 ):
@@ -187,8 +185,6 @@ def add_dynamic_doctype(
         workflow_setup=workflow_setup,
         as_web_view=as_web_view,
         mail_id=mail_id,
-        form_valid_form=form_valid_form,
-        form_valid_to=form_valid_to,
         public_form_response=public_form_response,
         now=True,
         is_async=True,
@@ -250,8 +246,6 @@ def enqueued_add_dynamic_doctype(
     as_web_view:Optional[int] = None,
     mail_id:Optional[str] = None,
     public_form_response:Optional[str] = None,
-    form_valid_to=None,
-    form_valid_form=None,
     **kwargs  # Accept any additional parameters
 ):
     """Optimized DocType creation with better error handling and performance."""
@@ -293,7 +287,7 @@ def enqueued_add_dynamic_doctype(
                     "public_form_response":public_form_response
                 })
                 if as_web_view == 1:
-                    enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short",form_valid_form=form_valid_form,form_valid_to=form_valid_to)
+                    enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short")
 
             # Create DocType if it doesn't exist
             if not doctype_exists:
@@ -446,7 +440,7 @@ def _create_form_definitions(
     
     # creating Qr For Web View forms
     if as_web_view == 1:
-        enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short",form_valid_form=None,form_valid_to=None)
+        enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short")
 
 def _add_default_static_fields(doctype: str):
     """Add default static fields to DocType."""
