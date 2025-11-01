@@ -111,7 +111,9 @@
               <!-- Static QR Tab -->
               <div class="tab-pane fade show active" id="staticQR" role="tabpanel" aria-labelledby="static-tab">
                 <div class="text-center">
-                  <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
+                  <div class="p-3 border rounded-3 d-inline-block bg-light">
+                    <qrcode-vue :value="formName.qr_url" :size="180" level="H" />
+                  </div>
                 </div>
                 <div class="input-group my-3">
                   <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
@@ -120,7 +122,7 @@
                   </button>
                 </div>
                 <div>
-                  <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR('static')">
+                  <button class="btn CreateQrBtn font-14 w-100 shadow-none" @click="downloadQR('static')">
                     <i class="bi bi-download me-2"></i> Download
                   </button>
                 </div>
@@ -130,7 +132,9 @@
               <div class="tab-pane fade" id="dynamicQR" role="tabpanel" aria-labelledby="dynamic-tab">
                 <div>
                   <div v-if="dynamicQrData.dynamic_link" class="text-center">
-                    <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" class="qrCodeDiv" />
+                    <div class="p-3 border rounded-3 d-inline-block bg-light">
+                    <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" />
+                    </div>
                   </div>
                   <div class="d-flex gap-2 mt-4">
                     <div class="w-100">
@@ -1247,7 +1251,7 @@ onMounted(() => {
   bottom: -2px;
   width: 0%;
   height: 3px;
-  background-color: #007bff;
+  background-color: #000;
   transition: width 0.3s ease;
 }
 
@@ -1256,10 +1260,11 @@ onMounted(() => {
 }
 
 .nav-tabs .nav-link.active {
-  color: #007bff;
+  color: #000;
 }
 
 .nav-tabs .nav-link.active::after {
   width: 100%;
+  background-color: #000;
 }
 </style>
