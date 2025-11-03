@@ -259,29 +259,6 @@
           />
       </div>
 
-      <!-- Form Valid from -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Form Valid From <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <input
-          class="form-control shadow-none mt-2"
-          type="datetime-local"
-          name="Value"
-          id="formNameSeries"
-          v-model="filterObj.form_valid_form"
-        />
-      </div>
-      <!-- Form Valid to -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Form Valid to <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <input
-          class="form-control shadow-none mt-2"
-          type="datetime-local"
-          name="Value"
-          id="formNameSeries"
-          v-model="filterObj.form_valid_to"
-        />
-      </div>
-
       <!-- Linked Checkbox and Linked Form -->
       <div class="col-md-6" v-if="route.query.preId">
         <div class="form-check d-flex align-items-center p-0 pe-3">
@@ -1674,8 +1651,13 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
+          
+          
+          <div>
+
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
             :name="selectedBlockIndex === 0 ? 'Add Requestor':'Add Approvers'" />
+        </div>
         </div>
       </div>
     </div>
@@ -3990,8 +3972,6 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
-
 
   axiosInstance
     .post(apis.savedata, dataObj)
@@ -4006,7 +3986,7 @@ function formData(status) {
           }
           axiosInstance.put(`${apis.resource}${doctypes.preDefinedForm}/${preId}`, predData)
             .then(res => {
-              console.log(res);
+              const response=res
               localStorage.removeItem('preName')
             })
             .catch(error => {
@@ -4192,11 +4172,9 @@ const removeBlock = (blockIndex) => {
       });
     });
   });
-  // if(rolesToDelete.length){
-
-
-  //   delete_assigned_roles(rolesToDelete, blockIndex);
-  // }
+  if(rolesToDelete.length){
+    delete_assigned_roles(rolesToDelete, blockIndex);
+  }
 
 };
 
@@ -4213,7 +4191,7 @@ function delete_assigned_roles(roles, blockIndex) {
     .post(apis.deleteAssigneRoles, payload)
     .then((res) => {
       if (res) {
-        console.log(res);
+        const response=res
         formData();
       }
     });
