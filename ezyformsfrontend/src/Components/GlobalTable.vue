@@ -95,6 +95,13 @@
                 </span>
               </span>
 
+               <span v-tooltip.top="row[column.td_key]" v-else-if="column.td_key === 'name'">
+                  <span v-if="isAging" class="badge d-inline-flex align-items-center me-1" :class="getBadgeColor(row.modified)">
+                    <i class="bi bi-clock me-1"></i>{{ getTimeDifference(row.modified) }}
+                  </span>
+                  <span>{{ row[column.td_key] }}</span>
+              </span>
+
               <!-- Condition for Active Column -->
               <span v-else-if="column.td_key === 'active'" :class="{
                 activeform: row[column.td_key] == '1',
@@ -155,7 +162,7 @@
                 <div>
                   <span v-tooltip.top="getAssignedToUsers(row, column)">
                     <div>
-                      <span>{{ getAssignedToUsers(row, column) }}<span v-if="row.status !== 'Completed'">({{ getTimeDifference(row.modified) }})</span></span>
+                      <span>{{ getAssignedToUsers(row, column) }}</span>
                     </div>
                   </span>
 
@@ -433,6 +440,9 @@ const props = defineProps({
   QR_Code:{
     type:String,
   },
+  isAging:{
+    type:String,
+  },
   raiseRequest: {
     type: String
   },
@@ -505,20 +515,35 @@ const allCheck = ref(false);
 
 // Function to calculate difference
 function getTimeDifference(modifiedTime) {
-  const modifiedDate = new Date(modifiedTime)
-  const now = new Date()
-  const diffMs = now - modifiedDate // difference in milliseconds
+  const modifiedDate = new Date(modifiedTime);
+  const now = new Date();
+  const diffMs = now - modifiedDate;
 
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
+  const seconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`
-  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
-  return `${seconds} second${seconds !== 1 ? 's' : ''} ago`
+  if (days > 0) return `${days}d`;
+  if (hours > 0) return `${hours}h`;
+  if (minutes > 0) return `${minutes}m`;
+  return `Just now`;
 }
+
+function getBadgeColor(modifiedTime) {
+  const modifiedDate = new Date(modifiedTime);
+  const now = new Date();
+  const diffMs = now - modifiedDate;
+
+  const minutes = diffMs / (1000 * 60);
+  const hours = diffMs / (1000 * 60 * 60);
+  const days = diffMs / (1000 * 60 * 60 * 24);
+
+  if (minutes < 60) return "success-color text-white"; // ✅ Fresh (minutes)
+  if (hours < 24) return "bg-warning text-dark";    // 🕐 Updated within a day
+  return "danger-color text-white";        // ⏳ Older (days)
+}
+
 
 // function formatDate(dateString) {
 //   if (!dateString) return "-"; // Handle empty or null values
@@ -840,6 +865,12 @@ watch(
 // .tooltip-text:hover::after {
 //   opacity: 1;
 // }
+.success-color{
+  background-color: #80d865;
+}
+.danger-color{
+  background-color: rgb(249 96 96);
+}
 
 .raiseRequest {
   background-color: transparent;
