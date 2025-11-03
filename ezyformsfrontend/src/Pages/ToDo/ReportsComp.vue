@@ -451,7 +451,6 @@ const filtersArray = ref([
   },
 ]);
 
-// Static date filter
 const dateFilter = ref({
   date_field: "",
   start_date: "",

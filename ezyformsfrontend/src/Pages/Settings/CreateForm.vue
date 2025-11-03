@@ -127,7 +127,6 @@
 
         <!-- Normal Fields -->
         <div class="report-fields row mb-2 pb-2">
-          <!-- <h6 class="font-13 fw-bold mb-2">Main Fields</h6> -->
           <div v-for="(field, index) in reportFields.filter(f => !f.isChild)" :key="index" class="col-md-4 mb-2">
             <div class="d-flex align-items-center">
               <input
