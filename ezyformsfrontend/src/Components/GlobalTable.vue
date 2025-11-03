@@ -96,8 +96,8 @@
               </span>
 
                <span v-tooltip.top="row[column.td_key]" v-else-if="column.td_key === 'name'">
-                  <span v-if="isAging" class="badge d-inline-flex align-items-center me-1" :class="getBadgeColor(row.modified)">
-                    <i class="bi bi-clock me-1"></i>{{ getTimeDifference(row.modified) }}
+                  <span v-if="isAging && row.status !== 'Completed'" class="badge d-inline-flex align-items-baseline me-1" :class="getBadgeColor(row.modified)">
+                    <i class="bi bi-clock-fill font-10 me-1" style="font-weight:bold"></i>{{ getTimeDifference(row.modified) }}
                   </span>
                   <span>{{ row[column.td_key] }}</span>
               </span>
@@ -524,9 +524,9 @@ function getTimeDifference(modifiedTime) {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days}d`;
-  if (hours > 0) return `${hours}h`;
-  if (minutes > 0) return `${minutes}m`;
+  if (days > 0) return `${days} d`;
+  if (hours > 0) return `${hours} h`;
+  if (minutes > 0) return `${minutes} m`;
   return `Just now`;
 }
 
@@ -539,9 +539,9 @@ function getBadgeColor(modifiedTime) {
   const hours = diffMs / (1000 * 60 * 60);
   const days = diffMs / (1000 * 60 * 60 * 24);
 
-  if (minutes < 60) return "success-color text-white"; // ✅ Fresh (minutes)
-  if (hours < 24) return "bg-warning text-dark";    // 🕐 Updated within a day
-  return "danger-color text-white";        // ⏳ Older (days)
+  if (minutes < 60) return "success-color"; // ✅ Fresh (minutes)
+  if (hours < 24) return "warning-color";    // 🕐 Updated within a day
+  return "danger-color";     // ⏳ Older (days)
 }
 
 
@@ -866,10 +866,16 @@ watch(
 //   opacity: 1;
 // }
 .success-color{
-  background-color: #80d865;
+  color: #63da3e;
+  background-color: #e1f7da;
 }
 .danger-color{
-  background-color: rgb(249 96 96);
+  color: rgb(249, 96, 96);
+  background-color: #ff505020;
+}
+.warning-color{
+  color:rgb(249 180 15);
+  background-color: rgb(255, 237, 196);
 }
 
 .raiseRequest {
