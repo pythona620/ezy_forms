@@ -3972,8 +3972,6 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
-
 
   axiosInstance
     .post(apis.savedata, dataObj)
@@ -3988,7 +3986,7 @@ function formData(status) {
           }
           axiosInstance.put(`${apis.resource}${doctypes.preDefinedForm}/${preId}`, predData)
             .then(res => {
-              console.log(res);
+              const response=res
               localStorage.removeItem('preName')
             })
             .catch(error => {
@@ -4174,11 +4172,9 @@ const removeBlock = (blockIndex) => {
       });
     });
   });
-  // if(rolesToDelete.length){
-
-
-  //   delete_assigned_roles(rolesToDelete, blockIndex);
-  // }
+  if(rolesToDelete.length){
+    delete_assigned_roles(rolesToDelete, blockIndex);
+  }
 
 };
 
@@ -4195,7 +4191,7 @@ function delete_assigned_roles(roles, blockIndex) {
     .post(apis.deleteAssigneRoles, payload)
     .then((res) => {
       if (res) {
-        console.log(res);
+        const response=res
         formData();
       }
     });
