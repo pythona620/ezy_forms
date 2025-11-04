@@ -170,6 +170,41 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="formview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="formviewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-gradient text-black py-3">
+        <div>
+          <h5 class="modal-title fw-semibold mb-1" id="formviewLabel">
+            {{ FormInfo.name }}
+          </h5>
+          <h6 class="font-13 text-black opacity-75">
+            Created on: {{ formatDate(FormInfo.creation) }}
+          </h6>
+        </div>
+        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body bg-light p-4">
+        <div class="row g-4 justify-content-center">
+          <div class="col-6 col-md-4 col-lg-3" v-for="item in stats" :key="item.label">
+            <div class="status-card text-center p-4 rounded-4 shadow-sm">
+              <div class="icon-wrapper mb-2" :class="item.bg">
+                <i :class="item.icon"></i>
+              </div>
+              <h6 class="fw-semibold mb-1">{{ item.label }}</h6>
+              <h4 class="fw-bold">{{ item.value }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-outline-dark rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   </div>
 </template>
 
@@ -259,6 +294,38 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
+const FormInfo = ref({});
+const statusCounts = ref([]);
+
+// Computed stats based on API response
+const stats = computed(() => {
+  const total = statusCounts.value.reduce((sum, item) => sum + item.count, 0);
+
+  const completed = statusCounts.value.find((s) => s.status === "Completed")?.count || 0;
+  const inProgress = statusCounts.value.find((s) => s.status === "In Progress")?.count || 0;
+  const canceled = statusCounts.value.find((s) => s.status === "Canceled")?.count || 0;
+  const requestRaised = statusCounts.value.find((s) => s.status === "Request Raised")?.count || 0;
+
+  return [
+    { label: "Total Forms", value: total, icon: "bi bi-list-task", bg: "bg-total" },
+    { label: "Completed", value: completed, icon: "bi bi-check-circle", bg: "bg-completed" },
+    { label: "In Progress", value: inProgress || requestRaised, icon: "bi bi-arrow-repeat", bg: "bg-progress" },
+    { label: "Canceled", value: canceled, icon: "bi bi-x-circle", bg: "bg-canceled" },
+  ];
+});
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 function toWorkOrder (){
   router.push({
     name: "vendorcomparison",
@@ -266,10 +333,8 @@ function toWorkOrder (){
       });
 } 
 function viewPreview(data, index, type) {
-  // console.log(route.path);
   if (type === "view") {
     if (data) {
-      // console.log(data, "------------");
       router.push({
         name: "FormPreviewComp",
         query: {
@@ -284,17 +349,14 @@ function viewPreview(data, index, type) {
   if (type === 'raiseRequest') {
     const parsedData = JSON.parse(data.form_json);
     const storedData = localStorage.getItem("employeeData");
-    // console.log(parsedData);
 
     if (storedData) {
       const designation = JSON.parse(storedData).designation;
-      // console.log(designation);
 
       if (!parsedData.workflow.length) {
         showInfo("No Roles Added")
       }
       const roles = parsedData.workflow[0].roles;
-      // console.log(roles);
 
       let hasAccess = false;
 
@@ -304,7 +366,6 @@ function viewPreview(data, index, type) {
           break;
         }
       }
-      // console.log(route.path, "sadasda");
 
       if (hasAccess) {
         router.push({
@@ -321,9 +382,6 @@ function viewPreview(data, index, type) {
         showInfo("You do not have permission to access this Form.");
       }
     }
-    //  else {
-    //   console.log("No employee data found in localStorage.");
-    // }
   }
 
 
@@ -350,7 +408,10 @@ function actionClickedDropDown(row) {
   }
   if (is_admin.value == 1) {
      baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
-   }  
+  }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Form Info', icon: 'fa fa-info-circle' });
+  }
 
   actions.value = baseActions;
 
@@ -396,7 +457,6 @@ function getDisplayLabel(field) {
 
 // function actionClickedDropDown(row){
 
-//   console.log(row.form_status, "actionClickedDropDown");
 //   if(row.form_status === 'Created'){
 //     actions.value.push({ name: 'In-active this form', icon: 'fa-solid fa-ban' });
 //   }
@@ -460,18 +520,15 @@ function actionCreated(rowData, actionEvent) {
   }
 
   if (actionEvent.name === 'Raise Request') {
-    // console.log(rowData);
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
     if (storedData) {
       const designation = JSON.parse(storedData).designation;
-      // console.log(designation);
       if (!parsedData.workflow?.length) {
         showInfo("No Roles Added");
       }
       const roles = parsedData.workflow[0].roles;
-      // console.log(roles);
 
       let hasAccess = false;
 
@@ -481,7 +538,6 @@ function actionCreated(rowData, actionEvent) {
           break;
         }
       }
-      // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
         if(rowData.form_name === 'VENDOR COMPARISON'){
@@ -509,9 +565,6 @@ function actionCreated(rowData, actionEvent) {
         showInfo("You do not have permission to access this Form.");
       }
     }
-    //  else {
-    //   console.log("No employee data found in localStorage.");
-    // }
   }
 
   if (actionEvent.name === 'Download Print format') {
@@ -544,7 +597,6 @@ function actionCreated(rowData, actionEvent) {
   }
 
   if (actionEvent.name === 'Create Report') {
-  console.log(rowData, "rowData");
 
   reportShortCode.value = rowData.name;
 
@@ -590,7 +642,29 @@ function actionCreated(rowData, actionEvent) {
   // Open the modal
   const modal = new bootstrap.Modal(document.getElementById("reportmodal"), {});
   modal.show();
-}
+  }
+  if (actionEvent.name === 'Form Info') {
+    FormInfo.value=rowData;
+    const modal = new bootstrap.Modal(document.getElementById("formview"), {});
+    modal.show();
+
+     const queryParams = {
+      fields: JSON.stringify(["doctype_name","name","status","creation"]),
+      limit_page_length: "None",
+      doctype:doctypes.WFWorkflowRequests,
+      doctype_name:FormInfo.value.name,
+      group_by:"status"
+      };
+      axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+        .then((res) => {
+          if (res.message) {
+            statusCounts.value = res.message;
+          }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
+    }
 
 }
 async function generateReport() {
@@ -770,7 +844,6 @@ function inLineFiltersData(searchedData) {
     if (searchedData.form_status === 'Retired') {
       filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
-    // console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
       filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
@@ -833,7 +906,8 @@ function fetchDepartmentDetails(data) {
               "is_linked_form",
               "form_department",
               "series",
-              "report_fields"
+              "report_fields",
+              "creation"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -927,4 +1001,29 @@ onMounted(() => {
   padding: 8px;
   width: 100%;
 }
+
+.status-card {
+  transition: all 0.3s ease-in-out;
+  background: white;
+}
+.status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 22px;
+  color: white;
+}
+.bg-total { background: linear-gradient(135deg, #0d6efd, #3a7af3); }
+.bg-completed { background: linear-gradient(135deg, #198754, #2fc074); }
+.bg-progress { background: linear-gradient(135deg, #0dcaf0, #0995b5); }
+.bg-canceled { background: linear-gradient(135deg, #dc3545, #a71d2a); }
 </style>
