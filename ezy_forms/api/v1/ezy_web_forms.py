@@ -25,7 +25,13 @@ def create_qr_for_web_view(form_name):
         qr_form_doctype.insert(ignore_permissions=True)
         frappe.db.commit()
 
-    doctype = qr_form_doctype.form_name  # Change this to your target Doctype
+    
+    # base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
+    # base_url = frappe.utils.get_url()
+    # get the site url
+    base_url = get_url()
+    #form_name in link should be in lowercase and spaces replaced with hyphens
+    qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
     # Get the base URL of your site
     base_url = frappe.get_single("Global Site Settings").site_url
