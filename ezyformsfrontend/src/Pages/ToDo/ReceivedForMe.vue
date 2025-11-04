@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAging="true" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
