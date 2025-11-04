@@ -25,34 +25,15 @@ def create_qr_for_web_view(form_name):
         qr_form_doctype.insert(ignore_permissions=True)
         frappe.db.commit()
 
-    
-    # base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
-    # base_url = frappe.utils.get_url()
     # get the site url
     base_url = get_url()
     #form_name in link should be in lowercase and spaces replaced with hyphens
     qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
-    # Get the base URL of your site
-    base_url = frappe.get_single("Global Site Settings").site_url
-
-    # Link to open a new document form in Frappe
-    qr_link = (
-        f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{doctype.lower().replace(' ', '-')}?&ftid={action_token}"
-    )
-
-    doctype = qr_form_doctype.form_name  # Change this to your target Doctype
-
-    # Get the base URL of your site
-    base_url = frappe.get_single("Global Site Settings").site
-    
-    # Link to open a new document form in Frappe
-    qr_link = (
-        f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{doctype.lower().replace(' ', '-')}?&ftid={action_token}"
-    )
-    
-    frappe.db.set_value("Ezy Form Definitions", {"name":doctype},{"qr_url":qr_link})
+    # Update the Ezy Form Definitions record
+    frappe.db.set_value("Ezy Form Definitions", {"name": form_name}, "qr_url", qr_link)
     frappe.db.commit()
+    
 
 
 @frappe.whitelist(allow_guest=True)
