@@ -17,19 +17,20 @@
         <!-- d-none d-lg-block -->
         <div class="d-none d-lg-block">
 
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
-          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
-          :field-mapping="fieldMapping" isFiltersoption="true" />
+          <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"
+            raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+            QR_Code="true" @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
+            :field-mapping="fieldMapping" isFiltersoption="true" />
         </div>
-         <div class=" d-block d-lg-none">
-        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
-          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
-          :field-mapping="fieldMapping" isFiltersoption="flase"  />
-      </div>
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
-          @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+        <div class=" d-block d-lg-none">
+          <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"
+            raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+            QR_Code="true" @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
+            :field-mapping="fieldMapping" isFiltersoption="flase" />
+        </div>
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+          :items-per-page="filterObj.limitPageLength" @updateValue="PaginationUpdateValue"
+          @limitStart="PaginationLimitStart" />
       </div>
 
     </div>
@@ -86,23 +87,87 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-16">{{ formName.form_name }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="text-center">
-              <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
-            </div>
-            <div class="input-group my-3">
-              <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
-              <button class="btn bg-secondary text-white shadow-none" @click="copyToClipboard"><i class="bi bi-copy h-100"></i></button>
-            </div>
-            <div>
-              <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
-                <i class="bi bi-download me-2"></i> Download
-              </button>
-            </div>
+            <!-- Tabs Header -->
+            <ul class="nav nav-tabs mb-3" id="qrTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active text-black me-4" id="static-tab" data-bs-toggle="tab"
+                  data-bs-target="#staticQR" type="button" role="tab" aria-controls="staticQR" aria-selected="true">
+                  Static QR
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link text-black" id="dynamic-tab" data-bs-toggle="tab" data-bs-target="#dynamicQR"
+                  type="button" role="tab" aria-controls="dynamicQR" aria-selected="false">
+                  Dynamic QR
+                </button>
+              </li>
+            </ul>
 
+            <!-- Tabs Content -->
+            <div class="tab-content" id="qrTabsContent">
+              <!-- Static QR Tab -->
+              <div class="tab-pane fade show active" id="staticQR" role="tabpanel" aria-labelledby="static-tab">
+                <div class="text-center">
+                  <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
+                </div>
+                <div class="input-group my-3">
+                  <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
+                  <button class="btn bg-secondary text-white shadow-none" @click="copyQR('static')">
+                    <i class="bi bi-copy h-100"></i>
+                  </button>
+                </div>
+                <div>
+                  <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR('static')">
+                    <i class="bi bi-download me-2"></i> Download
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dynamic QR Tab -->
+              <div class="tab-pane fade" id="dynamicQR" role="tabpanel" aria-labelledby="dynamic-tab">
+                <div>
+                  <div v-if="dynamicQrData.dynamic_link" class="text-center">
+                    <qrcode-vue :value="dynamicQrData.dynamic_link" :size="180" level="H" class="qrCodeDiv" />
+                  </div>
+                  <div class="d-flex gap-2 mt-4">
+                    <div class="w-100">
+                      <label class="font-13 ms-1">Form Valid From<span class="text-danger">*</span></label>
+                      <input class="form-control shadow-none mt-1 font-13" type="datetime-local" name="Value"
+                        id="formNameSeries" :min="currentDateTime" v-model="dynamicQrData.form_valid_from" />
+                    </div>
+                    <div class="w-100">
+                      <label class="font-13 ms-1">Form Valid To<span class="text-danger">*</span></label>
+                      <input class="form-control shadow-none mt-1 font-13" type="datetime-local" name="Value"
+                        id="formNameSeries" :min="dynamicQrData.form_valid_from || currentDateTime" v-model="dynamicQrData.form_valid_to" />
+                    </div>
+                  </div>
+
+                  <div v-if="dynamicQrData.dynamic_link" class="input-group mt-3">
+                    <input type="text" class="form-control shadow-none font-12" :value="dynamicQrData.dynamic_link"
+                      readonly />
+                    <button class="btn bg-secondary text-white shadow-none" @click="copyQR('dynamic')">
+                      <i class="bi bi-copy h-100"></i>
+                    </button>
+                  </div>
+                  <div class="d-flex gap-3 mt-3">
+                    <button v-if="dynamicQrData.dynamic_link" class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR('dynamic')">
+                      <i class="bi bi-download me-2"></i> Download
+                    </button>
+                    <button class="btn CreateQrBtn font-14 w-100 shadow-none" @click="generateDynamicQR">
+                      <i class="bi bi-qr-code-scan me-2"></i>
+                      {{ dynamicQrData.dynamic_link ? 'Update QR Code' : 'Generate QR Code' }}
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -195,27 +260,164 @@ const actions = computed(() => {
 const formName = ref("");
 
 
-// Copy QR ID
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(formName.value.qr_url);
-  toast.success(`Copied QR for ${formName.value.form_name}`, { autoClose: 600 });
+/**
+ * Copy QR URL to clipboard
+ * @param {string} type - 'static' or 'dynamic'
+ */
+const copyQR = (type) => {
+  const url =
+    type === "dynamic" ? dynamicQrData.value.dynamic_link : formName.value.qr_url;
+  navigator.clipboard.writeText(url);
+  toast.success(
+    `Copied ${type === "dynamic" ? "Dynamic" : "Static"} QR for ${formName.value.form_name}`,
+    { autoClose: 600 }
+  );
 };
 
-// downloadQR
-const downloadQR = () => {
-  const canvas = document.querySelector("canvas");
-  const url = canvas.toDataURL("image/png");
+/**
+ * Download QR code image
+ * @param {string} type - 'static' or 'dynamic'
+ */
+// const downloadQR = (type) => {
+//   const canvasSelector = type === "dynamic" ? "#dynamicQR canvas" : "#staticQR canvas";
+//   const canvas = document.querySelector(canvasSelector);
+//   if (!canvas) return;
+
+//   const url = canvas.toDataURL("image/png");
+//   const a = document.createElement("a");
+//   const suffix = type === "dynamic" ? "_dynamic" : "_static";
+//   const fileName = formName.value.form_name
+//     ? `${formName.value.form_name}${suffix}.png`
+//     : `qrcode${suffix}.png`;
+
+//   a.href = url;
+//   a.download = fileName;
+//   a.click();
+// };
+
+
+const downloadQR = (type) => {
+  const canvas = document.querySelector(`#${type}QR canvas`);
+  if (!canvas) return;
+
+  const originalQR = canvas;
+  const qrSize = originalQR.width;
+
+  // Padding and styling
+  const padding = 30;
+  const borderWidth = 6;
+  const topTextHeight = 50; // increased space for top text (form name)
+  const bottomTextHeight = 50; // space for valid date
+  const totalSize = qrSize + padding * 2 + borderWidth * 2 + topTextHeight + bottomTextHeight;
+
+  const newCanvas = document.createElement("canvas");
+  newCanvas.width = totalSize;
+  newCanvas.height = totalSize;
+
+  const ctx = newCanvas.getContext("2d");
+
+  // White background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
+  // Border
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = borderWidth;
+  ctx.strokeRect(
+    borderWidth / 2,
+    borderWidth / 2,
+    newCanvas.width - borderWidth,
+    newCanvas.height - borderWidth
+  );
+
+  // 🏷️ Add form name on top
+  const formLabel = formName.value.form_name || "QR Code";
+  ctx.fillStyle = "#000000";
+  ctx.font = "bold 18px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const topTextY = padding + borderWidth + 20;
+  ctx.fillText(formLabel, newCanvas.width / 2, topTextY);
+
+  // 🧩 Add extra gap between text and QR
+  const spaceBetweenTextAndQR = 20; // 🔹 adjust this for more or less space
+
+  // Draw QR below form name
+  const qrX = (newCanvas.width - qrSize) / 2;
+  const qrY = topTextY + spaceBetweenTextAndQR;
+  ctx.drawImage(originalQR, qrX, qrY, qrSize, qrSize);
+
+  // 🗓️ Add Form Valid To date (for dynamic QR only)
+  if (type === "dynamic" && dynamicQrData.value.form_valid_to) {
+    const validTo = new Date(dynamicQrData.value.form_valid_to);
+    const formattedDate = validTo.toLocaleString();
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "#333333";
+    const dateY = qrY + qrSize + 20;
+    ctx.fillText(`Valid Until: ${formattedDate}`, newCanvas.width / 2, dateY);
+  }
+
+  // ✅ Draw border again for clarity
+  ctx.strokeRect(
+    borderWidth / 2,
+    borderWidth / 2,
+    newCanvas.width - borderWidth,
+    newCanvas.height - borderWidth
+  );
+
+  // 📥 Download
+  const url = newCanvas.toDataURL("image/png");
   const a = document.createElement("a");
-
-  // Use form name or fallback
-  const fileName = formName.value.form_name
-    ? `${formName.value.form_name}.png`
-    : "qrcode.png";
-
   a.href = url;
-  a.download = fileName;
+  a.download = `${formLabel}_${type}_QR.png`;
   a.click();
 };
+
+const dynamicQrData = ref({});
+
+function generateDynamicQR() {
+const fromDate = dynamicQrData.value.form_valid_from;
+  const toDate = dynamicQrData.value.form_valid_to;
+
+  // 🧩 Step 1: Check if both fields are filled
+  if (!fromDate || !toDate) {
+    showInfo("Please fill in both 'From Date & Time' and 'To Date & Time' fields.");
+    return;
+  }
+
+  const from = new Date(fromDate);
+  const to = new Date(toDate);
+
+  // 🕐 Step 2: Validate
+  if (to < from) {
+    const sameDate =
+      from.toDateString() === to.toDateString();
+
+    if (sameDate) {
+      // Same date but time issue
+      showInfo("'To Time' must be later than 'From Time' on the same date.");
+    } else {
+      // Different date issue
+      showInfo("'To Date' must be after 'From Date'.");
+    }
+    return;
+  }
+
+  const dataObj = {
+    "form_name": formName.value.form_short_name,
+    "form_valid_from": dynamicQrData.value.form_valid_from,
+    "form_valid_to": dynamicQrData.value.form_valid_to,
+  };
+
+  axiosInstance.post(apis.generate_dynamic_qr_code, dataObj)
+    .then((response) => {
+      dynamicQrData.value = response.message;
+      showSuccess(dynamicQrData.value.message);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 
 // const showShareOptions = ref(false);
 
@@ -299,11 +501,24 @@ function viewPreview(data, index, type) {
   }
   if (type === "QR Code") {
     formName.value = data;
-    if(formName.value.qr_url && data.as_web_view===1){
+
+    const dataObj = {
+      "form_name": formName.value.form_short_name,
+    };
+
+    axiosInstance.post(apis.fetchDynamicQrData, dataObj)
+      .then((response) => {
+        dynamicQrData.value = response.message;
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+
+    if (formName.value.qr_url && data.as_web_view === 1) {
       const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
       modal.show();
     }
-    else{
+    else {
       toast.info("No QR Code Available", { autoClose: 500 })
     }
 
@@ -334,24 +549,24 @@ function viewPreview(data, index, type) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess) {
-         if(data.form_name === 'VENDOR COMPARISON'){
-            router.push({
-          name: "vendorcomparison",
- 
+        if (data.form_name === 'VENDOR COMPARISON') {
+          router.push({
+            name: "vendorcomparison",
+
           });
 
-        } else{
+        } else {
 
-        router.push({
-          name: "RaiseRequest",
-          query: {
-            routepath: route.path,
-            selectedForm: data.form_short_name,
-            business_unit: data.business_unit,
+          router.push({
+            name: "RaiseRequest",
+            query: {
+              routepath: route.path,
+              selectedForm: data.form_short_name,
+              business_unit: data.business_unit,
 
 
-          },
-        });
+            },
+          });
         }
 
       } else {
@@ -420,23 +635,23 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
-        
+
         router.push({
           name: "RaiseRequest",
           query: {
             routepath: route.path,
             selectedForm: rowData.form_short_name,
             business_unit: rowData.business_unit,
-            has_workflow:rowData.has_workflow
+            has_workflow: rowData.has_workflow
 
 
           },
         });
       } else if (rowData.enable === 0) {
-      showInfo("This form is currently disabled.");
-    } else {
-      showInfo("You do not have permission to access this Form.");
-    }
+        showInfo("This form is currently disabled.");
+      } else {
+        showInfo("You do not have permission to access this Form.");
+      }
     }
     //  else {
     //   console.log("No employee data found in localStorage.");
@@ -678,42 +893,42 @@ const timeout = ref(null);
 
 const fullData = ref([]);
 const filteredData = ref([]);
-const VendorComparison=ref("");
+const VendorComparison = ref("");
 
 function fetchDepartmentDetails() {
   const userDetails = JSON.parse(localStorage.getItem('employeeData'));
 
-const queryParams = {
-  designation: userDetails.designation || "",
-  property: `${newBusinessUnit.value.business_unit}`,
-  fields: JSON.stringify(["accessible_departments","active","business_unit","count",
-    "creation",
-    "docstatus",
-    "enable",
-    "form_category",
-    "form_department",
-    "form_json",
-    "form_name",
-    "form_short_name",
-    "form_status",
-    "has_workflow",
-    "idx",
-    "is_landscape",
-    "is_linked",
-    "is_linked_form",
-    "is_predefined_doctype",
-    "modified",
-    "modified_by",
-    "name",
-    "owner",
-    "owner_of_the_form",
-    "print_format",
-    "series",
-    "workflow_check",
-    "qr_url",
-    "as_web_view",
-  ]),
-};
+  const queryParams = {
+    designation: userDetails.designation || "",
+    property: `${newBusinessUnit.value.business_unit}`,
+    fields: JSON.stringify(["accessible_departments", "active", "business_unit", "count",
+      "creation",
+      "docstatus",
+      "enable",
+      "form_category",
+      "form_department",
+      "form_json",
+      "form_name",
+      "form_short_name",
+      "form_status",
+      "has_workflow",
+      "idx",
+      "is_landscape",
+      "is_linked",
+      "is_linked_form",
+      "is_predefined_doctype",
+      "modified",
+      "modified_by",
+      "name",
+      "owner",
+      "owner_of_the_form",
+      "print_format",
+      "series",
+      "workflow_check",
+      "qr_url",
+      "as_web_view",
+    ]),
+  };
 
   if (props.id && props.id !== "allforms") {
     queryParams.department = props.id;
@@ -723,24 +938,24 @@ const queryParams = {
     .get(apis.GetAccessibleDeptForms, { params: queryParams })
     .then((response) => {
       if (Array.isArray(response.message)) {
-      fullData.value = response.message;
-    } else {
-      fullData.value = [];
-    }
-    filteredData.value = [...fullData.value];
-    totalRecords.value = filteredData.value.length;
-    filterObj.value.limit_start = 0;
-    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
-    
-    if (props.id === "allforms") {
-      const hasVendorComparison = fullData.value.some(
-        (item) => item.form_name === "Vendor Comparison"
-      );
-      VendorComparison.value = hasVendorComparison;
-      sessionStorage.setItem("VendorComparison", hasVendorComparison);
-    }
-    
-  })
+        fullData.value = response.message;
+      } else {
+        fullData.value = [];
+      }
+      filteredData.value = [...fullData.value];
+      totalRecords.value = filteredData.value.length;
+      filterObj.value.limit_start = 0;
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+
+      if (props.id === "allforms") {
+        const hasVendorComparison = fullData.value.some(
+          (item) => item.form_name === "Vendor Comparison"
+        );
+        VendorComparison.value = hasVendorComparison;
+        sessionStorage.setItem("VendorComparison", hasVendorComparison);
+      }
+
+    })
     .catch((error) => {
       console.error(error);
     });
@@ -910,8 +1125,13 @@ function PaginationLimitStart() {
 //     });
 // }
 
+const currentDateTime = ref("");
 
 onMounted(() => {
+   const now = new Date();
+   now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for local timezone
+   currentDateTime.value = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm format
+
   localStorage.removeItem('routepath')
 
   const userData = JSON.parse(localStorage.getItem('employeeData'));
@@ -976,21 +1196,70 @@ onMounted(() => {
   width: 100%;
 }
 
-.download-btn{
+.download-btn {
   padding: 10px;
-  border: 1px dashed #6c757d;
+  border: 1px solid #6c757d;
   display: flex;
   justify-content: center;
   align-items: center;
 
 }
-.download-btn:hover{
-  background-color: #6c757d;
+
+.download-btn:hover {
+  background-color: #343a40;
   color: white;
 }
-.qrCodeDiv{
+
+.qrCodeDiv {
   border: 1px solid black;
   padding: 10px;
   border-radius: 6px;
+}
+
+.CreateQrBtn {
+  background-color: #343a40;
+  color: white;
+}
+
+.CreateQrBtn:hover {
+  border: 1px solid #6c757d;
+  color: black;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  justify-content: center;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  background: transparent;
+  color: #555;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.nav-tabs .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 3px;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-tabs .nav-link.active {
+  color: #007bff;
+}
+
+.nav-tabs .nav-link.active::after {
+  width: 100%;
 }
 </style>

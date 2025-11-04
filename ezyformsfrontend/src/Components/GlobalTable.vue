@@ -155,7 +155,7 @@
                 <div>
                   <span v-tooltip.top="getAssignedToUsers(row, column)">
                     <div>
-                      <span>{{ getAssignedToUsers(row, column) }}</span>
+                      <span>{{ getAssignedToUsers(row, column) }}<span v-if="row.status !== 'Completed'">({{ getTimeDifference(row.modified) }})</span></span>
                     </div>
                   </span>
 
@@ -502,6 +502,24 @@ function getTooltipText(value) {
 }
 
 const allCheck = ref(false);
+
+// Function to calculate difference
+function getTimeDifference(modifiedTime) {
+  const modifiedDate = new Date(modifiedTime)
+  const now = new Date()
+  const diffMs = now - modifiedDate // difference in milliseconds
+
+  const seconds = Math.floor(diffMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
+  return `${seconds} second${seconds !== 1 ? 's' : ''} ago`
+}
+
 // function formatDate(dateString) {
 //   if (!dateString) return "-"; // Handle empty or null values
 
