@@ -20,10 +20,12 @@ def create_qr_for_web_view(form_name):
         "token": action_token
     }).insert(ignore_permissions=True)
 
-    # Build the QR link
+    
     # base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
     # base_url = frappe.utils.get_url()
+    # get the site url
     base_url = get_url()
+    #form_name in link should be in lowercase and spaces replaced with hyphens
     qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
     # Update the Ezy Form Definitions record
