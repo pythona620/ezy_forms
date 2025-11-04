@@ -38,6 +38,7 @@ def create_qr_for_web_view(form_name):
 
 @frappe.whitelist(allow_guest=True)
 def qr_code_to_new_form(token, save_doc=None):
+    
     # Get form_name from QR token
     form_name = frappe.db.get_value("EzyForm QR Code", {"token": token}, "form_name")
     if not form_name:
