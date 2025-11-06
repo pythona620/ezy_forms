@@ -72,18 +72,18 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
         emp_fields = ["signature", "acknowledgement", "company_field"]
         emp_data = frappe.db.get_value("Ezy Employee", {"emp_mail_id": user_id}, emp_fields, as_dict=True)
 
-        bu_fields = ["is_acknowledge","subscription_end_date"]
+        bu_fields = ["is_acknowledge"]
         bu_data = frappe.db.get_value("Ezy Business Unit", emp_data.company_field, bu_fields, as_dict=True)
         
         sys_fields = ["enable_two_factor_auth", "minimum_password_score"]
         sys_data = frappe.db.get_value("System Settings", "System Settings", sys_fields, as_dict=True)
-        
+        subscription_end_date=frappe.get_value("Global Site Settings","Global Site Settings","subscription_end_date")
         # If no updates, return user data
         login_doc = frappe.get_doc("Login Check", {"user_id": user_id}).as_dict()
         login_doc["is_signature"] = 1 if emp_data.signature else 0
         login_doc["login_acknowledge"] = bu_data.is_acknowledge if bu_data else 0
         login_doc["is_acknowledge"] = 1 if emp_data.acknowledgement else 0
-        login_doc["subscription_end_date"] = bu_data.subscription_end_date if bu_data.subscription_end_date else None
+        login_doc["subscription_end_date"] = subscription_end_date if subscription_end_date else None
         login_doc["enable_check"] = 1 if frappe.get_value("User", {"email": user_id}, "enabled") else 0
         login_doc["enable_two_factor_auth"] = sys_data.enable_two_factor_auth
         login_doc['minimum_password_score'] =  sys_data.minimum_password_score
