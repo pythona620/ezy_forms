@@ -95,12 +95,12 @@
                 </span>
               </span>
 
-               <span v-tooltip.top="row[column.td_key]" v-else-if="column.td_key === 'name'">
+               <!-- <span v-tooltip.top="row[column.td_key]" v-else-if="column.td_key === 'name'">
                   <span v-if="isAging && row.status !== 'Completed'" class="badge d-inline-flex align-items-baseline me-1" :class="getBadgeColor(row.modified)">
                     <i class="bi bi-clock-fill font-10 me-1" style="font-weight:bold"></i>{{ getTimeDifference(row.modified) }}
                   </span>
                   <span>{{ row[column.td_key] }}</span>
-              </span>
+              </span> -->
 
               <!-- Condition for Active Column -->
               <span v-else-if="column.td_key === 'active'" :class="{
@@ -162,6 +162,9 @@
                 <div>
                   <span v-tooltip.top="getAssignedToUsers(row, column)">
                     <div>
+                      <span v-if="isAging && row.status !== 'Completed'" class="badge d-inline-flex align-items-baseline me-1" :class="getBadgeColor(row.modified)">
+                        <i class="bi bi-clock-fill font-10 me-1" style="font-weight:bold"></i>{{ getTimeDifference(row.modified) }}
+                      </span>
                       <span>{{ getAssignedToUsers(row, column) }}</span>
                     </div>
                   </span>
@@ -870,7 +873,7 @@ watch(
   background-color: #e1f7da;
 }
 .danger-color{
-  color: rgb(249, 96, 96);
+  color: rgb(240 79 79 / 64%);
   background-color: #ff505020;
 }
 .warning-color{

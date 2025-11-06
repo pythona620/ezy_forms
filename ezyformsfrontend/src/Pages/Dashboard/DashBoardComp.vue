@@ -95,29 +95,34 @@ const remainingDaysCount = ref(0);
 const subscriptionEndDateStr = ref("");
 const showSubscriptionAlert = ref(false);
 const timeout = ref(null);
-
+const BuName=ref("")
 const fullData = ref([]); 
 const filteredData = ref([]);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  // { th: "Form name", td_key: "name" },
-  // { th: "Form category", td_key: "doctype_name" },
-  // { th: "Owner of form", td_key: "owner" },
   { th: "Requester Name", td_key: "requester_name" },
   { th: "Requested On", td_key: "requested_on" },
   { th: "Requester Department", td_key: "department_name" },
-  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
 
 ]);
 
+watch(
+  businessUnit,
+  (newVal) => {
+    newBusinessUnit.value.business_unit = newVal;
+
+    if (newVal.length) {
+       fetchData();
+    }
+  },
+  { immediate: true },
+  BuName.value = localStorage.getItem("Bu")
+);
+
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
-
-  // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-  // { name: 'Download Form', icon: 'fa-solid fa-download' },
-  // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 // Define keys used for legends and chart series
 const keys = ['Approved', 'Pending', 'request_raised', 'Request_cancelled'];
@@ -150,89 +155,72 @@ const chartsData = ref([]);
 // Array to store refs for each dynamically rendered chart container
 const chartRefs = [];
 
-// const router = useRouter();
-
-// API call that fetches the data and processes it
 async function fetchData() {
-    const queryParams = {
-        property : businessUnit.value
-        };
+  const payload = {
+    property: BuName.value
+  };
 
-    try {
-        const response = await axiosInstance.get(`${apis.dashboard}`, { params: queryParams });
-        if (response.message) {
-            // Extract the two datasets from the API response
-            const receivedByUser = response.message.data.received_by_user;
-            const requestedByUser = response.message.data.requested_by_user;
+  try {
+    const response = await axiosInstance.post(`${apis.dashboard}`, payload);
 
-            // Calculate totals for each dataset
-            const receivedTotal =
-                (receivedByUser.Approved || 0) +
-                (receivedByUser.Pending || 0) +
-                (receivedByUser.request_raised || 0) +
-                (receivedByUser.Request_cancelled || 0);
+    if (response?.message?.data) {
 
-            const requestedTotal =
-                (requestedByUser.Approved || 0) +
-                (requestedByUser.Pending || 0) +
-                (requestedByUser.request_raised || 0) +
-                (requestedByUser.Request_cancelled || 0);
+       const filtered = (response.message.data.pick_view_only_reportee || []).filter(
+        item => item.status !== 'Completed' && item.status !== 'Request Cancelled'
+      );
 
- // Build an array for the charts.
-            // Only add the "received" chart if receivedTotal > 0.
-            // const tempCharts = [];
-            // if (receivedTotal > 0) {
-            //     tempCharts.push({
-            //         title: "Requests Assigned to me",
-            //         data: {
-            //             ...receivedByUser,
-            //             total: receivedTotal
-            //         }
-            //     });
-            // }
+      fullData.value = filtered;
+      filteredData.value = [...filtered];
 
-            // // Always add the "requested" chart regardless of requestedTotal value.
-            // tempCharts.push({
-            //     title: "Requests Submitted",
-            //     data: {
-            //         ...requestedByUser,
-            //         total: requestedTotal
-            //     }
-            // });
+      totalRecords.value = filteredData.value.length;
+      limitStart.value = 0;
+      tableData.value = filteredData.value.slice(0, limit.value);
 
-            // chartsData.value = tempCharts;
+      const receivedByUser = response.message.data.received_by_user;
+      const requestedByUser = response.message.data.requested_by_user;
 
-            chartsData.value = [
-                {
-                    title: "Requests Assigned to me",
-                    data: {
-                        request_raised: receivedByUser.request_raised || 0,
-                        Pending: receivedByUser.Pending || 0,
-                        total: (receivedByUser.request_raised || 0) + (receivedByUser.Pending || 0)
-                    }
-                },
-                {
-                    title: "Requests Submitted",
-                    data: {
-                        ...requestedByUser,
-                        total: requestedTotal
-                    }
+        // Calculate totals for each dataset
+        const receivedTotal =
+            (receivedByUser.Approved || 0) +
+            (receivedByUser.Pending || 0) +
+            (receivedByUser.request_raised || 0) +
+            (receivedByUser.Request_cancelled || 0);
+
+        const requestedTotal =
+            (requestedByUser.Approved || 0) +
+            (requestedByUser.Pending || 0) +
+            (requestedByUser.request_raised || 0) +
+            (requestedByUser.Request_cancelled || 0);
+
+        chartsData.value = [
+            {
+                title: "Requests Assigned to me",
+                data: {
+                    request_raised: receivedByUser.request_raised || 0,
+                    Pending: receivedByUser.Pending || 0,
+                    total: (receivedByUser.request_raised || 0) + (receivedByUser.Pending || 0)
                 }
-            ];
+            },
+            {
+                title: "Requests Submitted",
+                data: {
+                    ...requestedByUser,
+                    total: requestedTotal
+                }
+            }
+        ];
 
 
-
-            // Wait for the DOM to update so refs are populated, then initialize charts
-            await nextTick();
-            updateCharts();
-        }
-    } catch (error) {
-        console.error("Error fetching data:", error);
+      await nextTick();
+      updateCharts();
     }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 }
 // Google Charts loader
 onMounted(() => {
-    fetchData()
+    // fetchData()
     subEndDate.value = (localStorage.getItem("subEndDate"));
     if (subEndDate.value) {
     const today = new Date();
@@ -249,36 +237,29 @@ onMounted(() => {
     }
   }
 
-    // Load Google Charts script
-    // const script = document.createElement('script')
-    // script.src = 'https://www.gstatic.com/charts/loader.js'
-    // script.onload = () => {
-    //     google.charts.load('current', { packages: ['corechart'] })
-    //     google.charts.setOnLoadCallback(drawDonutChart)
-    // }
-    // document.head.appendChild(script)
 })
 const viewlist = ref([])
-function ViewOnlyReport() {
-  axiosInstance
-    .post(apis.view_only_reportee)
-    .then((response) => {
-      // Filter out items with status 'Completed' or 'Request Cancelled'
-      const filtered = (response.message || []).filter(
-        item => item.status !== 'Completed' && item.status !== 'Request Cancelled'
-      );
 
-      fullData.value = filtered;
-      filteredData.value = [...filtered];
+// function ViewOnlyReport() {
+//   axiosInstance
+//     .post(apis.view_only_reportee)
+//     .then((response) => {
+//       // Filter out items with status 'Completed' or 'Request Cancelled'
+//       const filtered = (response.message || []).filter(
+//         item => item.status !== 'Completed' && item.status !== 'Request Cancelled'
+//       );
 
-      totalRecords.value = filteredData.value.length;
-      limitStart.value = 0;
-      tableData.value = filteredData.value.slice(0, limit.value);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-}
+//       fullData.value = filtered;
+//       filteredData.value = [...filtered];
+
+//       totalRecords.value = filteredData.value.length;
+//       limitStart.value = 0;
+//       tableData.value = filteredData.value.slice(0, limit.value);
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//     });
+// }
 
 const limit = ref(20);
 const limitStart = ref(0);
@@ -325,21 +306,6 @@ function PaginationLimitStart() {
   tableData.value = [...tableData.value, ...nextBatch];
 }
 
-
-
-
-
-watch(
-  businessUnit,
-  (newVal) => {
-    newBusinessUnit.value.business_unit = newVal;
-
-    if (newVal.length) {
-      ViewOnlyReport();
-    }
-  },
-  { immediate: true }
-);
 function viewPreview(data) {
   // console.log(data);
   router.push({
