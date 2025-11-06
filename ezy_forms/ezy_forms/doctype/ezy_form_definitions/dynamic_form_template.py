@@ -1514,7 +1514,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 html_view_ = get_html_file_data(form_short_name, name, print_format)
                 html_view = html_view_['html']
             else:
-                json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+                json_object = frappe.db.get_value("WF Workflow Requests", name, "json_columns")
                 json_object = literal_eval(json_object)["fields"]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
                 data_list = {}
