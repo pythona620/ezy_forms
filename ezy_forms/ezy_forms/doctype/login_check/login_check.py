@@ -13,36 +13,38 @@ class LoginCheck(Document):
 def after_insert_user(self, method=None):
     try:
         if not frappe.db.exists("Login Check", {"user_id": self.emp_mail_id}):
-            existing_user = frappe.db.get_value("Login Check",{"user_id": self.emp_mail_id},["user_id"])
+            new_doc = frappe.new_doc("Login Check")
+            new_doc.user_id = self.emp_mail_id
+            new_doc.insert(ignore_permissions=True)
+            frappe.db.commit()
+            employee_update_notification(emp_mail=self.emp_mail_id)
             
-            if not existing_user:
-                new_doc = frappe.new_doc("Login Check")
-                new_doc.user_id = self.emp_mail_id
-                new_doc.insert(ignore_permissions=True)
-                frappe.db.commit()
-                employee_update_notification(emp_mail=self.emp_mail_id)
-                
- 
     except Exception as e:
         frappe.log_error(f"Error in after_insert_user for {self.emp_mail_id}: {str(e)}")
         
 @frappe.whitelist(allow_guest=True)
-def update_is_first_value(user_id_name,company=None):
+def update_is_first_value(user_id_name, company=None):
     try:
- 
-        get_doc = frappe.get_doc("Login Check",{"name":user_id_name})
-        get_doc.is_first_login  = 1
-        get_doc.save(ignore_permissions=True)
-        frappe.db.commit()
- 
-        return get_doc
+        # Check if user exists
+        login_doc = frappe.db.get_value("Login Check", {"name":user_id_name}, ["name", "is_first_login"], as_dict=True)
+        if not login_doc:
+            return "User does not exist"
+
+        # Update only if not already set
+        if login_doc.is_first_login == 0:
+            frappe.db.set_value("Login Check", login_doc.name, "is_first_login", 1)
+        return "User Update "
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "update_is_first_value error")
+        return {"status": "error", "message": str(e)}
+
     
     except Exception as e:
         frappe.log_error(f"Error In User Not exit for :", {str(e)})  
         
-             
         
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True,methods=["GET","POST"])
 def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None):
     if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user_id}):
         return "User does not exist"
@@ -55,8 +57,10 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
             response["signature_updated"] = True
 
         if acknowledgement:
-            frappe.db.set_value("Ezy Employee", user_id, "acknowledgement", acknowledgement)
-            frappe.db.set_value("Ezy Employee", user_id, "acknowledge_on", now_datetime())
+            frappe.db.set_value("Ezy Employee", user_id, {
+                "acknowledgement": acknowledgement,
+                "acknowledge_on": now_datetime()
+            })
             response["acknowledgement_updated"] = True
 
         # Commit only if any update has happened
@@ -64,16 +68,25 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
             frappe.db.commit()
             response["success"] = True
             return response
+        
+        emp_fields = ["signature", "acknowledgement", "company_field"]
+        emp_data = frappe.db.get_value("Ezy Employee", {"emp_mail_id": user_id}, emp_fields, as_dict=True)
 
+        bu_fields = ["is_acknowledge","subscription_end_date"]
+        bu_data = frappe.db.get_value("Ezy Business Unit", emp_data.company_field, bu_fields, as_dict=True)
+        
+        sys_fields = ["enable_two_factor_auth", "minimum_password_score"]
+        sys_data = frappe.db.get_value("System Settings", "System Settings", sys_fields, as_dict=True)
+        
         # If no updates, return user data
         login_doc = frappe.get_doc("Login Check", {"user_id": user_id}).as_dict()
-        login_doc["is_signature"] = 1 if frappe.get_value("Ezy Employee", user_id, "signature") else 0
-        login_doc["login_acknowledge"] = frappe.get_value("Ezy Business Unit",frappe.get_value("Ezy Employee", user_id, "company_field"),"is_acknowledge")
-        login_doc["is_acknowledge"] = 1 if frappe.get_value("Ezy Employee", user_id, "acknowledgement") else 0
-        login_doc["subscription_end_date"] = frappe.get_value("Global Site Settings","Global Site Settings","subscription_end_date")
+        login_doc["is_signature"] = 1 if emp_data.signature else 0
+        login_doc["login_acknowledge"] = bu_data.is_acknowledge if bu_data else 0
+        login_doc["is_acknowledge"] = 1 if emp_data.acknowledgement else 0
+        login_doc["subscription_end_date"] = bu_data.subscription_end_date if bu_data.subscription_end_date else None
         login_doc["enable_check"] = 1 if frappe.get_value("User", {"email": user_id}, "enabled") else 0
-        login_doc["enable_two_factor_auth"] = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
-        login_doc['minimum_password_score'] = frappe.db.get_value("System Settings", "System Settings", "minimum_password_score")
+        login_doc["enable_two_factor_auth"] = sys_data.enable_two_factor_auth
+        login_doc['minimum_password_score'] =  sys_data.minimum_password_score
         return login_doc
 
     except Exception as e:
@@ -82,19 +95,15 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
 
          
          
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True,methods=["PUT"])
 def update_password(user_id,new_password,company=None):
     try:
- 
         get_doc = frappe.get_doc("User",{"name":user_id})
         get_doc.new_password  = new_password
         get_doc.save(ignore_permissions=True)
         frappe.db.commit()
- 
-        return get_doc
-    
+        return "Password Updated Successfully"
     except Exception as e:
         frappe.log_error(f"Error In User Not exit for :", {str(e)})  
-        
-        
+
 

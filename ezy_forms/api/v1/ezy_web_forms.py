@@ -1,46 +1,67 @@
 import frappe
-from frappe.model.document import Document
 from frappe.utils import get_url
-from frappe.utils.file_manager import save_file
 from io import BytesIO
 import json
 import uuid
 import random
 import string
-from frappe.utils import add_to_date
+from frappe.utils import add_to_date,get_datetime, now_datetime
+from ezy_forms.api.v1.send_an_email import sending_mail_api  
 
+
+# Create QR code for web view
 def create_qr_for_web_view(form_name):
-    # Generate a unique token
     action_token = str(uuid.uuid4())
 
-    # Create and insert QR record
-    frappe.get_doc({
-        "doctype": "EzyForm QR Code",
-        "form_name": form_name,
-        "token": action_token
-    }).insert(ignore_permissions=True)
+    exited_qr = frappe.db.get_list("EzyForm QR Code", {"form_name": form_name}, ["name"])
+    if not exited_qr:
+        # Create a new QR code entry
+        frappe.get_doc({
+            "doctype": "EzyForm QR Code",
+            "form_name": form_name,
+            "token": action_token
+        }).insert(ignore_permissions=True)
+        frappe.db.commit()
 
-    # Build the QR link
-    # base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
-    # base_url = frappe.utils.get_url()
-    base_url = get_url()
-    qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
+        # get the site url
+        base_url = get_url()
+        #form_name in link should be in lowercase and spaces replaced with hyphens
+        qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
-    # Update the Ezy Form Definitions record
-    frappe.db.set_value("Ezy Form Definitions", {"name": form_name}, "qr_url", qr_link)
-    frappe.db.commit()
+        # Update the Ezy Form Definitions record
+        frappe.db.set_value("Ezy Form Definitions", {"name": form_name}, "qr_url", qr_link)
+        frappe.db.commit()
+    
+
 
 @frappe.whitelist(allow_guest=True)
 def qr_code_to_new_form(token, save_doc=None):
     # Get form_name from QR token
-    form_name = frappe.db.get_value("EzyForm QR Code", {"token": token}, "form_name")
-    if not form_name:
+    form_data = frappe.db.get_list("EzyForm QR Code", {"token": token}, ["form_name", "form_valid_from", "form_valid_to"])
+    if not form_data:
         frappe.throw("Invalid token")
- 
+        
+    form_name = form_data[0].form_name
+    form_valid_from = form_data[0].form_valid_from
+    form_valid_to = form_data[0].form_valid_to
+
+    now = now_datetime()  # Current date + time (as datetime)
+    form_from = get_datetime(form_valid_from) if form_valid_from else None
+    form_to = get_datetime(form_valid_to) if form_valid_to else None
+
+    # Check not yet active
+    if form_from and form_from > now:
+        frappe.throw(f"This form will be available from {form_from}.")
+
+    # Check expired
+    if form_to and form_to < now:
+        frappe.throw("This form is no longer available (expired).")
+
     # Get form definition details
     data = frappe.get_doc("Ezy Form Definitions", {"name": form_name}).as_dict()
     if data.get("enable") == 0:
-        frappe.throw("This form is disabled. Please contact administrator.")
+        frappe.throw("This Form is Disabled. Please Contact Administrator.")
+
     # Case 1: If save_doc is NOT provided → return form definition only
     if not save_doc:
         return {
@@ -128,6 +149,9 @@ def qr_code_to_new_form(token, save_doc=None):
     frappe.db.commit()
     new_activate_log.reload()
     
+    sending_mail_api(request_id=new_wf_work_flow_requests.name, doctype_name=doctype_name,Qr_form_mali_id=data.get("mail_id"),property= data.get("business_unit"),cluster=None,timestamp=None,reason= reason,skip_user_role= None,user=None,field_changes=None,current_level=None,current_status = "Request Raised Via QR Code" )
+
+    
     
     
     if data.get("public_form_response"):
@@ -137,5 +161,124 @@ def qr_code_to_new_form(token, save_doc=None):
 
     return {
         "message": message_response,
-        "docname": new_doc
     }
+    
+    
+@frappe.whitelist()
+def get_dynamic_Qr_data(form_name, form_valid_from=None, form_valid_to=None):
+    from frappe.utils import now_datetime, get_datetime
+
+    # Get existing active dynamic QR for the form
+    existing_data_for_qr = frappe.db.get_list(
+        "EzyForm QR Code",
+        filters={
+            "form_name": form_name,
+            "is_dynamic_qr": 1,
+            "token_status": "Active"
+        },
+        fields=["name","form_valid_from", "form_valid_to", "dynamic_link", "token_status"]
+    )
+
+    now = now_datetime()
+
+    # If no existing QR found
+    if not existing_data_for_qr:
+        return {"message": "No active dynamic QR link found. Please create a new one."}
+
+    qr_data = existing_data_for_qr[0]
+
+    # Convert to datetime for comparison
+    form_from = get_datetime(qr_data["form_valid_from"]) if qr_data["form_valid_from"] else None
+    form_to = get_datetime(qr_data["form_valid_to"]) if qr_data["form_valid_to"] else None
+
+    # Check validity period
+    if form_from and form_from > now:
+        return {
+            "message": "QR link is not yet active.",
+            "dynamic_link": qr_data["dynamic_link"],
+            "token_status": qr_data["token_status"],
+            "form_valid_from": qr_data["form_valid_from"],
+            "form_valid_to": qr_data["form_valid_to"]
+        }
+
+    if form_to and form_to < now:
+        frappe.db.set_value(
+            "EzyForm QR Code",
+            qr_data["name"],
+            {
+                "is_dynamic_qr": 0,
+                "token_status": "Inactive"
+            }
+        )
+        frappe.db.commit()
+        return {"message": "QR link has expired. Please create a new one."}
+
+    # If valid (active)
+    return {
+        "message": "Active QR link found.",
+        "dynamic_link": qr_data["dynamic_link"],
+        "token_status": qr_data["token_status"],
+        "form_valid_from": qr_data["form_valid_from"],
+        "form_valid_to": qr_data["form_valid_to"]
+    }
+
+
+@frappe.whitelist()
+def create_dynamic_qr_link(form_name, form_valid_from=None, form_valid_to=None, status=None):
+    import uuid
+    from frappe.utils import get_url
+
+    existing_data_for_qr = frappe.db.get_list(
+        "EzyForm QR Code",
+        filters={
+            "form_name": form_name,
+            "is_dynamic_qr": 1,
+            "token_status": "Active"
+        },
+        fields=["name", "form_valid_from", "form_valid_to", "dynamic_link", "is_dynamic_qr", "token_status"]
+    )
+
+    if existing_data_for_qr:
+        # Update existing QR
+        frappe.db.set_value(
+            "EzyForm QR Code",
+            existing_data_for_qr[0]["name"],
+            {
+                "form_valid_from": form_valid_from,
+                "form_valid_to": form_valid_to
+            }
+        )
+        frappe.db.commit()
+
+        return {
+            "message": "Dynamic QR Code updated successfully.",
+            "dynamic_link": existing_data_for_qr[0]["dynamic_link"],
+            "form_valid_from": form_valid_from,
+            "form_valid_to": form_valid_to
+        }
+
+    else:
+        # Create new QR
+        action_token = str(uuid.uuid4())
+        base_url = get_url()
+        qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
+
+        qr_doc = frappe.get_doc({
+            "doctype": "EzyForm QR Code",
+            "form_name": form_name,
+            "token": action_token,
+            "form_valid_from": form_valid_from,
+            "form_valid_to": form_valid_to,
+            "is_dynamic_qr": 1,
+            "token_status": "Active",
+            "dynamic_link": qr_link
+        })
+        qr_doc.insert(ignore_permissions=True)
+
+        return {
+            "message": "Dynamic QR Code created successfully.",
+            "dynamic_link": qr_link,
+            "token_status": "Active",
+            "form_valid_from": form_valid_from,
+            "form_valid_to": form_valid_to
+        }

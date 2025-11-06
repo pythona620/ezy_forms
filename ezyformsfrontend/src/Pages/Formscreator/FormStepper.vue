@@ -3,10 +3,13 @@
     <div class="">
       <div class="">
         <div class="d-flex justify-content-between align-items-center CancelNdSave">
-          <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
+           <div class="d-flex align-items-center">
+            <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
             <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
             </button>
+          </div>
+          <span v-if="$route.query.id || $route.query.preId" class="font-16">({{ selectedData.formId || route.query.form_name }})</span>
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
@@ -79,7 +82,7 @@
             <span v-if="route.query.preId" class=" font-12 position-absolute PredefinedLabel">Predefined
               <i class="bi bi-check2-circle"></i></span>
                 <FormFields
-                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+                  :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                   id="formName" validationStar="true" placeholder="Untitled Form"
                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -91,7 +94,7 @@
       <!-- Form Short Code -->
       <div class="col-md-6">
         <FormFields
-          :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
           labeltext="Form Short Code"
           class="formHeight"
           type="text"
@@ -109,7 +112,7 @@
       <!-- Form Naming Series -->
       <div class="col-md-6">
         <FormFields
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           labeltext="Form Naming series"
           class="formHeight"
           type="text"
@@ -128,7 +131,7 @@
           <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span>
         </label>
         <Multiselect
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           @open="deptData"
           :options="OwnerOfTheFormData"
           @change="OwnerOftheForm"
@@ -147,7 +150,7 @@
           <span v-if="!filterObj.form_category" class="text-danger">*</span>
         </label>
         <Multiselect
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           :options="departments"
           v-model="filterObj.form_category"
           placeholder="Select Category"
@@ -206,18 +209,6 @@
           openDirection="top"
         />
         <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
-
-        <FormFields
-          v-if="filterObj.as_web_view===1"
-          labeltext="Form Submit Response"
-          class="formHeight mt-2"
-          type="text"
-          tag="input"
-          name="Value"
-          id="formNameSeries"
-          placeholder="Form Submit Response"
-          v-model="filterObj.public_form_response"
-        />
       </div>
 
       <!-- Has Workflow -->
@@ -233,9 +224,48 @@
         />
       </div>
 
+      <!-- Form Submit Response -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+      <label>Form Submit Response <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+      <FormFields
+        class="formHeight mt-2"
+        type="text"
+        tag="input"
+        name="Value"
+        id="formNameSeries"
+        placeholder="Form Submit Response"
+        v-model="filterObj.public_form_response"
+        />
+      </div>
+ 
+      <!-- Form Submit Send Mail -->
+      <div class="col-md-6" v-if="filterObj.as_web_view===1">
+        <label>Submit Notification Email <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+            <FormFields
+              class="formHeight mt-2"
+              type="text"
+              tag="input"
+              name="Value"
+              id="formNameSeries"
+              placeholder="Form Submit mail"
+              v-model="filterObj.mail_id"
+            />
+        <small class="text-muted font-12 ms-2">Note : If multiple Emails, separate with commas (,).</small>
+        <!-- <Multiselect
+          @open="EmployeeData"
+          :options="EmpMailsList"
+          v-model="filterObj.mail_id"
+          placeholder="Select Mail Id"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+          openDirection="top"
+          /> -->
+      </div>
+
       <!-- Linked Checkbox and Linked Form -->
-      <div class="col-md-6">
-        <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
+      <div class="col-md-6" v-if="route.query.preId">
+        <div class="form-check d-flex align-items-center p-0 pe-3">
           <input
             class="form-check-input linketoCheck p-1"
             :disabled="filterObj.is_predefined_doctype == 1"
@@ -1514,66 +1544,78 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
-        <div class="px-3 listofdesignations">
-          <div class="my-1 d-flex justify-content-between">
-            <span class="font-12 fw-bold">Select {{  selectedBlockIndex === 0 ? 'Requestors': ' Approvers' }} </span>
-            <span class="italic-style text-secondary font-12">{{ designationValue.length }} Selected </span>
-          </div>
-          <div  ref="resizableDiv" class=" my-1 disgnationlist_div" v-if="DesignationList.length">
-              <div  class="d-flex align-items-center justify-content-between gap-1">
-                
-                <!-- Select All -->
-                <div class="form-check ps-1 d-flex align-items-center m-0">
-                  <input
+         <div class="px-3 listofdesignations">
+    <div class="my-1 d-flex justify-content-between">
+      <span class="font-12 fw-bold">
+        Select {{ selectedBlockIndex === 0 ? "Requestors" : "Approvers" }}
+      </span>
+      <span class="italic-style text-secondary font-12">
+        {{ designationValue.length }} Selected
+      </span>
+    </div>
+
+    <div ref="resizableDiv" class="my-1 disgnationlist_div" v-if="DesignationList.length">
+      <div class="d-flex align-items-center justify-content-between gap-1">
+        <!-- ✅ Select All -->
+        <div class="form-check ps-1 d-flex align-items-center m-0">
+          <input
             type="checkbox"
             id="selectAll"
-            
             :checked="isAllSelected"
             @change="toggleSelectAll"
             class="form-check-input me-2 designationCheckBox"
           />
-          <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">
+          <label
+            for="selectAll"
+            class="form-check-label SelectallDesignation mt-2 fw-bold"
+          >
             Select all designation ({{ filteredDesignationList.length }})
           </label>
-                </div>
-
-                <!-- Show HODs -->
-                <div v-if="selectedBlockIndex !== 0 " class="form-check d-flex align-items-center m-0">
-                  <input
-                    type="checkbox"
-                    id="showHods"
-                    v-model="showHods"
-                    class="form-check-input me-2 designationCheckBox"
-                  />
-                  <label for="showHods" class="form-check-label  mt-2 fw-bold">Show HODs Only</label>
-                </div>
-                <div><button type="button" class="btn btn-sm font-12  text-danger" @click="clearall_designations"> <i class="bi bi-x" ></i>Clear all</button></div>
-
-
-
-              </div>
-              <!-- {{ designationValue }}
-              {{filteredDesignationList}} -->
-            <Vue3Select v-if="DesignationList.length" :multiple="true" v-model="designationValue" 
-            :options="filteredDesignationList" :close-on-select="false" :clear-search-on-select="true"
-             placeholder="Search & Select Designations" label="label"  />
-            </div>
-
-
-          <!-- <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
-            <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
-              <input type="checkbox" :id="`SelectedDisignation_${index}`" v-model="designationValue" :value="item"
-                class="designationCheckBox  form-check-input mt-0" @change="handleSingleSelect" />
-              <label :for="`SelectedDisignation_${index}`" class="ps-2">{{ item }}</label>
-
-            </li>
-          </ul>  -->
-          <div v-else>
-            <div class="d-flex justify-content-center">
-              <span>No Designations Found</span>
-            </div>
-          </div>
         </div>
+
+        <!-- ✅ Show HODs -->
+        <div v-if="selectedBlockIndex !== 0" class="form-check d-flex align-items-center m-0">
+          <input
+            type="checkbox"
+            id="showHods"
+            v-model="showHods"
+            class="form-check-input me-2 designationCheckBox"
+          />
+          <label for="showHods" class="form-check-label mt-2 fw-bold">
+            Show HODs Only
+          </label>
+        </div>
+
+        <!-- ✅ Clear All -->
+        <div>
+          <button v-if="designationValue.length"
+            type="button"
+            class="btn btn-sm font-12 text-danger"
+            @click="clearall_designations"
+          >
+            <i class="bi bi-x"></i> Clear all
+          </button>
+        </div>
+      </div>
+
+      <!-- ✅ Multi-select -->
+      <Vue3Select
+        v-if="DesignationList.length"
+        :multiple="true"
+        v-model="designationValue"
+        :options="filteredDesignationList"
+        :close-on-select="false"
+        :clear-search-on-select="true"
+        placeholder="Search & Select Designations"
+      />
+    </div>
+
+    <div v-else>
+      <div class="d-flex justify-content-center">
+        <span>No Designations Found</span>
+      </div>
+    </div>
+  </div>
          <div v-if="selectedBlockIndex !== 0 " class="p-3">
               <div>
                 <label for="" class="fw-bold font-12 ">On Rejection</label>
@@ -1613,8 +1655,13 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
+          
+          
+          <div>
+
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
             :name="selectedBlockIndex === 0 ? 'Add Requestor':'Add Approvers'" />
+        </div>
         </div>
       </div>
     </div>
@@ -1733,6 +1780,14 @@ const formNameModel = computed({
   }
 });
 
+// const mailInput = ref("");
+// function updateMailArray() {
+//   // Split input by commas, trim spaces, and remove empty entries
+//   filterObj.value.mail_id = mailInput.value
+//     .split(",")
+//     .map(email => email.trim())
+//     .filter(email => email);
+// }
 
 const filterObj = ref({
   form_name: "",
@@ -1748,6 +1803,7 @@ const filterObj = ref({
   is_linked_form: "",
   is_predefined_doctype: route.query.id ? 1 : 0,
   as_web_view: 0,
+  mail_id: "",
 
 
 });
@@ -2227,24 +2283,24 @@ const lowerApproverLevels = computed(() => {
 // };
 
 
-const filteredDesignationList = computed(() => {
-  let list = DesignationList.value;
+// const filteredDesignationList = computed(() => {
+//   let list = DesignationList.value;
 
-  if (showHods.value) {
-    list = list.filter(item => item.is_hod === 1);
-  }
+//   if (showHods.value) {
+//     list = list.filter(item => item.is_hod === 1);
+//   }
 
-  if (searchDesignation.value?.trim()) {
-    list = list.filter(item =>
-      item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
-    );
-  }
+//   if (searchDesignation.value?.trim()) {
+//     list = list.filter(item =>
+//       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+//     );
+//   }
 
-  // Remove already selected items for display only
-  list = list.filter(item => !designationValue.value.includes(item.role));
+//   // Remove already selected items for display only
+//   list = list.filter(item => !designationValue.value.includes(item.role));
 
-  return list.map(item => item.role);
-});
+//   return list.map(item => item.role);
+// });
 
 
 // const filteredDesignationList = computed(() => {
@@ -2344,15 +2400,20 @@ const Predata = ref([
 
   }
 ]);
+const isDuplicate=ref("");
+
 onMounted(() => {
   deptData();
-  paramId.value = route.params.paramid || "new";
-  // console.log(paramId.value, "ggggg");
+  isDuplicate.value=route.query.Clone
+  paramId.value = route.query.id || "new";
+
+  if (isDuplicate.value === '1') {
+    filterObj.value.series = '';
+  }
 
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
     OwnerOftheForm();
-    // console.log(paramId.value, "[[[]]]");
   }
   sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
@@ -2367,7 +2428,6 @@ onMounted(() => {
 
       const formData = Predata.value[0];
 
-      // console.log(typeof formJsonFromStorage); // Should log: 'string'
 
       // Parse and rebuild the structured array from form fields
       const parsedJson = JSON.parse(formData.form_json);
@@ -2710,7 +2770,6 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block  ? table.as_a_block : 'false',
   };
 
-  // console.log(data); 
   // // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // // table.newTable = false
 
@@ -2854,7 +2913,6 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 
 //   const section = blockArr[blockIndex].sections[sectionIndex];
 //   const table = section.afterCreated.find((t) => t.tableName === tableName);
-//   // console.log('table', table)
 //   if (!table) return;
 
 //   if (editMode[tableName]) {
@@ -3271,45 +3329,177 @@ const handleRemove = (option) => {
     filterObj.value.accessible_departments = [];
   }
 };
-const isAllSelected = computed(() => {
-  return designationValue.value.length === DesignationList.value.length;
-});
-// Toggle Select All
-// Toggle Select All
-function toggleSelectAll(event) {
-  if (event.target.checked) {
-    // Select all items currently visible in the filtered dropdown
-    const itemsToSelect = DesignationList.value
-      .filter(item => {
-        // Respect HOD filter
-        if (showHods.value && item.is_hod !== 1) return false;
+const selectAllChecked = ref(false); // select-all checkbox state
 
-        // Respect search filter
-        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
-          return false;
-        }
+// ✅ Computed filtered list
+// ✅ Filtered list (based on HODs + search)
+// const filteredDesignationList = computed(() => {
+//   let list = [...DesignationList.value]; // copy original list
 
-        return true;
-      })
-      .map(item => item.role);
+//   // ✅ Apply HOD filter
+//   if (showHods.value) list = list.filter(item => item.is_hod === 1);
 
-    designationValue.value = itemsToSelect;
-  } else {
-    // Unselect all visible items
-    const itemsToRemove = DesignationList.value
-      .filter(item => {
-        if (showHods.value && item.is_hod !== 1) return false;
-        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
-          return false;
-        }
-        return true;
-      })
-      .map(item => item.role);
+//   // ✅ Apply search filter
+//   if (searchDesignation.value?.trim()) {
+//     const search = searchDesignation.value.toLowerCase();
+//     list = list.filter(item => item.role.toLowerCase().includes(search));
+//   }
 
-    // Remove only the visible items from the selection
-    designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
+//   // ✅ Sort: move already selected items to the end
+//   list = list.sort((a, b) => {
+//     const aSelected = designationValue.value.includes(a.role);
+//     const bSelected = designationValue.value.includes(b.role);
+
+//     if (aSelected === bSelected) return 0;
+//     return aSelected ? 1 : -1; // selected items go last
+//   });
+
+//   // ✅ Map to string for Vue3Select
+//   return list.map(item => item.role);
+// });
+const filteredDesignationList = computed(() => {
+  let list = [...DesignationList.value];
+
+  // ✅ 1. Apply HOD filter
+  if (showHods.value) list = list.filter(item => item.is_hod === 1);
+
+  // ✅ 2. Apply search filter
+  if (searchDesignation.value?.trim()) {
+    const search = searchDesignation.value.toLowerCase();
+    list = list.filter(item => item.role.toLowerCase().includes(search));
   }
+
+  // ✅ 3. Sort alphabetically (A → Z)
+  list.sort((a, b) => a.role.localeCompare(b.role));
+
+  // ✅ 4. Move selected items to bottom
+  list.sort((a, b) => {
+    const aSelected = designationValue.value.includes(a.role);
+    const bSelected = designationValue.value.includes(b.role);
+    if (aSelected === bSelected) return 0;
+    return aSelected ? 1 : -1;
+  });
+
+  // ✅ 5. Return only role names for dropdown
+  return list.map(item => item.role);
+});
+
+
+
+// ✅ Computed to determine if all visible ones are selected
+const isAllSelected = computed(() => {
+  const visible = filteredDesignationList.value
+  return (
+    visible.length > 0 &&
+    visible.every(role => designationValue.value.includes(role))
+  )
+})
+
+// ✅ Watch to keep select-all checkbox synced
+watch(
+  [designationValue, filteredDesignationList],
+  () => {
+    const visible = filteredDesignationList.value
+    selectAllChecked.value =
+      visible.length > 0 &&
+      visible.every(role => designationValue.value.includes(role))
+  },
+  { immediate: true, deep: true }
+)
+function toggleSelectAll(event) {
+  const checked = event.target.checked;
+
+  // Only consider visible roles for this filter
+  const visibleRoles = DesignationList.value
+    .filter(item => {
+      if (showHods.value && item.is_hod !== 1) return false;
+      if (searchDesignation.value?.trim() &&
+          !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+      ) return false;
+      return true;
+    })
+    .map(item => item.role);
+
+  if (checked) {
+    // Add visible roles only
+    designationValue.value = Array.from(
+      new Set([...designationValue.value, ...visibleRoles])
+    );
+  } else {
+    // Remove only visible roles
+    designationValue.value = designationValue.value.filter(
+      r => !visibleRoles.includes(r)
+    );
+  }
+
+  selectAllChecked.value = checked;
 }
+
+// ✅ Select / Unselect all
+// function toggleSelectAll(event) {
+//   const checked = event.target.checked
+//   const visibleRoles = filteredDesignationList.value
+
+//   if (checked) {
+//     // Add visible items to selected list
+//     designationValue.value = Array.from(
+//       new Set([...designationValue.value, ...visibleRoles])
+//     )
+//   } else {
+//     // Remove only visible ones
+//     designationValue.value = designationValue.value.filter(
+//       r => !visibleRoles.includes(r)
+//     )
+//   }
+
+//   selectAllChecked.value = checked
+// }
+
+// ✅ Clear all selections
+function clearall_designations() {
+  designationValue.value = []
+  selectAllChecked.value = false
+  showHods.value = false
+}
+// const isAllSelected = computed(() => {
+//   return designationValue.value.length === DesignationList.value.length;
+// });
+// // Toggle Select All
+// // Toggle Select All
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     // Select all items currently visible in the filtered dropdown
+//     const itemsToSelect = DesignationList.value
+//       .filter(item => {
+//         // Respect HOD filter
+//         if (showHods.value && item.is_hod !== 1) return false;
+
+//         // Respect search filter
+//         if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+//           return false;
+//         }
+
+//         return true;
+//       })
+//       .map(item => item.role);
+
+//     designationValue.value = itemsToSelect;
+//   } else {
+//     // Unselect all visible items
+//     const itemsToRemove = DesignationList.value
+//       .filter(item => {
+//         if (showHods.value && item.is_hod !== 1) return false;
+//         if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+//           return false;
+//         }
+//         return true;
+//       })
+//       .map(item => item.role);
+
+//     // Remove only the visible items from the selection
+//     designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
+//   }
+// }
 
 
 
@@ -3324,9 +3514,9 @@ function toggleSelectAll(event) {
 //     designationValue.value = [];
 //   }
 // }
-function clearall_designations(){
-  designationValue.value = []
-}
+// function clearall_designations(){
+//   designationValue.value = []
+// }
 // ✅ Toggle select all
 // function toggleSelectAll(event) {
 //   if (event.target.checked) {
@@ -3456,6 +3646,7 @@ function initializeDesignationValue(blockIndex) {
 
 
 const AddDesignCanvas = (idx) => {
+  showHods.value = false;
   searchDesignation.value = ''
   selectedApproverType.value = ''; 
   // ViewOnlyReportee.value = false;
@@ -3613,11 +3804,11 @@ function getFormData() {
     .then((res) => {
       let res_data = res?.message.data;
       if (res_data) {
-        router.push({
-          query: {
-            id: res_data.name
-          }
-        })
+        // router.push({
+        //   query: {
+        //     id: res_data.name,
+        //   }
+        // })
         if (res_data.accessible_departments) {
           res_data.accessible_departments = res_data.accessible_departments.split(",");
         }
@@ -3713,6 +3904,29 @@ function deptData() {
       console.error("Error fetching department data:", error);
     });
 }
+
+const EmpMailsList=ref("")
+ 
+function EmployeeData() {
+  const queryParams = {
+    fields: JSON.stringify(["name"]),
+    limit_page_length: "none",
+    filters: JSON.stringify([["company_field", "=", `${selectedData.value.business_unit || route.query.business_unit}`],["enable", "=", "1"]]),
+    doctype:doctypes.EzyEmployeeList,
+  };
+ 
+  axiosInstance
+    .get(apis.GetDoctypeData, { params: queryParams })
+    .then((res) => {
+      if (res?.message.data?.length) {
+        EmpMailsList.value = res.message.data.map((emp) => emp.name);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
+
 watch(
   () => filterObj.value.owner_of_the_form,
   (newVal) => {
@@ -3773,8 +3987,6 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
-
 
   axiosInstance
     .post(apis.savedata, dataObj)
@@ -3789,7 +4001,7 @@ function formData(status) {
           }
           axiosInstance.put(`${apis.resource}${doctypes.preDefinedForm}/${preId}`, predData)
             .then(res => {
-              console.log(res);
+              const response=res
               localStorage.removeItem('preName')
             })
             .catch(error => {
@@ -3975,11 +4187,9 @@ const removeBlock = (blockIndex) => {
       });
     });
   });
-  // if(rolesToDelete.length){
-
-
-  //   delete_assigned_roles(rolesToDelete, blockIndex);
-  // }
+  if(rolesToDelete.length){
+    delete_assigned_roles(rolesToDelete, blockIndex);
+  }
 
 };
 
@@ -3996,7 +4206,7 @@ function delete_assigned_roles(roles, blockIndex) {
     .post(apis.deleteAssigneRoles, payload)
     .then((res) => {
       if (res) {
-        console.log(res);
+        const response=res
         formData();
       }
     });

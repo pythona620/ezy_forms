@@ -147,6 +147,7 @@ def add_dynamic_doctype(
     is_predefined_doctype: Optional[int] = None,
     series: Optional[str] = None,
     as_web_view:Optional[int] = None,
+    mail_id:Optional[str] = None,
     public_form_response:Optional[str] = None,
     **kwargs  # Accept additional parameters gracefully
 ):
@@ -183,6 +184,7 @@ def add_dynamic_doctype(
         workflow_check=workflow_check,
         workflow_setup=workflow_setup,
         as_web_view=as_web_view,
+        mail_id=mail_id,
         public_form_response=public_form_response,
         now=True,
         is_async=True,
@@ -242,6 +244,7 @@ def enqueued_add_dynamic_doctype(
     workflow_check: Optional[str] = None,
     workflow_setup: Optional[List] = None,
     as_web_view:Optional[int] = None,
+    mail_id:Optional[str] = None,
     public_form_response:Optional[str] = None,
     **kwargs  # Accept any additional parameters
 ):
@@ -280,6 +283,7 @@ def enqueued_add_dynamic_doctype(
                     "is_predefined_doctype": is_predefined_doctype,
                     "has_workflow": has_workflow,
                     "as_web_view":as_web_view,
+                    "mail_id":mail_id,
                     "public_form_response":public_form_response
                 })
                 if as_web_view == 1:
@@ -310,7 +314,7 @@ def enqueued_add_dynamic_doctype(
                 _create_form_definitions(
                     form_category, accessible_departments, form_name, form_short_name,
                     form_status, owner_of_the_form, naming_series, business_unit,
-                    has_workflow, is_linked_form, is_linked, is_predefined_doctype,public_form_response,as_web_view 
+                    has_workflow, is_linked_form, is_linked, is_predefined_doctype,public_form_response,as_web_view,mail_id
                 )
 
                 # Add default static fields
@@ -407,7 +411,7 @@ def _create_form_definitions(
     form_short_name: str, form_status: str, owner_of_the_form: str,
     naming_series: str, business_unit: str, has_workflow: Optional[str],
     is_linked_form: Optional[str], is_linked: Optional[int],
-    is_predefined_doctype: Optional[int],public_form_response:Optional[str], as_web_view
+    is_predefined_doctype: Optional[int],public_form_response:Optional[str],as_web_view:Optional[int],mail_id:Optional[str],
 ):
     """Create form definitions efficiently."""
     form_defs = frappe.get_doc({
@@ -428,6 +432,7 @@ def _create_form_definitions(
         "is_linked": is_linked,
         "is_predefined_doctype": is_predefined_doctype,
         "as_web_view": as_web_view,
+        "mail_id":mail_id,
         "public_form_response":public_form_response
     })
     form_defs.insert(ignore_permissions=True)
@@ -982,10 +987,14 @@ def _update_roadmap(short_name: str, property: str, role: List[str], level: int)
     for idx, entry in enumerate(new_setup, start=1):
         entry.idx = idx
     
-    doc.wf_level_setup = new_setup
-    
+    level_counts = [level.level for level in doc.wf_level_setup]
+    if level_counts:
+        if max(level_counts) > doc.workflow_levels:
+            frappe.throw("Workflow Levels should match the count of Workflow Level Setup.")
+    else:
+        frappe.msgprint("You can now set the Workflow Levels.")
     if len(new_setup) != original_count:
-        doc.workflow_levels = len(new_setup)
+        doc.workflow_levels = max(level_counts)
         doc.save(ignore_permissions=True)
         return [doc.name]
     

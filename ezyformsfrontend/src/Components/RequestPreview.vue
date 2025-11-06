@@ -481,8 +481,8 @@
                                             </div>
                                         </div>
                                         <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
-                                            class="font-11"><span  class="fw-semibold"></span>
-                                            <span v-html="field.description.replace(/\n/g, '<br>')"></span></span>
+                                            class="font-11"><span  class="fw-semibold" ></span>
+                                            <p class="font-11 field-desc" v-html="field.description.replace(/\n/g, '<br>')"></p></span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
@@ -1991,10 +1991,12 @@ const allFieldsFilled = computed(() => {
                 for (const column of row.columns) {
                     for (const field of column.fields) {
                         // If field is required and value is empty, return false
+                        console.log(field,"outside");
                         if (
                             field.reqd === 1 &&
                             (!field.value || field.value.toString().trim() === "")
                         ) {
+                            console.log(field,"inside");
                             return false;
                         }
                          const rowKey = row.__row_id || row.id || JSON.stringify(row);
@@ -3083,6 +3085,16 @@ function getFieldError(row, field) {
 
 .previewInputHeight {
     margin-bottom: 2px;
+}
+
+.field-desc {
+  line-height: 19px !important;
+}
+
+@media (max-width: 767px) {
+  .field-desc {
+    line-height: 14px !important;
+  }
 }
 
 .dynamicColumn {
