@@ -79,7 +79,7 @@ export const apis = {
   loginCheckmethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.check_is_first_time_or_not`,
   loginUpdatePassword: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_password`,
   loginCheckuseermethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_is_first_value`,
-  dashboard: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dashboard_counts`,
+  dashboard: domain + `/method/ezy_forms.api.v1.dashboard_api.dashboard_counts`,
   Update_raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.rejected_form_updating`,
   edit_form_before_approve: domain + `/method/ezy_forms.api.v1.ezy_form_update.edit_the_form_before_approve`,
   uploadbulkEmployeefile: domain + `/method/ezy_forms.api.v1.bulk_import_data.import_bulk_data`,
