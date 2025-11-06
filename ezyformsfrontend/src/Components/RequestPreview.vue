@@ -481,8 +481,8 @@
                                             </div>
                                         </div>
                                         <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
-                                            class="font-11"><span  class="fw-semibold"></span>
-                                            <span v-html="field.description.replace(/\n/g, '<br>')"></span></span>
+                                            class="font-11"><span  class="fw-semibold" ></span>
+                                            <p class="font-11 field-desc" v-html="field.description.replace(/\n/g, '<br>')"></p></span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
@@ -3085,6 +3085,16 @@ function getFieldError(row, field) {
 
 .previewInputHeight {
     margin-bottom: 2px;
+}
+
+.field-desc {
+  line-height: 19px !important;
+}
+
+@media (max-width: 767px) {
+  .field-desc {
+    line-height: 14px !important;
+  }
 }
 
 .dynamicColumn {

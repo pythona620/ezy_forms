@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="!raiseResponse">
+        <div v-if="fetchDetails && !raiseResponse">
         <div class="container">
             <div class="backtofromPage text-center my-2 py-2">
             <h6 class="m-0">{{ fetchDetails.name }}</h6>
@@ -31,9 +31,6 @@
 
                     </div>
                 </div>
-            </div>
-            <div class="no-form-div">
-                <span>{{ serverMessage }}</span>
             </div>
         </div>
         <div class="modal fade " id="ExportEmployeeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -66,6 +63,9 @@
             </div>
         </div>
 
+        </div>
+        <div v-if="!fetchDetails && !raiseResponse" class="no-form-div">
+            <span>{{ serverMessage }}</span>
         </div>
 
         <div class="res_div" v-if="raiseResponse">
@@ -139,21 +139,6 @@ const checkingIs_linked = ref([]);
 const LinkedChildTableData = ref([]);
 const Token = ref("")
 
-function backToForm() {
-    blockArr.value = [];
-    router.push({
-        path: selectedData.value.routepath,
-        query: {
-
-            routepath: '/todo/raisedbyme',
-            doctype_name: route.query.main_form,
-            business_unit: selectedData.value.selectedBusiness_unit,
-            name: selectedData.value.main_form_Id,
-            type: selectedData.value.type,
-        },
-    });
-}
-
 function reloadPage() {
   window.location.reload()
 }
@@ -161,11 +146,22 @@ function reloadPage() {
 onMounted(() => {
     loadInitialData();
     logout()
-    Token.value = route.query.ftid;
-    if (Token.value) {
-        fetchData();
-    }
+    // Token.value = route.query.ftid;
+    // if (Token.value) {
+    //     fetchData();
+    // }
 });
+
+watch(
+  () => route.query.ftid,
+  (newVal) => {
+    Token.value = newVal;
+    if (Token.value) {
+      fetchData();
+    }
+  },
+  { immediate: true }
+);
 
 const loadInitialData = () => {
     if (selectedData.value.main_form_Id) {
@@ -228,6 +224,8 @@ function fetchData() {
         .catch((error) => {
             console.error("Error fetching records:", error);
             const serverRes = error.response?.data?._server_messages;
+            fetchDetails.value = null;
+            raiseResponse.value=null;
             if (serverRes) {
                 try {
                 const messages = JSON.parse(serverRes);
@@ -540,6 +538,7 @@ async function raiseRequestSubmission() {
 
     try {
         const response = await axiosInstance.post(apis.getQrCodeData, formData);
+        fetchDetails.value = null;
         raiseResponse.value=response.message.message;
         if (raiseResponse.value) {
             // request_raising_fn(response);
