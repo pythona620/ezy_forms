@@ -969,36 +969,42 @@ def delete_roles_for_approver_roles(
 
 
 def _update_roadmap(short_name: str, property: str, role: List[str], level: int) -> List[str]:
-    """Update roadmap efficiently."""
+    """Update roadmap efficiently and safely."""
     doc = frappe.get_doc("WF Roadmap", {"document_type": short_name, "property": property})
-    original_count = len(doc.wf_level_setup)
     
     # Filter and reindex levels
     new_setup = []
+    seen = set()
+
     for entry in doc.wf_level_setup:
-        if entry.role in role and entry.level == level:
+        key = (entry.role, entry.level)
+        # Skip duplicates or entries to delete
+        if (entry.role in role and entry.level == level) or key in seen:
             continue
+
+        # Reindex levels higher than deleted one
         if entry.level > level:
             entry.level -= 1
+
+        seen.add((entry.role, entry.level))
         new_setup.append(entry)
-    
-    # Sort and reindex
+
+    # Sort and reindex by level
     new_setup.sort(key=lambda x: x.level or 0)
     for idx, entry in enumerate(new_setup, start=1):
         entry.idx = idx
-    
-    level_counts = [level.level for level in doc.wf_level_setup]
-    if level_counts:
-        if max(level_counts) > doc.workflow_levels:
-            frappe.throw("Workflow Levels should match the count of Workflow Level Setup.")
-    else:
-        frappe.msgprint("You can now set the Workflow Levels.")
-    if len(new_setup) != original_count:
-        doc.workflow_levels = max(level_counts)
-        doc.save(ignore_permissions=True)
-        return [doc.name]
-    
-    return []
+
+    # Replace the child table
+    doc.set("wf_level_setup", new_setup)
+
+    # Validate level count
+    level_counts = [entry.level for entry in new_setup]
+    doc.workflow_levels = max(level_counts) if level_counts else 0
+
+
+    doc.save(ignore_permissions=True)
+    return [doc.name]
+
 
 
 @frappe.whitelist()
