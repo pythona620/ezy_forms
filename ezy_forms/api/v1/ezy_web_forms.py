@@ -9,40 +9,59 @@ from frappe.utils import add_to_date,get_datetime, now_datetime
 from ezy_forms.api.v1.send_an_email import sending_mail_api  
 
 
+# Create QR code for web view
 def create_qr_for_web_view(form_name):
     action_token = str(uuid.uuid4())
 
-   
-    # Create a new QR code entry
-    frappe.get_doc({
-        "doctype": "EzyForm QR Code",
-        "form_name": form_name,
-        "token": action_token
-    }).insert(ignore_permissions=True)
-    frappe.db.commit()
+    exited_qr = frappe.db.get_list("EzyForm QR Code", {"form_name": form_name}, ["name"])
+    if not exited_qr:
+        # Create a new QR code entry
+        frappe.get_doc({
+            "doctype": "EzyForm QR Code",
+            "form_name": form_name,
+            "token": action_token
+        }).insert(ignore_permissions=True)
+        frappe.db.commit()
 
-    # get the site url
-    base_url = get_url()
-    #form_name in link should be in lowercase and spaces replaced with hyphens
-    qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
+        # get the site url
+        base_url = get_url()
+        #form_name in link should be in lowercase and spaces replaced with hyphens
+        qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
-    # Update the Ezy Form Definitions record
-    frappe.db.set_value("Ezy Form Definitions", {"name": form_name}, "qr_url", qr_link)
-    frappe.db.commit()
+        # Update the Ezy Form Definitions record
+        frappe.db.set_value("Ezy Form Definitions", {"name": form_name}, "qr_url", qr_link)
+        frappe.db.commit()
     
 
 
 @frappe.whitelist(allow_guest=True)
 def qr_code_to_new_form(token, save_doc=None):
     # Get form_name from QR token
-    form_name = frappe.db.get_value("EzyForm QR Code", {"token": token}, ["form_name"])
-    if not form_name:
+    form_data = frappe.db.get_list("EzyForm QR Code", {"token": token}, ["form_name", "form_valid_from", "form_valid_to"])
+    if not form_data:
         frappe.throw("Invalid token")
- 
+        
+    form_name = form_data[0].form_name
+    form_valid_from = form_data[0].form_valid_from
+    form_valid_to = form_data[0].form_valid_to
+
+    now = now_datetime()  # Current date + time (as datetime)
+    form_from = get_datetime(form_valid_from) if form_valid_from else None
+    form_to = get_datetime(form_valid_to) if form_valid_to else None
+
+    # Check not yet active
+    if form_from and form_from > now:
+        frappe.throw(f"This form will be available from {form_from}.")
+
+    # Check expired
+    if form_to and form_to < now:
+        frappe.throw("This form is no longer available (expired).")
+
     # Get form definition details
     data = frappe.get_doc("Ezy Form Definitions", {"name": form_name}).as_dict()
     if data.get("enable") == 0:
-        frappe.throw("This form is disabled. Please contact administrator.")
+        frappe.throw("This Form is Disabled. Please Contact Administrator.")
+
     # Case 1: If save_doc is NOT provided → return form definition only
     if not save_doc:
         return {
@@ -142,7 +161,6 @@ def qr_code_to_new_form(token, save_doc=None):
 
     return {
         "message": message_response,
-        "docname": new_doc
     }
     
     
