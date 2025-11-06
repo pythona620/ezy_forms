@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{month}-{year}",
+ "creation": "2025-10-17 11:20:25.744323",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "site_name",
+  "month",
+  "column_break_nwwaj",
+  "last_modified_on",
+  "year",
+  "storage_section",
+  "total_storage",
+  "subscribtion_stroage",
+  "column_break_a0btp",
+  "free_stroage",
+  "over_due_on",
+  "tab_break_mgotl",
+  "data_base_logs_section",
+  "db_size_mb",
+  "column_break_tpnpm",
+  "file_size",
+  "section_break_ppsrh",
+  "daily_doctypes_db_logs",
+  "record_logs_tab",
+  "form_requests"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "label": "Site Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "label": "Year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "\nJAN\nFEB\nMAR\nAPR\nMAY\nJUN\nJUL\nAUG\nSEP\nOCT\nNOV\nDEC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nwwaj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_storage",
+   "fieldtype": "Data",
+   "label": "Total Storage Used (MB)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "daily_doctypes_db_logs",
+   "fieldtype": "Table",
+   "label": "Daily Doctypes DB Logs",
+   "options": "Daily Doctypes DB Logs",
+   "read_only": 1
+  },
+  {
+   "fieldname": "data_base_logs_section",
+   "fieldtype": "Section Break",
+   "label": "DataBase Logs"
+  },
+  {
+   "fieldname": "tab_break_mgotl",
+   "fieldtype": "Tab Break",
+   "label": "DB Logs"
+  },
+  {
+   "fieldname": "record_logs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Record Logs"
+  },
+  {
+   "fieldname": "form_requests",
+   "fieldtype": "Table",
+   "label": "Form Requests",
+   "options": "Form Requests",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_modified_on",
+   "fieldtype": "Date",
+   "label": "Last Modified On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "storage_section",
+   "fieldtype": "Section Break",
+   "label": "Storage "
+  },
+  {
+   "default": "700",
+   "fieldname": "subscribtion_stroage",
+   "fieldtype": "Data",
+   "label": "Subscribtion Stroage (MB)"
+  },
+  {
+   "fieldname": "free_stroage",
+   "fieldtype": "Data",
+   "label": "Free Stroage (MB)"
+  },
+  {
+   "fieldname": "column_break_a0btp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "over_due_on",
+   "fieldtype": "Datetime",
+   "label": "Over Due On"
+  },
+  {
+   "fieldname": "file_size",
+   "fieldtype": "Float",
+   "label": "File Size (MB)",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "db_size_mb",
+   "fieldtype": "Float",
+   "label": "DB Size (MB)",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_tpnpm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ppsrh",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-17 17:54:51.143301",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Doctypes Database Logs",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}
