@@ -174,17 +174,24 @@
 <div class="modal fade" id="formview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="formviewLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <div class="modal-header bg-gradient text-black py-3">
-        <div>
-          <h5 class="modal-title fw-semibold mb-1" id="formviewLabel">
-            {{ FormInfo.name }}
-          </h5>
-          <h6 class="font-13 text-black opacity-75">
-            Created on: {{ formatDate(FormInfo.creation) }}
-          </h6>
+      <div class="modal-header bg-light border-0 py-3 shadow-sm">
+        <div class="w-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="modal-title fw-bold text-dark mb-0" id="formviewLabel">
+              {{ FormInfo.name }}
+            </h5>
+            <span class="badge bg-primary p-2 d-flex align-items-center rounded-pill">
+              <i class="bi bi-list-task me-1 font-16"></i> {{ totalCount }} Total Forms
+            </span>
+          </div>
+          <div>
+            <small class="text-secondary">
+              <i class="bi bi-calendar3 me-1"></i>
+              Created on: <b>{{ formatDate(FormInfo.creation) }}</b>
+            </small>
+          </div>
         </div>
-        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+        </div>
       <div class="modal-body bg-light p-4">
         <div class="row g-4 justify-content-center">
           <div class="col-6 col-md-4 col-lg-3" v-for="item in stats" :key="item.label">
@@ -192,7 +199,7 @@
               <div class="icon-wrapper mb-2" :class="item.bg">
                 <i :class="item.icon"></i>
               </div>
-              <h6 class="fw-semibold mb-1">{{ item.label }}</h6>
+              <h6 class="fw-semibold text-nowrap mb-1">{{ item.label }}</h6>
               <h4 class="fw-bold">{{ item.value }}</h4>
             </div>
           </div>
@@ -229,6 +236,7 @@ const tableheaders = ref([
   { th: "Form Short Code", td_key: "form_short_name" },
   // { th: "Form Category", td_key: "form_category" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
+  { th: "Form Type", td_key: "as_web_view" },
   { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
@@ -294,20 +302,22 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
+const totalCount=ref("")
 const FormInfo = ref({});
 const statusCounts = ref([]);
 
 // Computed stats based on API response
 const stats = computed(() => {
   const total = statusCounts.value.reduce((sum, item) => sum + item.count, 0);
-
+  totalCount.value=total
   const completed = statusCounts.value.find((s) => s.status === "Completed")?.count || 0;
   const inProgress = statusCounts.value.find((s) => s.status === "In Progress")?.count || 0;
   const canceled = statusCounts.value.find((s) => s.status === "Canceled")?.count || 0;
   const requestRaised = statusCounts.value.find((s) => s.status === "Request Raised")?.count || 0;
 
   return [
-    { label: "Total Forms", value: total, icon: "bi bi-list-task", bg: "bg-total" },
+    // { label: "Total Forms", value: total, icon: "bi bi-list-task", bg: "bg-total" },
+    { label: "Request Raised", value: requestRaised, icon: "bi bi-file-earmark-text", bg: "bg-primary" },
     { label: "Completed", value: completed, icon: "bi bi-check-circle", bg: "bg-completed" },
     { label: "In Progress", value: inProgress || requestRaised, icon: "bi bi-arrow-repeat", bg: "bg-progress" },
     { label: "Canceled", value: canceled, icon: "bi bi-x-circle", bg: "bg-canceled" },
@@ -411,6 +421,9 @@ function actionClickedDropDown(row) {
   }
   if (is_admin.value == 1) {
      baseActions.push({ name: 'Form Info', icon: 'fa fa-info-circle' });
+  }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Form Duplicate', icon: 'fa fa-copy' });
   }
 
   actions.value = baseActions;
@@ -665,7 +678,17 @@ function actionCreated(rowData, actionEvent) {
             console.error("Error fetching designations data:", error);
         });
     }
-
+  if(actionEvent.name === 'Form Duplicate'){
+    router.push({
+      name: "FormStepper",
+      query: {
+        business_unit: businessUnit.value,
+        id: rowData.name,
+        Clone: "1",
+      },
+    });
+  }
+  localStorage.setItem('routepath', route.path);
 }
 async function generateReport() {
   // collect only selected fields
@@ -907,7 +930,8 @@ function fetchDepartmentDetails(data) {
               "form_department",
               "series",
               "report_fields",
-              "creation"
+              "creation",
+              "as_web_view"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -1010,7 +1034,17 @@ onMounted(() => {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
-
+.modal-header {
+  border-bottom: none !important;
+}
+.modal-title {
+  font-size: 1.2rem;
+  letter-spacing: 0.3px;
+}
+.badge.bg-primary {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
 .icon-wrapper {
   width: 50px;
   height: 50px;
