@@ -987,10 +987,14 @@ def _update_roadmap(short_name: str, property: str, role: List[str], level: int)
     for idx, entry in enumerate(new_setup, start=1):
         entry.idx = idx
     
-    doc.wf_level_setup = new_setup
-    
+    level_counts = [level.level for level in doc.wf_level_setup]
+    if level_counts:
+        if max(level_counts) > doc.workflow_levels:
+            frappe.throw("Workflow Levels should match the count of Workflow Level Setup.")
+    else:
+        frappe.msgprint("You can now set the Workflow Levels.")
     if len(new_setup) != original_count:
-        doc.workflow_levels = len(new_setup)
+        doc.workflow_levels = max(level_counts)
         doc.save(ignore_permissions=True)
         return [doc.name]
     
