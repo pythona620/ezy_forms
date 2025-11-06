@@ -424,7 +424,7 @@ const enable_two_factor = () => {
         .then((res) => {
             if (res.message.data) {
 
-                tableData.value[0].checked = res.message.data.enable_two_factor_auth == 1;
+                tableData.value[0].checked = res.message.data[0].enable_two_factor_auth == 1;
             }
         })
         .catch((error) => {
