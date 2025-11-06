@@ -3,10 +3,13 @@
     <div class="">
       <div class="">
         <div class="d-flex justify-content-between align-items-center CancelNdSave">
-          <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
+           <div class="d-flex align-items-center">
+            <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
             <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
             </button>
+          </div>
+          <span v-if="$route.query.id || $route.query.preId" class="font-16">({{ selectedData.formId || route.query.form_name }})</span>
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
@@ -79,7 +82,7 @@
             <span v-if="route.query.preId" class=" font-12 position-absolute PredefinedLabel">Predefined
               <i class="bi bi-check2-circle"></i></span>
                 <FormFields
-                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+                  :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                   id="formName" validationStar="true" placeholder="Untitled Form"
                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -91,7 +94,7 @@
       <!-- Form Short Code -->
       <div class="col-md-6">
         <FormFields
-          :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
           labeltext="Form Short Code"
           class="formHeight"
           type="text"
@@ -109,7 +112,7 @@
       <!-- Form Naming Series -->
       <div class="col-md-6">
         <FormFields
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           labeltext="Form Naming series"
           class="formHeight"
           type="text"
@@ -128,7 +131,7 @@
           <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span>
         </label>
         <Multiselect
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           @open="deptData"
           :options="OwnerOfTheFormData"
           @change="OwnerOftheForm"
@@ -147,7 +150,7 @@
           <span v-if="!filterObj.form_category" class="text-danger">*</span>
         </label>
         <Multiselect
-          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           :options="departments"
           v-model="filterObj.form_category"
           placeholder="Select Category"
@@ -237,17 +240,18 @@
  
       <!-- Form Submit Send Mail -->
       <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Form Submit Mail <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <!-- <FormFields
-          class="formHeight mt-2"
-          type="text"
-          tag="input"
-          name="Value"
-          id="formNameSeries"
-          placeholder="Form Submit mail"
-          v-model="filterObj.mail_id"
-        /> -->
-        <Multiselect
+        <label>Submit Notification Email <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+            <FormFields
+              class="formHeight mt-2"
+              type="text"
+              tag="input"
+              name="Value"
+              id="formNameSeries"
+              placeholder="Form Submit mail"
+              v-model="filterObj.mail_id"
+            />
+        <small class="text-muted font-12 ms-2">Note : If multiple Emails, separate with commas (,).</small>
+        <!-- <Multiselect
           @open="EmployeeData"
           :options="EmpMailsList"
           v-model="filterObj.mail_id"
@@ -256,7 +260,7 @@
           class="font-11 multiselect"
           :searchable="true"
           openDirection="top"
-          />
+          /> -->
       </div>
 
       <!-- Linked Checkbox and Linked Form -->
@@ -1776,6 +1780,14 @@ const formNameModel = computed({
   }
 });
 
+// const mailInput = ref("");
+// function updateMailArray() {
+//   // Split input by commas, trim spaces, and remove empty entries
+//   filterObj.value.mail_id = mailInput.value
+//     .split(",")
+//     .map(email => email.trim())
+//     .filter(email => email);
+// }
 
 const filterObj = ref({
   form_name: "",
@@ -1791,6 +1803,7 @@ const filterObj = ref({
   is_linked_form: "",
   is_predefined_doctype: route.query.id ? 1 : 0,
   as_web_view: 0,
+  mail_id: "",
 
 
 });
@@ -2387,15 +2400,20 @@ const Predata = ref([
 
   }
 ]);
+const isDuplicate=ref("");
+
 onMounted(() => {
   deptData();
-  paramId.value = route.params.paramid || "new";
-  // console.log(paramId.value, "ggggg");
+  isDuplicate.value=route.query.Clone
+  paramId.value = route.query.id || "new";
+
+  if (isDuplicate.value === '1') {
+    filterObj.value.series = '';
+  }
 
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
     OwnerOftheForm();
-    // console.log(paramId.value, "[[[]]]");
   }
   sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
@@ -2410,7 +2428,6 @@ onMounted(() => {
 
       const formData = Predata.value[0];
 
-      // console.log(typeof formJsonFromStorage); // Should log: 'string'
 
       // Parse and rebuild the structured array from form fields
       const parsedJson = JSON.parse(formData.form_json);
@@ -2753,7 +2770,6 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block  ? table.as_a_block : 'false',
   };
 
-  // console.log(data); 
   // // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // // table.newTable = false
 
@@ -2897,7 +2913,6 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 
 //   const section = blockArr[blockIndex].sections[sectionIndex];
 //   const table = section.afterCreated.find((t) => t.tableName === tableName);
-//   // console.log('table', table)
 //   if (!table) return;
 
 //   if (editMode[tableName]) {
@@ -3789,11 +3804,11 @@ function getFormData() {
     .then((res) => {
       let res_data = res?.message.data;
       if (res_data) {
-        router.push({
-          query: {
-            id: res_data.name
-          }
-        })
+        // router.push({
+        //   query: {
+        //     id: res_data.name,
+        //   }
+        // })
         if (res_data.accessible_departments) {
           res_data.accessible_departments = res_data.accessible_departments.split(",");
         }
