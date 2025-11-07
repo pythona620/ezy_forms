@@ -324,7 +324,8 @@ def enqueued_add_dynamic_doctype(
                 enqueing_creation_of_roadmap(
                     doctype=doctype, 
                     property_name=business_unit, 
-                    bulk_request=False
+                    bulk_request=False,
+                    workflow_setup=workflow_setup or []
                 )
 
             # Add custom fields if provided
