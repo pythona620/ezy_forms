@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-21 11:30:13.960196",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "form_name",
+  "column_break_67wmm",
+  "property",
+  "section_break_fo6qo",
+  "form_approved",
+  "in_progress",
+  "form_rejected",
+  "total_forms"
+ ],
+ "fields": [
+  {
+   "fieldname": "form_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Form Name",
+   "read_only": 1
+  },
+    {
+   "fieldname": "total_forms",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Total Forms",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_67wmm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "property",
+   "fieldtype": "Data",
+   "label": "Property"
+  },
+  {
+   "fieldname": "section_break_fo6qo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "form_approved",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Form Approved",
+   "read_only": 1
+  },
+  {
+   "fieldname": "in_progress",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "In Progress",
+   "read_only": 1
+  },
+  {
+   "fieldname": "form_rejected",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Form Rejected",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-21 11:30:13.960196",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Form Requests",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

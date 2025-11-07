@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAging="true" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
@@ -50,6 +50,7 @@ const tableheaders = ref([
   { th: "Requested By", td_key: "requester_name" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Requested Department", td_key: "department_name" },
+  { th: "Last Action On", td_key: "modified" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },

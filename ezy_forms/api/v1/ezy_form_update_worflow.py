@@ -225,6 +225,9 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         return_message = combination_of_roadmap_and_request(doctype, request_id, property=property, cluster_name=cluster_name)
 
                         approvals_reasons = return_message["message"]["approvals_reasons"]
+                        request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
+                        todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids=request_id_document[0].name,status=None)
+                        
                         all_approvals_required = [
                             remaining_role["role"]
                             for remaining_role in approvals_reasons
@@ -233,7 +236,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         if all_approvals_required :
                             frappe.db.set_value("WF Workflow Requests", request_id, "status", "In Progress")
                         else:
-                            frappe.db.set_value("WF Workflow Requests", request_id, "status", "Completed")
+                            frappe.db.set_value("WF Workflow Requests", request_id, {"status": "Completed","assigned_to_users":f"[]"})
                         frappe.db.commit()
         
                         list_of_ids_of_mentioned_doctype = frappe.get_all("WF IDs", filters = {"parent":request_id}, fields = ["doctype_name_wf"], pluck = "doctype_name_wf")
@@ -241,10 +244,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         for mentioned_id in list_of_ids_of_mentioned_doctype:
                             frappe.db.set_value(doctype, mentioned_id, {"wf_generated_request_status":"Completed","wf_generated_request_id":request_id})
                             frappe.db.commit()
-                        request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
-                        todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids=request_id_document[0].name,status=None)
-                        
-                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason=reason, timestamp=my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level,current_status = "Completed" )
+                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason=reason, timestamp=my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level,current_status = "Completed" if not all_approvals_required else "In Progress" )
                         update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Completed")
 
 

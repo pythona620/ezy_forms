@@ -5,14 +5,44 @@
     "doctype": "DocType",
     "engine": "InnoDB",
     "field_order": [
-        "site"
+    "subscription_start_date",
+    "subscription_storage",
+    "column_break_cpva",
+    "subscription_end_date",
+    "section_break_cxwy",
+    "site"
     ],
     "fields": [
-        {
-            "fieldname": "site",
-            "fieldtype": "Data",
-            "label": "Site"
-        }
+    {
+        "fieldname": "subscription_start_date",
+        "fieldtype": "Date",
+        "label": "Subscription Start Date"
+    },
+    {
+        "fieldname": "subscription_storage",
+        "fieldtype": "Int",
+        "label": "Subscription Storage",
+        "defualt":10240,
+        "description":"Value in MB"
+    },
+    {
+        "fieldname": "subscription_end_date",
+        "fieldtype": "Date",
+        "label": "Subscription End Date"
+    },
+    {
+        "fieldname": "column_break_cpva",
+        "fieldtype": "Column Break"
+    },
+    {
+        "fieldname": "section_break_cxwy",
+        "fieldtype": "Section Break"
+    },
+    {
+        "fieldname": "site",
+        "fieldtype": "Data",
+        "label": "Site"
+    }
     ],
     "index_web_pages_for_search": 1,
     "issingle": 1,

@@ -89,7 +89,7 @@ def pick_view_only_reportee():
     final_requests  = DatabaseQuery("WF Workflow Requests").execute(
         filters={"name": ["in", final_requests]},
         fields=["name", "requested_by", "role", "current_level", "total_levels","requested_on","action","department","is_linked_form","linked_form_id","is_linked","user_session_id","property",
-                "status", "assigned_to_users", "is_linked", "is_linked_form", "linked_form_id","doctype_name","role","be_half_of","department_name","requester_name"],
+                "status", "assigned_to_users", "is_linked", "is_linked_form", "linked_form_id","doctype_name","role","be_half_of","department_name","requester_name","modified"],
         order_by="creation desc",
     )
     return final_requests

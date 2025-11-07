@@ -9,7 +9,9 @@
             </div>
             <div>
                 <GlobalTable :tHeaders="tableheaders" :tData="tableData" @cell-click="viewPreview" isAction="true"
-                    viewType="viewPdf" isCheckbox="true" />
+                    viewType="viewPdf" isCheckbox="true" @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
+                <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
+                    @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
             </div>
         </template>
         <template v-else>
@@ -26,7 +28,7 @@
                     </button>
                     <div class=" position-relative">
 
-                    <button type="button" class=" btn btn-dark font-12" @click="OpenFilterModal">Filters</button>
+                    <button v-if="source==='ezy_form_definition'" type="button" class=" btn btn-dark font-12" @click="OpenFilterModal">Filters</button>
                     <button v-tooltip.bottom="'Clear Filters'" v-if="dateFilter.date_field.length || dateFilter.start_date.length || dateFilter.end_date.length" type="button" class="btn btn-light btn-sm clear_filters position-absolute top-0 right-0" @click="clearFilters">
                       <i class="bi bi-x"></i>
                         </button>
@@ -186,6 +188,7 @@ import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes, domain } from "../../shared/apiurls";
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import PaginationComp from "../../Components/PaginationComp.vue"
 // import DataTable from "frappe-datatable";
 // import "frappe-datatable/dist/frappe-datatable.min.css";
 import ButtonComp from "../../Components/ButtonComp.vue";
@@ -194,17 +197,74 @@ import "vue3-toastify/dist/index.css";
 import { showSuccess } from "../../shared/services/toast";
 
 const saveloading = ref(false)
-// const totalRecords = ref(0);
+const totalRecords = ref(0);
 const viewReport = ref(false);
 const tableData = ref([]);
 const frappeTH = ref([]);
+
+const fieldMapping = ref({
+  name: { type: "input" },
+  source: { type: "select", options: ["report", "ezy_form_definition"] },
+});
+
+const fullData = ref([]);
+const filteredData = ref([]);
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
+const timeout = ref(null);
+
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
+
+function inLineFiltersData(searchedData) {
+  clearTimeout(timeout.value);
+
+  timeout.value = setTimeout(() => {
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
+    });
+
+    totalRecords.value = filteredData.value.length;
+    filterObj.value.limitPageLength = 20;
+    filterObj.value.limit_start = 0;
+
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+  }, 500);
+}
+
+function PaginationUpdateValue(newLimit) {
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
+  paginateData();
+}
+
+function PaginationLimitStart() {
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+  const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = [...tableData.value, ...nextBatch];
+}
+
 function ReportsData() {
    
     axiosInstance.get(apis.getReportList)
-        .then((res) => {
-            if (res.message) {
-                tableData.value = res.message;
+        .then((response) => {
+            if (Array.isArray(response.message)) {
+              fullData.value = response.message;
+            } else {
+              fullData.value = [];
             }
+            filteredData.value = [...fullData.value];
+            totalRecords.value = filteredData.value.length;
+            filterObj.value.limit_start = 0;
+            tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
         })
         .catch((error) => {
             console.error("Error:", error);
@@ -262,6 +322,7 @@ function backtoReportList() {
 }
 const tableheaders = ref([
     { th: "Name", td_key: "name" },
+    { th: "Source", td_key: "source" },
 
 ])
 
@@ -390,7 +451,6 @@ const filtersArray = ref([
   },
 ]);
 
-// Static date filter
 const dateFilter = ref({
   date_field: "",
   start_date: "",

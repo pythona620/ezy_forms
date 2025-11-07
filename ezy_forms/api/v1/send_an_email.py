@@ -6,7 +6,7 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template impo
 from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
 from frappe.utils import add_to_date,get_url
 
-def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
+def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,Qr_form_mali_id=None,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
 	frappe.enqueue('ezy_forms.api.v1.send_an_email.send_notifications',
 		queue='default',
 		timeout=300,
@@ -20,9 +20,10 @@ def sending_mail_api(request_id, doctype_name, property, cluster, reason, timest
 		timestamp= timestamp,
 		current_status =current_status,
 		skip_user_role = skip_user_role,
+		Qr_form_mali_id=Qr_form_mali_id,
 		user=user
 	)
-def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
+def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,Qr_form_mali_id,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
 	"""Send email notifications to relevant users"""
 	email_accounts = frappe.get_all(
 		"Email Account",
@@ -51,10 +52,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 					"fcontent": f.read()
 				})
 	try:
-     
-     
 		assigned_users = frappe.get_value("WF Workflow Requests", request_id, "assigned_to_users") if not skip_user_role else [skip_user_role]
-		
 		requested_by = frappe.get_value("WF Workflow Requests", request_id, "requested_by")
 		if assigned_users and isinstance(assigned_users, str):
 			assigned_users = ast.literal_eval(assigned_users)
@@ -64,16 +62,14 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		# Fetch roadmap and current level
 		roadmap = frappe.get_doc("WF Roadmap", {"property": property, "document_type": doctype_name}).as_dict()
 		if not roadmap:
-			return "No Roadmap Founded"
+			return "No Roadmap Founded"	
 		current_level = int(frappe.get_value("WF Workflow Requests", request_id, "current_level"))
-
 		# Precompute level setup for current level
 		level_setup = [i for i in roadmap.wf_level_setup if int(i.level) == current_level]
 
 		# Identify approver and requester roles
 		approver_level = [i.role for i in level_setup if int(i.view_only_reportee) == 1]
 		requester_to_level = [i.role for i in level_setup if int(i.requester_as_a_approver) == 1]
-
 		# Get user emails based on property/cluster
 		if  requester_to_level:
 			user_emails = [requested_by]
@@ -81,8 +77,12 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 			user_emails = [frappe.db.get_value("Ezy Employee", requested_by, "reporting_to")]
    
 		else:
-			user_emails = frappe.get_all("Ezy Employee",filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},fields=["name"],pluck="name") if not user else [user]
-		user_emails.append(requested_by)
+			if Qr_form_mali_id:
+				user_emails = [email.strip() for email in Qr_form_mali_id.split(",")]
+			else:
+				user_emails = frappe.get_all("Ezy Employee",filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},fields=["name"],pluck="name") if not user else [user]
+		if requested_by !="Guest":
+			user_emails.append(requested_by)
 		if user_list:
 			user_emails = list(set(user_emails + user_list ))
 		else:
@@ -114,7 +114,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 					
 					frappe.sendmail(
 						recipients=[email],
-						subject="ezyForms Notification",
+						subject= f"ezyForms Notification- {property}",
 						message=email_content['message'] if email_content['email_template'] else("<br><b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form.<br>" if  file_down and file_down['file_size'] else '')+ email_content['message'] ,
 						content = email_content['email_template'] + (f"<b>Note: </b>Since the file size is more than {file_attachment_limit_for_form}MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else '') if email_content['email_template'] else '',
 						attachments=attach_down

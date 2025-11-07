@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="!raiseResponse">
+        <div v-if="fetchDetails && !raiseResponse">
         <div class="container">
             <div class="backtofromPage text-center my-2 py-2">
             <h6 class="m-0">{{ fetchDetails.name }}</h6>
@@ -31,9 +31,6 @@
 
                     </div>
                 </div>
-            </div>
-            <div v-else>
-                <div class="no-form">No Form</div>
             </div>
         </div>
         <div class="modal fade " id="ExportEmployeeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -67,6 +64,9 @@
         </div>
 
         </div>
+        <div v-if="!fetchDetails && !raiseResponse" class="no-form-div">
+            <span>{{ serverMessage }}</span>
+        </div>
 
         <div class="res_div" v-if="raiseResponse">
             <div class="res_message text-center">
@@ -95,6 +95,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 // import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { useRoute, useRouter } from "vue-router";
+import { showError, showSuccess } from "../shared/services/toast";
 
 const router = useRouter();
 const route = useRoute();
@@ -138,21 +139,6 @@ const checkingIs_linked = ref([]);
 const LinkedChildTableData = ref([]);
 const Token = ref("")
 
-function backToForm() {
-    blockArr.value = [];
-    router.push({
-        path: selectedData.value.routepath,
-        query: {
-
-            routepath: '/todo/raisedbyme',
-            doctype_name: route.query.main_form,
-            business_unit: selectedData.value.selectedBusiness_unit,
-            name: selectedData.value.main_form_Id,
-            type: selectedData.value.type,
-        },
-    });
-}
-
 function reloadPage() {
   window.location.reload()
 }
@@ -160,11 +146,22 @@ function reloadPage() {
 onMounted(() => {
     loadInitialData();
     logout()
-    Token.value = route.query.ftid;
-    if (Token.value) {
-        fetchData();
-    }
+    // Token.value = route.query.ftid;
+    // if (Token.value) {
+    //     fetchData();
+    // }
 });
+
+watch(
+  () => route.query.ftid,
+  (newVal) => {
+    Token.value = newVal;
+    if (Token.value) {
+      fetchData();
+    }
+  },
+  { immediate: true }
+);
 
 const loadInitialData = () => {
     if (selectedData.value.main_form_Id) {
@@ -188,6 +185,7 @@ function logout() {
 }
 
 const fetchDetails=ref("");
+const serverMessage=ref("");
 
 function fetchData() {
     const data = {
@@ -225,7 +223,23 @@ function fetchData() {
         })
         .catch((error) => {
             console.error("Error fetching records:", error);
-        })
+            const serverRes = error.response?.data?._server_messages;
+            fetchDetails.value = null;
+            raiseResponse.value=null;
+            if (serverRes) {
+                try {
+                const messages = JSON.parse(serverRes);
+                messages.forEach((msg) => {
+                    const parsed = JSON.parse(msg);
+                    serverMessage.value = parsed.message?.replace(/\s*\(.*?\)\s*/g, "").trim();
+                });
+                } catch (err) {
+                console.error("Error parsing server messages:", err);
+                }
+            } else {
+                showError("Server error occurred", { transition: "zoom" });
+            }
+        });
 }
 
 watch(business_unit, (newBu, oldBu) => {
@@ -524,6 +538,7 @@ async function raiseRequestSubmission() {
 
     try {
         const response = await axiosInstance.post(apis.getQrCodeData, formData);
+        fetchDetails.value = null;
         raiseResponse.value=response.message.message;
         if (raiseResponse.value) {
             // request_raising_fn(response);
@@ -760,7 +775,7 @@ function linked_id_adding_method(name) {
     padding: 5px;
 }
 
-.no-form {
+.no-form-div {
     width: 100%;
     height: 100vh;
     display: flex;
@@ -768,6 +783,17 @@ function linked_id_adding_method(name) {
     align-items: center;
     font-size: 15px;
     font-weight: 500;
+    // background-color: #f0f0f0;
+    color: #e23434;
+    font-size: 15px;
+    animation: fadeIn 3s ease forwards;
+
+    span{
+        padding: 15px;
+        border: 1px solid #e23434;
+        border-radius: 10px;
+        box-shadow: rgba(245, 39, 39, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    }
 }
 
 .Acknowledgement-check {

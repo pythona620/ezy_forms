@@ -110,40 +110,56 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-       <div class="d-flex justify-content-between align-items-center mb-2">
-  <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
 
-  <div class="form-check m-0">
-    <input
-      id="select-all-fields"
-      type="checkbox"
-      class="form-check-input me-1"
-      v-model="selectAll"
-      @change="toggleSelectAll"
-    />
-    <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
-  </div>
-</div>
-
-        <div class="report-fields row">
-          <div 
-            v-for="(field, index) in reportFields" 
-            :key="index" 
-            class="col-md-4 mb-3"
-          >
-          <div class="d-flex align-items-center">
+          <div class="form-check m-0">
             <input
-              :id="'field-' + index"
+              id="select-all-fields"
               type="checkbox"
-              class="form-check-input me-2"
-              v-model="field.selected"
+              class="form-check-input me-1"
+              v-model="selectAll"
+              @change="toggleSelectAll"
             />
-            <label :for="'field-' + index" class="form-label font-12 mb-0">
-              {{ getDisplayLabel(field) }}
-            </label>
+            <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
           </div>
         </div>
 
+        <!-- Normal Fields -->
+        <div class="report-fields row mb-2 pb-2">
+          <div v-for="(field, index) in reportFields.filter(f => !f.isChild)" :key="index" class="col-md-4 mb-2">
+            <div class="d-flex align-items-center">
+              <input
+                :id="'field-' + index"
+                type="checkbox"
+                class="form-check-input me-2"
+                v-model="field.selected"
+              />
+              <label :for="'field-' + index" class="form-label font-12 mb-0">
+                {{ getDisplayLabel(field) }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Child Table Fields -->
+        <div v-for="(group, tableName) in groupByTable(reportFields)" :key="tableName" class="mb-3">
+          <h6 class="font-13 mb-2">{{ tableName }} (Child Table)</h6>
+          <div class="row">
+            <div v-for="(field, index) in group" :key="index" class="col-md-4 mb-2">
+              <div class="d-flex align-items-center">
+                <input
+                  :id="'child-' + tableName + '-' + index"
+                  type="checkbox"
+                  class="form-check-input me-2"
+                  v-model="field.selected"
+                />
+                <label :for="'child-' + tableName + '-' + index" class="form-label font-12 mb-0">
+                  {{ getDisplayLabel(field) }}
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -154,6 +170,48 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="formview" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="formviewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-0 py-3 shadow-sm">
+        <div class="w-100">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="modal-title fw-bold text-dark mb-0" id="formviewLabel">
+              {{ FormInfo.name }}
+            </h5>
+            <span class="badge bg-primary p-2 d-flex align-items-center rounded-pill">
+              <i class="bi bi-list-task me-1 font-16"></i> {{ totalCount }} Total Forms
+            </span>
+          </div>
+          <div>
+            <small class="text-secondary">
+              <i class="bi bi-calendar3 me-1"></i>
+              Created on: <b>{{ formatDate(FormInfo.creation) }}</b>
+            </small>
+          </div>
+        </div>
+        </div>
+      <div class="modal-body bg-light p-4">
+        <div class="row g-4 justify-content-center">
+          <div class="col-6 col-md-4 col-lg-3" v-for="item in stats" :key="item.label">
+            <div class="status-card text-center p-4 rounded-4 shadow-sm">
+              <div class="icon-wrapper mb-2" :class="item.bg">
+                <i :class="item.icon"></i>
+              </div>
+              <h6 class="fw-semibold text-nowrap mb-1">{{ item.label }}</h6>
+              <h4 class="fw-bold">{{ item.value }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-outline-dark rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   </div>
 </template>
 
@@ -178,6 +236,7 @@ const tableheaders = ref([
   { th: "Form Short Code", td_key: "form_short_name" },
   // { th: "Form Category", td_key: "form_category" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
+  { th: "Form Type", td_key: "as_web_view" },
   { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
@@ -243,6 +302,40 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
+const totalCount=ref("")
+const FormInfo = ref({});
+const statusCounts = ref([]);
+
+// Computed stats based on API response
+const stats = computed(() => {
+  const total = statusCounts.value.reduce((sum, item) => sum + item.count, 0);
+  totalCount.value=total
+  const completed = statusCounts.value.find((s) => s.status === "Completed")?.count || 0;
+  const inProgress = statusCounts.value.find((s) => s.status === "In Progress")?.count || 0;
+  const canceled = statusCounts.value.find((s) => s.status === "Canceled")?.count || 0;
+  const requestRaised = statusCounts.value.find((s) => s.status === "Request Raised")?.count || 0;
+
+  return [
+    // { label: "Total Forms", value: total, icon: "bi bi-list-task", bg: "bg-total" },
+    { label: "Request Raised", value: requestRaised, icon: "bi bi-file-earmark-text", bg: "bg-primary" },
+    { label: "Completed", value: completed, icon: "bi bi-check-circle", bg: "bg-completed" },
+    { label: "In Progress", value: inProgress || requestRaised, icon: "bi bi-arrow-repeat", bg: "bg-progress" },
+    { label: "Canceled", value: canceled, icon: "bi bi-x-circle", bg: "bg-canceled" },
+  ];
+});
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 function toWorkOrder (){
   router.push({
     name: "vendorcomparison",
@@ -250,10 +343,8 @@ function toWorkOrder (){
       });
 } 
 function viewPreview(data, index, type) {
-  // console.log(route.path);
   if (type === "view") {
     if (data) {
-      // console.log(data, "------------");
       router.push({
         name: "FormPreviewComp",
         query: {
@@ -268,17 +359,14 @@ function viewPreview(data, index, type) {
   if (type === 'raiseRequest') {
     const parsedData = JSON.parse(data.form_json);
     const storedData = localStorage.getItem("employeeData");
-    // console.log(parsedData);
 
     if (storedData) {
       const designation = JSON.parse(storedData).designation;
-      // console.log(designation);
 
       if (!parsedData.workflow.length) {
         showInfo("No Roles Added")
       }
       const roles = parsedData.workflow[0].roles;
-      // console.log(roles);
 
       let hasAccess = false;
 
@@ -288,7 +376,6 @@ function viewPreview(data, index, type) {
           break;
         }
       }
-      // console.log(route.path, "sadasda");
 
       if (hasAccess) {
         router.push({
@@ -305,9 +392,6 @@ function viewPreview(data, index, type) {
         showInfo("You do not have permission to access this Form.");
       }
     }
-    //  else {
-    //   console.log("No employee data found in localStorage.");
-    // }
   }
 
 
@@ -334,7 +418,13 @@ function actionClickedDropDown(row) {
   }
   if (is_admin.value == 1) {
      baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
-   }  
+  }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Form Info', icon: 'fa fa-info-circle' });
+  }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Form Duplicate', icon: 'fa fa-copy' });
+  }
 
   actions.value = baseActions;
 
@@ -380,7 +470,6 @@ function getDisplayLabel(field) {
 
 // function actionClickedDropDown(row){
 
-//   console.log(row.form_status, "actionClickedDropDown");
 //   if(row.form_status === 'Created'){
 //     actions.value.push({ name: 'In-active this form', icon: 'fa-solid fa-ban' });
 //   }
@@ -399,6 +488,19 @@ function getDisplayLabel(field) {
 
 //   return baseActions
 // })
+
+const groupByTable = (fields) => {
+  const groups = {};
+  fields.forEach(f => {
+    if (f.isChild) {
+      if (!groups[f.parentTable]) groups[f.parentTable] = [];
+      groups[f.parentTable].push(f);
+    }
+  });
+  return groups;
+};
+
+
 const reportShortCode = ref('');
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
@@ -431,18 +533,15 @@ function actionCreated(rowData, actionEvent) {
   }
 
   if (actionEvent.name === 'Raise Request') {
-    // console.log(rowData);
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
     if (storedData) {
       const designation = JSON.parse(storedData).designation;
-      // console.log(designation);
       if (!parsedData.workflow?.length) {
         showInfo("No Roles Added");
       }
       const roles = parsedData.workflow[0].roles;
-      // console.log(roles);
 
       let hasAccess = false;
 
@@ -452,7 +551,6 @@ function actionCreated(rowData, actionEvent) {
           break;
         }
       }
-      // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
         if(rowData.form_name === 'VENDOR COMPARISON'){
@@ -480,9 +578,6 @@ function actionCreated(rowData, actionEvent) {
         showInfo("You do not have permission to access this Form.");
       }
     }
-    //  else {
-    //   console.log("No employee data found in localStorage.");
-    // }
   }
 
   if (actionEvent.name === 'Download Print format') {
@@ -513,48 +608,103 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'In-active this form') {
     toggleFunction(rowData, null, null);
   }
-if (actionEvent.name === 'Create Report') {
-  console.log(rowData, "rowData");
 
-  // Store document name for PUT request
+  if (actionEvent.name === 'Create Report') {
+
   reportShortCode.value = rowData.name;
 
-  // Parse all available fields from form_json
-  const fields = JSON.parse(rowData?.form_json)?.fields || [];
+  const parsed = JSON.parse(rowData?.form_json || "{}");
+  const fields = parsed.fields || [];
+  const childTables = parsed.child_table_fields || {};
 
-  // Convert saved report_fields string into an array of fieldnames
+  // already selected fields
   let alreadySelected = [];
   if (rowData.report_fields) {
     alreadySelected = rowData.report_fields
       .split(",")
-      .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
+      .map(item => item.trim().split(" as ")[0]);
   }
-  
 
-  // Filter valid fields and mark them as selected if previously saved
-  reportFields.value = fields
+  // Normal fields
+  const normalFields = fields
     .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
     .map(f => ({
       ...f,
-      selected: alreadySelected.includes(f.fieldname) // pre-check
+      isChild: false,
+      parentTable: null,
+      fullName: f.fieldname, // Used when generating report
+      displayLabel: f.label,
+      selected: alreadySelected.includes(f.fieldname)
     }));
+
+  // Child table fields
+  const childTableFields = Object.entries(childTables).flatMap(([tableName, tableFields]) => {
+    return tableFields.map(f => ({
+      ...f,
+      isChild: true,
+      parentTable: tableName,
+      fullName: `${tableName}.${f.fieldname}`, // <-- used in report generation
+      displayLabel: f.label, // show just field label in UI
+      selected: alreadySelected.includes(`${tableName}.${f.fieldname}`)
+    }));
+  });
+
+  // merge both
+  reportFields.value = [...normalFields, ...childTableFields];
 
   // Open the modal
   const modal = new bootstrap.Modal(document.getElementById("reportmodal"), {});
   modal.show();
-}
+  }
+  if (actionEvent.name === 'Form Info') {
+    FormInfo.value=rowData;
+    const modal = new bootstrap.Modal(document.getElementById("formview"), {});
+    modal.show();
 
+     const queryParams = {
+      fields: JSON.stringify(["doctype_name","name","status","creation"]),
+      limit_page_length: "None",
+      doctype:doctypes.WFWorkflowRequests,
+      doctype_name:FormInfo.value.name,
+      group_by:"status"
+      };
+      axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+        .then((res) => {
+          if (res.message) {
+            statusCounts.value = res.message;
+          }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
+    }
+  if(actionEvent.name === 'Form Duplicate'){
+    router.push({
+      name: "FormStepper",
+      query: {
+        business_unit: businessUnit.value,
+        id: rowData.name,
+        Clone: "1",
+      },
+    });
+  }
+  localStorage.setItem('routepath', route.path);
 }
 async function generateReport() {
   // collect only selected fields
   const selectedFields = reportFields.value
     .filter(f => f.selected)
-    .map(f => `${f.fieldname} as '${f.label}'`);
+    .map(f => {
+      // ✅ If it's a child table field, prefix with table name
+      const fieldPath = f.isChild ? `${f.parentTable}.${f.fieldname}` : f.fieldname;
+      return `${fieldPath} as '${f.label}'`;
+    });
 
-  // add static field
-  selectedFields.unshift("name as Name"); // or push() if you want it at the end
+  // ✅ Add static "name" field (at the start)
+  selectedFields.unshift("name as Name");
 
-  const payload = selectedFields.join(","); // comma separated string
+ // Join fields into comma-separated string
+  const payload = selectedFields.join(",");
 
   const data = {};
   if (payload) {
@@ -717,7 +867,6 @@ function inLineFiltersData(searchedData) {
     if (searchedData.form_status === 'Retired') {
       filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
-    // console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
       filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
@@ -780,7 +929,9 @@ function fetchDepartmentDetails(data) {
               "is_linked_form",
               "form_department",
               "series",
-              "report_fields"
+              "report_fields",
+              "creation",
+              "as_web_view"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -874,4 +1025,39 @@ onMounted(() => {
   padding: 8px;
   width: 100%;
 }
+
+.status-card {
+  transition: all 0.3s ease-in-out;
+  background: white;
+}
+.status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+.modal-header {
+  border-bottom: none !important;
+}
+.modal-title {
+  font-size: 1.2rem;
+  letter-spacing: 0.3px;
+}
+.badge.bg-primary {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 22px;
+  color: white;
+}
+.bg-total { background: linear-gradient(135deg, #0d6efd, #3a7af3); }
+.bg-completed { background: linear-gradient(135deg, #198754, #2fc074); }
+.bg-progress { background: linear-gradient(135deg, #0dcaf0, #0995b5); }
+.bg-canceled { background: linear-gradient(135deg, #dc3545, #a71d2a); }
 </style>
