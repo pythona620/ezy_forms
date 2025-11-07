@@ -33,7 +33,6 @@
   "send_mail_for_frist_approval",
   "mail_id",
   "as_web_view",
-  "report_fields",
   "public_form_response"
  ],
  "fields": [
@@ -176,7 +175,7 @@
   },
   {
    "fieldname": "mail_id",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "mail id"
   },
   {
@@ -198,14 +197,14 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-08 16:49:44.252416",
+ "modified": "2025-11-07 10:31:43.246762",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
-  {
+{
    "create": 1,
    "delete": 1,
    "email": 1,

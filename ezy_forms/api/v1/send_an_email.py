@@ -78,7 +78,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
    
 		else:
 			if Qr_form_mali_id:
-				user_emails = [Qr_form_mali_id]
+				user_emails = [email.strip() for email in Qr_form_mali_id.split(",")]
 			else:
 				user_emails = frappe.get_all("Ezy Employee",filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},fields=["name"],pluck="name") if not user else [user]
 		if requested_by !="Guest":
