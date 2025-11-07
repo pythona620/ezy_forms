@@ -114,7 +114,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 					
 					frappe.sendmail(
 						recipients=[email],
-						subject="ezyForms Notification",
+						subject= f"ezyForms Notification- {property}",
 						message=email_content['message'] if email_content['email_template'] else("<br><b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form.<br>" if  file_down and file_down['file_size'] else '')+ email_content['message'] ,
 						content = email_content['email_template'] + (f"<b>Note: </b>Since the file size is more than {file_attachment_limit_for_form}MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else '') if email_content['email_template'] else '',
 						attachments=attach_down
