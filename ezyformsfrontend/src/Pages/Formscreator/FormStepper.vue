@@ -361,7 +361,21 @@
                       </div>
                       <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
                         :childHeaders="childtableHeaders" />
-                      <div class="main-block" ref="mainBlockRef">
+
+                      <!-- FIELD LIBRARY PANEL AND FORM CANVAS -->
+                      <div class="form-builder-with-library">
+                        <!-- Left: Field Library -->
+                        <aside class="field-library-container" v-if="showFieldLibrary">
+                          <FieldLibraryPanel
+                            :collapsible="true"
+                            @field-add="handleFieldAddFromLibrary"
+                            @field-dragstart="handleFieldDragStart"
+                          />
+                        </aside>
+
+                        <!-- Right: Form Canvas (existing content) -->
+                        <div class="form-canvas-container">
+                          <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                           <div class="requestandAppHeader">
@@ -1390,6 +1404,10 @@
                           </button>
                         </div>
                       </div>
+                        </div>
+                        <!-- End Form Canvas Container -->
+                      </div>
+                      <!-- End Form Builder with Library -->
                     </div>
                   </div>
                   <div v-if="activeStep === 3">
@@ -1695,6 +1713,12 @@ import FormPreviewComp from "../../Components/FormPreviewComp.vue";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+
+// Drag-and-Drop Field Library
+import FieldLibraryPanel from "../../Components/FormBuilder/FieldLibrary/FieldLibraryPanel.vue";
+import DropZone from "../../Components/FormBuilder/Canvas/DropZone.vue";
+import { FIELD_TYPES, FIELD_CATEGORIES } from "../../Components/FormBuilder/FieldLibrary/fieldTypes.js";
+
 const route = useRoute();
 const router = useRouter();
 const activeStep = ref(1);
@@ -1734,6 +1758,12 @@ const showSuggestions = ref(false);
 let debounceTimeout = null;
 const tableName = ref("");
 let paramId = ref("");
+
+// Drag-and-Drop State
+const draggedFieldType = ref(null);
+const selectedFieldForEdit = ref(null);
+const showFieldLibrary = ref(true);
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit;
 });
@@ -4750,10 +4780,137 @@ async function saveFormData(type) {
 }
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
+
+// ===== DRAG-AND-DROP FIELD LIBRARY HANDLERS =====
+
+// Handle field added from library (click)
+const handleFieldAddFromLibrary = (fieldType) => {
+  console.log('Field added from library:', fieldType);
+
+  // Get current block (default to first block if none selected)
+  const currentBlockIndex = selectedBlockIndex.value || 0;
+  const currentBlock = blockArr[currentBlockIndex];
+
+  if (!currentBlock) {
+    showError('Please create a block first before adding fields');
+    return;
+  }
+
+  // Create field from type
+  const newField = createFieldFromLibraryType(fieldType);
+
+  if (!newField) {
+    return;
+  }
+
+  // Add to block's sections
+  if (!currentBlock.sections) {
+    currentBlock.sections = [];
+  }
+
+  if (currentBlock.sections.length === 0) {
+    currentBlock.sections.push({
+      label: '',
+      rows: [[{ fields: [] }]]
+    });
+  }
+
+  // Add to first section, first row, first column
+  const firstSection = currentBlock.sections[0];
+  const firstRow = firstSection.rows[0];
+  const firstColumn = firstRow[0];
+
+  if (!firstColumn.fields) {
+    firstColumn.fields = [];
+  }
+
+  firstColumn.fields.push(newField);
+
+  console.log('Field added successfully:', newField);
+  showSuccess(`${newField.label} field added successfully`);
+};
+
+// Handle drag start from library
+const handleFieldDragStart = (fieldType) => {
+  console.log('Drag started:', fieldType);
+  draggedFieldType.value = fieldType;
+};
+
+// Create field object from library field type
+const createFieldFromLibraryType = (fieldType) => {
+  const fieldDef = FIELD_TYPES[fieldType];
+
+  if (!fieldDef) {
+    console.error('Field type not found:', fieldType);
+    showError('Field type not found');
+    return null;
+  }
+
+  // Generate unique field name
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  const fieldname = `${fieldType}_${timestamp}_${randomSuffix}`;
+
+  return {
+    id: `field_${timestamp}_${randomSuffix}`,
+    fieldname: fieldname,
+    label: fieldDef.name,
+    fieldtype: fieldDef.frappe_fieldtype,
+    options: fieldDef.defaultProps?.options || '',
+    reqd: fieldDef.defaultProps?.required ? 1 : 0,
+    read_only: 0,
+    hidden: 0,
+    description: fieldDef.description || '',
+    default: fieldDef.defaultProps?.default || '',
+    placeholder: fieldDef.defaultProps?.placeholder || '',
+    // Add other properties as needed based on existing field structure
+  };
+};
+
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+
+// ===== DRAG-AND-DROP FIELD LIBRARY LAYOUT =====
+
+.form-builder-with-library {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  min-height: calc(100vh - 200px);
+}
+
+.field-library-container {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 1rem;
+  height: fit-content;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+}
+
+.form-canvas-container {
+  flex: 1;
+  min-width: 0;
+}
+
+// Mobile responsive
+@media (max-width: 992px) {
+  .form-builder-with-library {
+    flex-direction: column;
+  }
+
+  .field-library-container {
+    width: 100%;
+    position: relative;
+    max-height: 400px;
+  }
+}
+
+// ===== END DRAG-AND-DROP STYLES =====
 
 .approver_type_div{
   border: 1px solid #BAFFC2;
