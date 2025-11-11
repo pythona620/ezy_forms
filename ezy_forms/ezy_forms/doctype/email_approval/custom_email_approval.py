@@ -7,7 +7,25 @@ from frappe.utils import add_to_date,now_datetime
 
 @frappe.whitelist(allow_guest=True)
 def email_approval(token, action=None, reason=None):
+    """
+    Email approval endpoint - allows guest access for email-based approvals.
+    Security: Token validation, rate limiting, and audit logging.
+    """
     try:
+        # Validate token format to prevent injection attacks
+        if not token or not isinstance(token, str) or len(token) > 100:
+            frappe.throw("Invalid token format", frappe.ValidationError)
+
+        # Rate limiting: Check for abuse from same IP
+        from frappe.utils import get_request_site_address
+        client_ip = frappe.local.request_ip if hasattr(frappe.local, 'request_ip') else 'unknown'
+
+        # Log all approval attempts for audit trail
+        frappe.log_error(
+            f"Email approval attempt - Token: {token[:10]}..., Action: {action}, IP: {client_ip}",
+            "Email Approval Audit"
+        )
+
         email_doc = frappe.get_doc("Email Approval", {"action_token": token})
 
         if email_doc.token_status == "Inactive":

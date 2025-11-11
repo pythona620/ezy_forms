@@ -14,6 +14,7 @@ import sys, traceback, time ,json
 from ezy_forms.api.v1.delete_files import delete_files_api
 from ezy_forms.api.v1.send_an_email import sending_mail_api
 from datetime import datetime
+from ezy_forms.utils.security import generate_secure_alphanumeric_token
 
 def parse_time(t):
     try:
@@ -120,8 +121,8 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
             already_used_random_string = True
 
             while already_used_random_string:
-                random_reference_id = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=10))
-                random_reference_id = ''.join(random.sample(random_reference_id,len(random_reference_id)))
+                # Generate cryptographically secure token (16 characters = ~95 bits entropy)
+                random_reference_id = generate_secure_alphanumeric_token(16)
                 if random_reference_id not in frappe.db.get_all("WF Supporting Documents",fields=["reference_id"],pluck="reference_id"):
                     already_used_random_string = False
             

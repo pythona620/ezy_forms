@@ -12,9 +12,11 @@ if TYPE_CHECKING:
     from frappe.core.doctype.user.user import User
 
 
+# Safe MIME types - removed dangerous types like SQL, ZIP, and PKCS12
 ALLOWED_MIMETYPES = (
     "image/png",
     "image/jpeg",
+    "image/gif",
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -23,19 +25,32 @@ ALLOWED_MIMETYPES = (
     "application/vnd.oasis.opendocument.text",
     "application/vnd.oasis.opendocument.spreadsheet",
     "text/plain",
+    "text/csv",
     "video/quicktime",
-    "video/mp4",
-    "application/xml",
-    "application/csv",
-    "application/x-pkcs12",
-    "application/zip",
-    "application/x-sql",
-    # "application/pgp-encrypted"
+    "video/mp4"
 )
 
-# Fetch allowed extensions dynamically
+# Maximum file size: 10MB
+MAX_FILE_SIZE = 10 * 1024 * 1024
+
+# Hardcoded safe extensions - do not allow dangerous extensions
+# Removed: .sql, .zip, .exe, .sh, .bat, .pgp, .p12
+SAFE_EXTENSIONS = {
+    'jpg', 'jpeg', 'png', 'gif',  # Images
+    'pdf',  # PDF documents
+    'doc', 'docx',  # Word documents
+    'xls', 'xlsx', 'csv',  # Spreadsheets
+    'txt',  # Text files
+    'odt', 'ods',  # OpenDocument
+    'mp4', 'mov'  # Videos
+}
+
+# Fetch allowed extensions from database but filter against safe list
 extensions_str = frappe.db.get_value("Ezy File Extensions", "Ezy File Extensions", "allowed_extensions") or ""
-ALLOWED_EXTENSIONS = {ext.replace(" ", "").lower() for ext in extensions_str.split(",") if ext.strip()}
+db_extensions = {ext.replace(" ", "").lower() for ext in extensions_str.split(",") if ext.strip()}
+
+# Only allow extensions that are in both the database config AND the safe list
+ALLOWED_EXTENSIONS = SAFE_EXTENSIONS if not db_extensions else (SAFE_EXTENSIONS & db_extensions)
 
 
 def is_allowed_file(filename):
@@ -44,17 +59,17 @@ def is_allowed_file(filename):
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def custom_upload_file():
-    user = None
+    """
+    Custom file upload with security validations.
+    Requires authentication - guest uploads are disabled for security.
+    """
+    # Require authentication
     if frappe.session.user == "Guest":
-        if frappe.get_system_settings("allow_guests_to_upload_files"):
-            ignore_permissions = True
-        else:
-            raise frappe.PermissionError
-    else:
-        user: "User" = frappe.get_doc("User", frappe.session.user)
-        ignore_permissions = False
+        frappe.throw("Authentication required for file uploads", frappe.AuthenticationError)
+
+    user: "User" = frappe.get_doc("User", frappe.session.user)
 
     files = frappe.request.files
     is_private = frappe.form_dict.is_private
@@ -68,8 +83,8 @@ def custom_upload_file():
     optimize = frappe.form_dict.optimize
     content = None
 
-    if not ignore_permissions:
-        check_write_permission(doctype, docname)
+    # Always check write permissions
+    check_write_permission(doctype, docname)
 
     if library_file := frappe.form_dict.get("library_file_name"):
         frappe.has_permission("File", doc=library_file, throw=True)
@@ -88,7 +103,19 @@ def custom_upload_file():
         content = file.stream.read()
         filename = file.filename
 
+        # Validate file size
+        if len(content) > MAX_FILE_SIZE:
+            frappe.throw(f"File size exceeds maximum allowed size of {MAX_FILE_SIZE / (1024 * 1024):.1f}MB", frappe.ValidationError)
+
+        # Validate file extension
+        if not is_allowed_file(filename):
+            frappe.throw(f"File type not allowed. Allowed types: {', '.join(sorted(ALLOWED_EXTENSIONS))}", frappe.ValidationError)
+
         content_type = guess_type(filename)[0]
+
+        # Validate MIME type
+        if content_type and content_type not in ALLOWED_MIMETYPES:
+            frappe.throw(f"File MIME type '{content_type}' is not allowed", frappe.ValidationError)
         
         if optimize and content_type and content_type.startswith("image/"):
             args = {"content": content, "content_type": content_type}

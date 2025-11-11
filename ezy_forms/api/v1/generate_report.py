@@ -8,6 +8,14 @@ def generate_custom_report(doctype_name, source, filters=None):
     Dynamically generates a report based on Ezy Form Definitions configuration.
     Supports parent + child table fields and multiple filters.
     """
+    # Validate doctype_name to prevent SQL injection
+    import re
+    if not doctype_name or not re.match(r'^[a-zA-Z0-9_ ]+$', doctype_name):
+        frappe.throw("Invalid DocType name", frappe.ValidationError)
+
+    # Verify DocType exists
+    if not frappe.db.exists("DocType", doctype_name):
+        frappe.throw(f"DocType '{doctype_name}' does not exist", frappe.DoesNotExistError)
 
     # Case 1: Run normal frappe report
     if source != "ezy_form_definition":
@@ -21,7 +29,7 @@ def generate_custom_report(doctype_name, source, filters=None):
         frappe.throw("Please specify both Doctype and Report Fields in the configuration")
 
     frappe.log_error("Report Field Configuration", report_fields)
-    # Parse fields 
+    # Parse fields
     field_mappings = []
     parsed_fields = []
     child_tables = {}  # {alias: child_doctype}
@@ -38,9 +46,20 @@ def generate_custom_report(doctype_name, source, filters=None):
         else:
             fieldname, label = field_expr, frappe.unscrub(field_expr).title()
 
+        # Validate fieldname to prevent SQL injection
+        if not re.match(r'^[a-zA-Z0-9_.]+$', fieldname):
+            frappe.log_error(f"Invalid field name format: '{fieldname}'", "Invalid Field")
+            continue
+
         # --- Child table field handling ---
         if "." in fieldname:
             parent_field, child_field = fieldname.split(".", 1)
+
+            # Validate both parent and child field names
+            if not re.match(r'^[a-zA-Z0-9_]+$', parent_field) or not re.match(r'^[a-zA-Z0-9_]+$', child_field):
+                frappe.log_error(f"Invalid field name format: '{fieldname}'", "Invalid Field")
+                continue
+
             parent_df = parent_meta.get_field(parent_field)
 
             if not parent_df:
@@ -57,6 +76,11 @@ def generate_custom_report(doctype_name, source, filters=None):
             parsed_fields.append(f"`{parent_field}`.`{child_field}` AS `{fieldname}`")
 
         else:
+            # Validate fieldname
+            if not re.match(r'^[a-zA-Z0-9_]+$', fieldname):
+                frappe.log_error(f"Invalid field name format: '{fieldname}'", "Invalid Field")
+                continue
+
             # Skip Table-type fields (cannot be directly queried)
             parent_df = parent_meta.get_field(fieldname)
             if parent_df and parent_df.fieldtype == "Table":

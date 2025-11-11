@@ -9,6 +9,7 @@ import traceback
 from urllib.parse import urlparse
 import ast
 from ezy_forms.api.v1.send_an_email import sending_mail_api
+from ezy_forms.utils.security import generate_secure_alphanumeric_token
 
 @frappe.whitelist()
 def edit_the_form_before_approve(document_type,property,form_id,updated_fields,status=None):
@@ -23,8 +24,9 @@ def edit_the_form_before_approve(document_type,property,form_id,updated_fields,s
         todo_tab(document_type=document_type, request_id=form_id, property=property, cluster_name=None, current_level=current_level_for_wf_workflow,account_ids=record_data,status="None")
             
         now = add_to_date(None,as_datetime=True)
-        my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}:{now.second}:{now.microsecond}" 
-        random_reference_id = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=10))
+        my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}:{now.second}:{now.microsecond}"
+        # Generate cryptographically secure token
+        random_reference_id = generate_secure_alphanumeric_token(16)
         setting_reason = frappe.get_doc('WF Activity Log', form_id)
         # Append to the child table "reason"
         setting_reason.append("reason", {
@@ -34,7 +36,7 @@ def edit_the_form_before_approve(document_type,property,form_id,updated_fields,s
             "user": frappe.session.user,
             "action": 'Request Raised',
             "time": my_time,
-            "random_string":  ''.join(random.sample(random_reference_id,len(random_reference_id)))
+            "random_string": random_reference_id
         })
         # Save the parent document
         setting_reason.save(ignore_permissions=True)

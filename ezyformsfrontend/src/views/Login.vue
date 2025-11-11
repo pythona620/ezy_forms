@@ -301,7 +301,7 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
-            <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
+            <div class="ql-editor read-mode" v-html="safeAcknowledgementHtml"></div>
             <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
@@ -331,8 +331,8 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
-            <div v-if="this.isAcknowledge == 0" class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-          
+            <div v-if="this.isAcknowledge == 0" class="ql-editor read-mode" v-html="safeAcknowledgementHtml"></div>
+
             <div class="mt-2 row" v-if="this.isAcknowledgeSign == 0">
               <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
                 <input type="radio" id="digital" value="digital" v-model="selectedOption"
@@ -411,6 +411,7 @@ import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 import DigitalSignature from '../views/DigitalSignature.vue';
 import { showSuccess, showError } from "../shared/services/toast";
+import { sanitizeHtml } from "../shared/utils/sanitize";
 export default {
   props: ["id"],
   components: {
@@ -1504,6 +1505,10 @@ export default {
   },
 
   computed: {
+    safeAcknowledgementHtml() {
+      // Sanitize HTML to prevent XSS attacks
+      return sanitizeHtml(this.acknowledgementHtml || '');
+    },
     passwordRule() {
       if (this.selectedScore == 2) {
         return {

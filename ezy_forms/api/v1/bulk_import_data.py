@@ -5,9 +5,17 @@ from frappe import _
 from frappe.core.doctype.data_import.data_import import start_import, get_import_logs, get_preview_from_template,form_start_import
 from frappe.utils.file_manager import save_file
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def import_bulk_data(file: str | None, doctype: str | None):
+    """
+    Import bulk data from Excel file.
+    Requires authentication and appropriate permissions.
+    """
     try:
+        # Ensure user is authenticated
+        if frappe.session.user == "Guest":
+            frappe.throw(_("Authentication required for data import"), frappe.AuthenticationError)
+
         # Permission checks
         if not any(frappe.has_permission(doctype, ptype=pt, user=frappe.session.user) for pt in ["create", "import", "write"]):
             frappe.response["data"] = {"message": _("You do not have permission to perform this action"), "success": False}

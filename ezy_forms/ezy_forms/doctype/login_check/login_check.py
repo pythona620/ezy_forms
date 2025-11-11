@@ -22,32 +22,46 @@ def after_insert_user(self, method=None):
     except Exception as e:
         frappe.log_error(f"Error in after_insert_user for {self.emp_mail_id}: {str(e)}")
         
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def update_is_first_value(user_id_name, company=None):
+    """Update first login flag - requires authentication"""
     try:
+        # Ensure user is authenticated
+        if frappe.session.user == "Guest":
+            frappe.throw("Authentication required", frappe.AuthenticationError)
+
         # Check if user exists
         login_doc = frappe.db.get_value("Login Check", {"name":user_id_name}, ["name", "is_first_login"], as_dict=True)
         if not login_doc:
-            return "User does not exist"
+            frappe.throw("User does not exist", frappe.DoesNotExistError)
+
+        # Users can only update their own login status
+        if frappe.session.user != user_id_name and frappe.session.user != "Administrator":
+            frappe.throw("You can only update your own login status", frappe.PermissionError)
 
         # Update only if not already set
         if login_doc.is_first_login == 0:
             frappe.db.set_value("Login Check", login_doc.name, "is_first_login", 1)
-        return "User Update "
+        return {"success": True, "message": "User updated successfully"}
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "update_is_first_value error")
-        return {"status": "error", "message": str(e)}
-
-    
-    except Exception as e:
-        frappe.log_error(f"Error In User Not exit for :", {str(e)})  
+        frappe.throw("Failed to update user status")  
         
         
-@frappe.whitelist(allow_guest=True,methods=["GET","POST"])
+@frappe.whitelist(methods=["GET","POST"])
 def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None):
+    """Check first-time login status and update user preferences - requires authentication"""
+    # Ensure user is authenticated
+    if frappe.session.user == "Guest":
+        frappe.throw("Authentication required", frappe.AuthenticationError)
+
+    # Users can only check their own status
+    if frappe.session.user != user_id and frappe.session.user != "Administrator":
+        frappe.throw("You can only check your own status", frappe.PermissionError)
+
     if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user_id}):
-        return "User does not exist"
+        frappe.throw("User does not exist", frappe.DoesNotExistError)
 
     try:
         response = {}
@@ -95,15 +109,54 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
 
          
          
-@frappe.whitelist(allow_guest=True,methods=["PUT"])
-def update_password(user_id,new_password,company=None):
+@frappe.whitelist(methods=["PUT"])
+def update_password(user_id, new_password, old_password, company=None):
+    """
+    Update user password with proper authentication and validation.
+    Requires:
+    - User must be logged in
+    - User can only change their own password
+    - Old password must be verified
+    """
     try:
-        get_doc = frappe.get_doc("User",{"name":user_id})
-        get_doc.new_password  = new_password
-        get_doc.save(ignore_permissions=True)
+        # Ensure user is authenticated
+        if frappe.session.user == "Guest":
+            frappe.throw("Authentication required", frappe.AuthenticationError)
+
+        # Users can only change their own password (unless they're Administrator)
+        if frappe.session.user != user_id and frappe.session.user != "Administrator":
+            frappe.throw("You can only change your own password", frappe.PermissionError)
+
+        # Verify old password (except for Administrator changing other users' passwords)
+        if frappe.session.user == user_id:
+            from frappe.utils.password import check_password
+            if not old_password:
+                frappe.throw("Current password is required")
+            check_password(user_id, old_password)
+
+        # Validate new password strength
+        if not new_password or len(new_password) < 8:
+            frappe.throw("New password must be at least 8 characters long")
+
+        # Update password
+        get_doc = frappe.get_doc("User", user_id)
+        get_doc.new_password = new_password
+        get_doc.save()
         frappe.db.commit()
-        return "Password Updated Successfully"
+
+        # Log the password change for audit
+        frappe.logger().info(f"Password changed for user: {user_id}")
+
+        return {"success": True, "message": "Password updated successfully"}
+
+    except frappe.AuthenticationError:
+        frappe.log_error("Unauthenticated password reset attempt", "Security Alert")
+        raise
+    except frappe.PermissionError:
+        frappe.log_error(f"Unauthorized password change attempt by {frappe.session.user} for {user_id}", "Security Alert")
+        raise
     except Exception as e:
-        frappe.log_error(f"Error In User Not exit for :", {str(e)})  
+        frappe.log_error(frappe.get_traceback(), "Password Update Error")
+        frappe.throw("Failed to update password")  
 
 
