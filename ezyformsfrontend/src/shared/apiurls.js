@@ -77,6 +77,7 @@ export const apis = {
   preview_dynamic_form: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template.preview_dynamic_form`,
   download_pdf_form: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template.download_filled_form`,
   loginCheckmethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.check_is_first_time_or_not`,
+  checkFirstLoginStatus: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.check_first_login_status`,
   loginUpdatePassword: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_password`,
   loginCheckuseermethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_is_first_value`,
   dashboard: domain + `/method/ezy_forms.api.v1.dashboard_api.dashboard_counts`,

@@ -491,7 +491,7 @@ export default {
   methods: {
     validatename() {
       if (!this.formdata.usr) {
-        this.errors.usr = "Please Enter Valid Email Address *";
+        this.errors.usr = "Please Enter User Name *";
       } else {
         delete this.errors.usr;
       }
@@ -548,36 +548,34 @@ export default {
     validateEmail() {
       if(this.SignUpdata.email){
         this.SignUpdata.email = this.SignUpdata.email.trim().toLowerCase();
-      
+
       const email = this.SignUpdata.email;
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (!email) {
         this.errors.email = "Email is required *";
-
-      } else if (!regex.test(email)) {
-        this.errors.email = "Please enter a valid email address *";
       }
       else {
         delete this.errors.email;
       }
+
+      // Check if user already exists using guest-allowed API
       axiosInstance
-        .get(`${apis.loginCheckmethod}`, {
+        .get(`${apis.checkFirstLoginStatus}`, {
           params: { user_id: this.SignUpdata.email},
         })
         .then((res) => {
-          // Case: User not found – clear error
-          if (res.message === "User not found") {
-            this.errors.email = '';
-          }
-          // Case: res.message is an object (user exists) – show error
-          else if (typeof res.message === 'object' && res.message.user_id) {
+          // If user exists, show error
+          if (res.message && res.message.success && res.message.user_exists) {
             this.errors.email = "Already Registered User";
+          } else {
+            // User doesn't exist, clear error
+            delete this.errors.email;
           }
         })
         .catch((error) => {
-          console.error("Login error: ", error);
-          this.errors.email = "Error checking email";
+          console.error("Error checking email:", error);
+          // Don't block signup if check fails
+          delete this.errors.email;
         });
         }
 
@@ -1031,26 +1029,21 @@ export default {
     },
 
     checkUserMail() {
+      // Use guest-allowed API for pre-authentication check
       axiosInstance
-        .get(`${apis.loginCheckmethod}`, {
+        .get(`${apis.checkFirstLoginStatus}`, {
           params: { user_id: this.formdata.usr },
         })
         .then((res) => {
-          if (res.message) {
+          if (res.message && res.message.success) {
+            // Get basic info from guest-allowed API
             this.isFirstLogin = res.message.is_first_login;
-            this.twoFactorAuth = res.message.enable_two_factor_auth
             this.user_id_name = res.message.name;
-            this.enableCheck = res.message.enable_check
-            this.isAcknowledge = res.message.is_acknowledge
-            this.ShowAcknowledgement = res.message.show_acknowledgement
-            this.isAcknowledgeSign = res.message.is_signature;
-            this.LoginAcknowledge = res.message.login_acknowledge;
-            this.subEndDate = res.message.subscription_end_date;
-            this.selectedScore = res.message.minimum_password_score;
-            // this.vendorComparisonForm=res.message.vender_comparison_form;
+            this.enableCheck = res.message.enable_check;
 
+            // Show password change modal for first-time users
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
-              this.clearPassword()
+              this.clearPassword();
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
               );
@@ -1058,9 +1051,13 @@ export default {
               this.showPwdField = false;
               this.showOtpPage = false;
             }
+
+            // Show error for disabled users
             if (this.isFirstLogin === 0 && this.enableCheck == 0) {
-              showError("User is disabled. Please contact your IT Manager to verify your sign-up")
+              showError("User is disabled. Please contact your IT Manager to verify your sign-up");
             }
+
+            // Enable password field for returning users
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;
               this.showOtpPage = false;
@@ -1069,26 +1066,23 @@ export default {
               nextTick(() => {
                 document.getElementById("password")?.focus();
               });
+            }
 
-              // console.log("User is logging in for the first time.");
-            }
-            if (this.subEndDate === this.today) {
-              const modal = new bootstrap.Modal(
-                document.getElementById("subscriptionModal")
-              );
-              modal.show();
-              this.showPwdField = false;
-            }
-            else {
-              console.log("User has logged in before.");
-            }
+            // After getting basic info, if user exists and is enabled,
+            // we'll get full data (2FA, acknowledgement, etc.) after successful login
           } else {
-            // console.log("No user data found.");
-            this.showPwdField = true; // Show password field when no user data is found
+            // No user data found or error
+            this.showPwdField = true;
+            if (res.message && res.message.error) {
+              showError(res.message.error);
+            }
           }
         })
         .catch((error) => {
-          console.error("Login error: ", error);
+          console.error("Error checking user status:", error);
+          // On error, still allow password field to show
+          this.showPwdField = true;
+          showError("Unable to verify user. Please try again.");
         });
     },
 
@@ -1099,9 +1093,31 @@ export default {
         this.loading = true;
         axiosInstance
           .post(apis.login, this.formdata)
-          .then((res) => {
+          .then(async (res) => {
             if (res) {
               this.storeData = res;
+
+              // After successful login, get full user data (authenticated API)
+              try {
+                const fullDataRes = await axiosInstance.get(`${apis.loginCheckmethod}`, {
+                  params: { user_id: this.formdata.usr },
+                });
+
+                if (fullDataRes.message) {
+                  // Update with full data from authenticated API
+                  this.twoFactorAuth = fullDataRes.message.enable_two_factor_auth;
+                  this.isAcknowledge = fullDataRes.message.is_acknowledge;
+                  this.ShowAcknowledgement = fullDataRes.message.show_acknowledgement;
+                  this.isAcknowledgeSign = fullDataRes.message.is_signature;
+                  this.LoginAcknowledge = fullDataRes.message.login_acknowledge;
+                  this.subEndDate = fullDataRes.message.subscription_end_date;
+                  this.selectedScore = fullDataRes.message.minimum_password_score;
+                }
+              } catch (error) {
+                console.error("Error fetching full user data:", error);
+                // Continue with login even if this fails
+              }
+
               if (this.twoFactorAuth === "1") {
                 this.ShowLoginPage = false;
                 this.showOtpPage = true;

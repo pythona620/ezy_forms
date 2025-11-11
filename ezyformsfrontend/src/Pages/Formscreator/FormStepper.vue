@@ -317,53 +317,71 @@
                     </div>
                   </div>
 
-                  <!-- Questions in Form Step -->
-                  <div v-if="activeStep === 2">
-                    <div class="">
-                      <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                        <h1 @click="prevStep(1)" class="font-11 m-0">
-                          <i class="bi bi-chevron-left"></i><span class="ms-2">Back To About Form</span>
-                        </h1>
-                        <div class="d-flex gap-2 align-items-center">
-                          <div>
-                            <button v-if="isPreviewVisible"
-                              class="btn btn-light previewBtn d-flex align-items-center font-13" type="button"
-                              @click="previewForm">
-                              <i class="bi bi-eye me-1 ms-1 mb-0"></i>Preview
-                            </button>
-                            <!-- <button
-                              class="btn btn-light previewBtn d-flex align-items-center font-13"
-                              type="button"
-                              @click="previewForm"
-                            >
-                              <i class="bi bi-eye me-1 ms-1 mb-0"></i>Preview
-                            </button> -->
-                          </div>
-
-                          <!-- <ButtonComp
-                                                        class="buttoncomp btn btn-dark font-10 Withborder border"
-                                                        name="Next" v-if="activeStep < 3" @click="nextStep" /> -->
-
-                          <!-- :disabled="hasErrors || isNextDisabled"
-                            :style="{
-                              cursor: hasErrors ? 'not-allowed' : 'pointer',
-                            }" -->
-                          <button v-if="blockArr.length" class="btn btn-dark font-10 Withborder border" type="button"
-                            @click="saveFormData('save')">
-                            {{ paramId !== "new" ? "Update Form" : "Create Form" }}
-                          </button>
-                          <!-- <button class="btn btn-light font-10" type="button"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModal"
-                                                        @click="createForm">
-                                                        <i class="bi bi-eye me-1"></i>Preview
-                                                    </button> -->
-                        </div>
+                  <!-- Questions in Form Step - NEW ZOHO-STYLE LAYOUT -->
+                  <div v-if="activeStep === 2" class="zoho-form-builder">
+                    <!-- Top Toolbar -->
+                    <div class="zoho-toolbar">
+                      <div class="toolbar-left">
+                        <button @click="prevStep(1)" class="btn btn-sm btn-light">
+                          <i class="bi bi-chevron-left"></i> Back
+                        </button>
                       </div>
-                      <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
-                        :childHeaders="childtableHeaders" />
-                      <div class="main-block" ref="mainBlockRef">
+
+                      <!-- Tab Navigation -->
+                      <div class="zoho-tabs">
+                        <button
+                          v-for="(block, index) in blockArr"
+                          :key="index"
+                          :class="['zoho-tab', { active: currentBuilderTab === index }]"
+                          @click="currentBuilderTab = index">
+                          <i class="bi bi-file-earmark-text me-1"></i>
+                          {{ index === 0 ? 'Requestor Block' : `Approver Block ${index}` }}
+                          <i v-if="blockArr.length > 1" class="bi bi-x-lg ms-2" @click.stop="removeBlock(index)"></i>
+                        </button>
+                        <button class="zoho-tab zoho-tab-add" @click="addBlock">
+                          <i class="bi bi-plus-lg"></i> Add Block
+                        </button>
+                      </div>
+
+                      <div class="toolbar-right">
+                        <button v-if="isPreviewVisible" class="btn btn-sm btn-light me-2" @click="previewForm">
+                          <i class="bi bi-eye me-1"></i>Preview
+                        </button>
+                        <button v-if="blockArr.length" class="btn btn-sm btn-dark" @click="saveFormData('save')">
+                          {{ paramId !== "new" ? "Update Form" : "Create Form" }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Main Builder Area -->
+                    <div class="zoho-builder-container">
+                      <!-- Left: Field Library -->
+                      <aside class="zoho-field-library">
+                        <div class="library-header">
+                          <h6 class="mb-0">Field Types</h6>
+                          <button class="btn btn-sm btn-link p-0" @click="showFieldLibrary = !showFieldLibrary">
+                            <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
+                          </button>
+                        </div>
+
+                        <div v-if="showFieldLibrary" class="library-content">
+                          <FieldLibraryPanel
+                            :collapsible="false"
+                            @field-add="handleFieldAddFromLibrary"
+                            @field-dragstart="handleFieldDragStart"
+                          />
+                        </div>
+                      </aside>
+
+                      <!-- Center: Form Canvas -->
+                      <div class="zoho-form-canvas">
+                        <div class="canvas-inner" ref="mainBlockRef">
+                          <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
+                            :childHeaders="childtableHeaders" />
+
+                          <!-- Current Block Content -->
                         <!-- Here is block level starts -->
-                        <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
+                        <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex" v-show="blockIndex === currentBuilderTab">
                           <div class="requestandAppHeader">
                             <div class="d-flex justify-content-between align-items-center">
                               <div class=" ">
@@ -1389,9 +1407,30 @@
                             }}
                           </button>
                         </div>
+                        <!-- End Add Block Button -->
                       </div>
+                      <!-- End Canvas Inner -->
                     </div>
+                    <!-- End Zoho Form Canvas -->
+
+                      <!-- Right: Field Properties Panel (Optional - for future enhancement) -->
+                      <aside class="zoho-properties-panel" v-if="selectedFieldForEdit">
+                        <div class="properties-header">
+                          <h6 class="mb-0">Field Properties</h6>
+                          <button class="btn btn-sm btn-link p-0" @click="selectedFieldForEdit = null">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                        <div class="properties-content">
+                          <!-- Field properties will go here -->
+                          <p class="text-muted small">Select a field to edit its properties</p>
+                        </div>
+                      </aside>
+                    </div>
+                    <!-- End Zoho Builder Container -->
                   </div>
+                  <!-- End Zoho Form Builder -->
+
                   <div v-if="activeStep === 3">
                     <div class="stepperbackground d-flex align-items-center justify-content-end gap-2 ">
 
@@ -1695,6 +1734,12 @@ import FormPreviewComp from "../../Components/FormPreviewComp.vue";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+
+// Drag-and-Drop Field Library
+import FieldLibraryPanel from "../../Components/FormBuilder/FieldLibrary/FieldLibraryPanel.vue";
+import DropZone from "../../Components/FormBuilder/Canvas/DropZone.vue";
+import { FIELD_TYPES, FIELD_CATEGORIES } from "../../Components/FormBuilder/FieldLibrary/fieldTypes.js";
+
 const route = useRoute();
 const router = useRouter();
 const activeStep = ref(1);
@@ -1734,6 +1779,15 @@ const showSuggestions = ref(false);
 let debounceTimeout = null;
 const tableName = ref("");
 let paramId = ref("");
+
+// Drag-and-Drop State
+const draggedFieldType = ref(null);
+const selectedFieldForEdit = ref(null);
+const showFieldLibrary = ref(true);
+
+// Zoho-style Tab State
+const currentBuilderTab = ref(0);
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit;
 });
@@ -4750,10 +4804,359 @@ async function saveFormData(type) {
 }
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
+
+// ===== DRAG-AND-DROP FIELD LIBRARY HANDLERS =====
+
+// Handle field added from library (click)
+const handleFieldAddFromLibrary = (fieldType) => {
+  console.log('Field added from library:', fieldType);
+
+  // Get current block based on active tab
+  const currentBlockIndex = currentBuilderTab.value;
+  const currentBlock = blockArr[currentBlockIndex];
+
+  if (!currentBlock) {
+    showError('Please create a block first before adding fields');
+    return;
+  }
+
+  // Create field from type
+  const newField = createFieldFromLibraryType(fieldType);
+
+  if (!newField) {
+    return;
+  }
+
+  // Add to block's sections
+  if (!currentBlock.sections) {
+    currentBlock.sections = [];
+  }
+
+  if (currentBlock.sections.length === 0) {
+    currentBlock.sections.push({
+      label: '',
+      rows: [[{ fields: [] }]]
+    });
+  }
+
+  // Add to first section, first row, first column
+  const firstSection = currentBlock.sections[0];
+  const firstRow = firstSection.rows[0];
+  const firstColumn = firstRow[0];
+
+  if (!firstColumn.fields) {
+    firstColumn.fields = [];
+  }
+
+  firstColumn.fields.push(newField);
+
+  console.log('Field added successfully:', newField);
+  showSuccess(`${newField.label} field added successfully`);
+};
+
+// Handle drag start from library
+const handleFieldDragStart = (fieldType) => {
+  console.log('Drag started:', fieldType);
+  draggedFieldType.value = fieldType;
+};
+
+// Create field object from library field type
+const createFieldFromLibraryType = (fieldType) => {
+  const fieldDef = FIELD_TYPES[fieldType];
+
+  if (!fieldDef) {
+    console.error('Field type not found:', fieldType);
+    showError('Field type not found');
+    return null;
+  }
+
+  // Generate unique field name
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  const fieldname = `${fieldType}_${timestamp}_${randomSuffix}`;
+
+  return {
+    id: `field_${timestamp}_${randomSuffix}`,
+    fieldname: fieldname,
+    label: fieldDef.name,
+    fieldtype: fieldDef.frappe_fieldtype,
+    options: fieldDef.defaultProps?.options || '',
+    reqd: fieldDef.defaultProps?.required ? 1 : 0,
+    read_only: 0,
+    hidden: 0,
+    description: fieldDef.description || '',
+    default: fieldDef.defaultProps?.default || '',
+    placeholder: fieldDef.defaultProps?.placeholder || '',
+    // Add other properties as needed based on existing field structure
+  };
+};
+
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+
+// ===== ZOHO-STYLE FORM BUILDER LAYOUT =====
+
+.zoho-form-builder {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 160px);
+  background: #ffffff;
+}
+
+// Top Toolbar
+.zoho-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 1rem;
+
+  .toolbar-left {
+    flex-shrink: 0;
+  }
+
+  .toolbar-right {
+    flex-shrink: 0;
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+// Tab Navigation
+.zoho-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  flex: 1;
+  align-items: center;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+}
+
+.zoho-tab {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px 6px 0 0;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &.active {
+    background: #ffffff;
+    border-bottom-color: #ffffff;
+    font-weight: 500;
+    margin-bottom: -1px;
+  }
+
+  i.bi-x-lg {
+    font-size: 10px;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+      color: #ef4444;
+    }
+  }
+}
+
+.zoho-tab-add {
+  background: transparent;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+
+  &:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+  }
+}
+
+// Main Builder Container
+.zoho-builder-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+// Left: Field Library
+.zoho-field-library {
+  width: 280px;
+  background: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+
+  .library-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+
+    h6 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .btn-link {
+      color: #6b7280;
+      text-decoration: none;
+
+      &:hover {
+        color: #111827;
+      }
+    }
+  }
+
+  .library-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+  }
+}
+
+// Center: Form Canvas
+.zoho-form-canvas {
+  flex: 1;
+  overflow-y: auto;
+  background: #f9fafb;
+  padding: 1.5rem;
+
+  .canvas-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+}
+
+// Right: Properties Panel
+.zoho-properties-panel {
+  width: 320px;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+
+  .properties-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+
+    h6 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .btn-link {
+      color: #6b7280;
+      text-decoration: none;
+
+      &:hover {
+        color: #111827;
+      }
+    }
+  }
+
+  .properties-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+}
+
+// Mobile Responsive
+@media (max-width: 992px) {
+  .zoho-builder-container {
+    flex-direction: column;
+  }
+
+  .zoho-field-library {
+    width: 100%;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .zoho-properties-panel {
+    width: 100%;
+    max-height: 250px;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .zoho-form-canvas {
+    padding: 1rem;
+
+    .canvas-inner {
+      padding: 1rem;
+    }
+  }
+
+  .zoho-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .toolbar-left,
+    .toolbar-right {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  .zoho-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+// ===== END ZOHO-STYLE STYLES =====
 
 .approver_type_div{
   border: 1px solid #BAFFC2;
