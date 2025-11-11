@@ -491,7 +491,7 @@ export default {
   methods: {
     validatename() {
       if (!this.formdata.usr) {
-        this.errors.usr = "Please Enter Valid Email Address *";
+        this.errors.usr = "Please Enter User Name *";
       } else {
         delete this.errors.usr;
       }
@@ -548,36 +548,34 @@ export default {
     validateEmail() {
       if(this.SignUpdata.email){
         this.SignUpdata.email = this.SignUpdata.email.trim().toLowerCase();
-      
+
       const email = this.SignUpdata.email;
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (!email) {
         this.errors.email = "Email is required *";
-
-      } else if (!regex.test(email)) {
-        this.errors.email = "Please enter a valid email address *";
       }
       else {
         delete this.errors.email;
       }
+
+      // Check if user already exists using guest-allowed API
       axiosInstance
-        .get(`${apis.loginCheckmethod}`, {
+        .get(`${apis.checkFirstLoginStatus}`, {
           params: { user_id: this.SignUpdata.email},
         })
         .then((res) => {
-          // Case: User not found – clear error
-          if (res.message === "User not found") {
-            this.errors.email = '';
-          }
-          // Case: res.message is an object (user exists) – show error
-          else if (typeof res.message === 'object' && res.message.user_id) {
+          // If user exists, show error
+          if (res.message && res.message.success && res.message.user_exists) {
             this.errors.email = "Already Registered User";
+          } else {
+            // User doesn't exist, clear error
+            delete this.errors.email;
           }
         })
         .catch((error) => {
-          console.error("Login error: ", error);
-          this.errors.email = "Error checking email";
+          console.error("Error checking email:", error);
+          // Don't block signup if check fails
+          delete this.errors.email;
         });
         }
 
