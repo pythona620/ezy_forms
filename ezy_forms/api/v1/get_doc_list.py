@@ -62,19 +62,29 @@ def get_doctype_list(doctype, fields: str, filters=None, limit_start: int = None
     group_by_data = None
     if group_by:
         try:
+            # Validate group_by field name to prevent SQL injection
+            import re
             group_by = group_by.strip()
-            query = f"""                
-                SELECT {group_by}, COUNT(*) AS count
-                FROM `tab{doctype}`
-                WHERE doctype_name = '{doctype_name}'
-                GROUP BY {group_by}
-                ORDER BY count DESC;
+            if not re.match(r'^[a-zA-Z0-9_]+$', group_by):
+                frappe.throw("Invalid field name for grouping", frappe.ValidationError)
+
+            # Verify the field exists in the DocType
+            if not frappe.db.exists("DocField", {"parent": doctype, "fieldname": group_by}):
+                frappe.throw(f"Field '{group_by}' does not exist in DocType '{doctype}'", frappe.ValidationError)
+
+            # Use parameterized query for doctype_name
+            query = f"""
+                SELECT `{group_by}`, COUNT(*) AS count
+                FROM `tab{frappe.db.escape(doctype)}`
+                WHERE doctype_name = %s
+                GROUP BY `{group_by}`
+                ORDER BY count DESC
             """
-            group_by_data = frappe.db.sql(query, as_dict=True)
+            group_by_data = frappe.db.sql(query, (doctype_name,), as_dict=True)
             return group_by_data
         except Exception as e:
             frappe.log_error(f"Group By Error in {doctype}", str(e))
-            group_by_data = []
+            frappe.throw("Failed to group data")
 
     # Main data query
     data = DatabaseQuery(doctype).execute(

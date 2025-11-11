@@ -8,6 +8,7 @@ import string
 import numpy as np
 import random
 import sys, traceback, time
+from ezy_forms.utils.security import generate_secure_alphanumeric_token
 from ezy_forms.api.v1.delete_files import delete_files_api
 import os
 from ezy_forms.api.v1.send_an_email import sending_mail_api
@@ -262,14 +263,9 @@ def generate_unique_random_string(length=10):
 	))
 	
 	while True:
-		random_string = ''.join(
-			random.choices(
-				string.ascii_lowercase + string.ascii_uppercase + string.digits, 
-				k=length
-			)
-		)
-		random_string = ''.join(random.sample(random_string, len(random_string)))
-		
+		# Generate cryptographically secure token
+		random_string = generate_secure_alphanumeric_token(length)
+
 		if random_string not in existing_refs:
 			return random_string
 
@@ -571,7 +567,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						"action": "Approved",
 						"reason": "Auto Approved by the system",
 						"time": my_time,
-						"random_string": ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+						"random_string": generate_secure_alphanumeric_token(16)
 					}
 					existing_roles = activate_log_roles.get("reason") or []
 					record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role and r.get("action") != "Rejected"  for r in existing_roles)
@@ -626,7 +622,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					"action": "Approved",
 					"reason": "Auto Approved by the system",
 					"time": my_time,
-					"random_string": ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+					"random_string": generate_secure_alphanumeric_token(16)
 				}
 				existing_roles = activate_log_roles.get("reason") or []
 				record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role and r.get("action") != "Rejected"  for r in existing_roles)

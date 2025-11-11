@@ -51,7 +51,7 @@ axiosInstance.interceptors.response.use(
           showError(error.response.data?.message || "Unauthorized", { transition: "zoom" });
           break;
         case 403:
-          showError(error.response.data?.exc_type || "Forbidden", { transition: "zoom" });
+          showError("Access forbidden. You don't have permission to perform this action.", { transition: "zoom" });
           break;
         case 404:
         case 417:
@@ -61,7 +61,10 @@ axiosInstance.interceptors.response.use(
           showError("Conflict: The data already exists.");
           break;
         case 500:
-          showError(error.response.data?.exception || "Internal Server Error", { transition: "zoom" });
+          // Don't expose technical error details to users
+          showError("An internal error occurred. Please try again later.", { transition: "zoom" });
+          // Log the actual error for debugging
+          console.error('Server Error:', error.response.data);
           break;
         default:
           showError(`${status}: ${statusText}`, { transition: "zoom" });

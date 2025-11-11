@@ -102,27 +102,29 @@ def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup:
 		try:
 			# Check for existing requestors
 			existing_requestors = frappe.db.sql(
-				f"""SELECT COUNT(*) as count FROM `tabWF Requestors` 
-					WHERE parent = '{doc_rec}' AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""", 
+				"""SELECT COUNT(*) as count FROM `tabWF Requestors`
+					WHERE parent = %s AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""",
+				(doc_rec,),
 				as_dict=True
 			)
-			
+
 			# Check for existing level setup
 			existing_levels = frappe.db.sql(
-				f"""SELECT COUNT(*) as count FROM `tabWF Level Setup` 
-					WHERE parent = '{doc_rec}' AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""", 
+				"""SELECT COUNT(*) as count FROM `tabWF Level Setup`
+					WHERE parent = %s AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""",
+				(doc_rec,),
 				as_dict=True
 			)
 			
 			# Only delete if records exist and combine both deletions in single transaction
 			if existing_requestors[0]['count'] > 0 or existing_levels[0]['count'] > 0:
 				if existing_requestors[0]['count'] > 0:
-					frappe.db.sql(f"""DELETE FROM `tabWF Requestors` 
-									 WHERE parent = '{doc_rec}' AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""")
-				
+					frappe.db.sql("""DELETE FROM `tabWF Requestors`
+									 WHERE parent = %s AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""", (doc_rec,))
+
 				if existing_levels[0]['count'] > 0:
-					frappe.db.sql(f"""DELETE FROM `tabWF Level Setup` 
-									 WHERE parent = '{doc_rec}' AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""")
+					frappe.db.sql("""DELETE FROM `tabWF Level Setup`
+									 WHERE parent = %s AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""", (doc_rec,))
 				
 				frappe.db.commit()  #c                
 		except Exception as e:

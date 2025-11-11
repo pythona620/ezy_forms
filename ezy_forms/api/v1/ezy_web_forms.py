@@ -6,7 +6,8 @@ import uuid
 import random
 import string
 from frappe.utils import add_to_date,get_datetime, now_datetime
-from ezy_forms.api.v1.send_an_email import sending_mail_api  
+from ezy_forms.api.v1.send_an_email import sending_mail_api
+from ezy_forms.utils.security import generate_secure_alphanumeric_token  
 
 
 # Create QR code for web view
@@ -36,10 +37,18 @@ def create_qr_for_web_view(form_name):
 
 @frappe.whitelist(allow_guest=True)
 def qr_code_to_new_form(token, save_doc=None):
+    """
+    Handle QR code form submission.
+    Allows guest access for public forms, but validates token and form settings.
+    """
+    # Validate token format
+    if not token or not isinstance(token, str):
+        frappe.throw("Invalid token format", frappe.ValidationError)
+
     # Get form_name from QR token
     form_data = frappe.db.get_list("EzyForm QR Code", {"token": token}, ["form_name", "form_valid_from", "form_valid_to"])
     if not form_data:
-        frappe.throw("Invalid token")
+        frappe.throw("Invalid or expired QR code token", frappe.ValidationError)
         
     form_name = form_data[0].form_name
     form_valid_from = form_data[0].form_valid_from
@@ -124,8 +133,8 @@ def qr_code_to_new_form(token, save_doc=None):
     new_doc.wf_generated_request_status = reason
     new_doc.save(ignore_permissions=True)
     frappe.db.commit()
-    random_reference_id = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=10))
-    random_reference_id = ''.join(random.sample(random_reference_id,len(random_reference_id)))
+    # Generate cryptographically secure token
+    random_reference_id = generate_secure_alphanumeric_token(16)
     
     # activate log
     now = add_to_date(None,as_datetime=True)
