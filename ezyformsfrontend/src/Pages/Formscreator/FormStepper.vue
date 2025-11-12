@@ -54,14 +54,14 @@
                     <div class="">
                       <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
                         <div></div>
-                        <h1 class="font-14 fw-bold m-0">Form Info & Fields</h1>
+                        <h1 class="font-14 fw-bold m-0">Form Info</h1>
                         <div>
                           <button v-if="!$route.query.id && !$route.query.preId" class=" btn btn-light font-12 mx-2" type="button"
                             @click="clearForm">Clear
                             Form</button>
 
                           <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                            v-if="activeStep < 4" @click="nextStep" />
+                            v-if="activeStep < 5" @click="nextStep" />
                         </div>
                         <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
                         <!-- :disabled="isNextDisabled" -->
@@ -336,8 +336,8 @@
                     </div>
                   </div>
 
-                  <!-- Form Builder Section (still in Step 1) -->
-                  <div v-if="activeStep === 1" class="zoho-form-builder mt-4">
+                  <!-- Step 2: Form Fields (Form Builder) -->
+                  <div v-if="activeStep === 2" class="zoho-form-builder">
                     <!-- Top Toolbar -->
                     <div class="zoho-toolbar">
                       <div class="toolbar-left">
@@ -1438,13 +1438,174 @@
                   </div>
                   <!-- End Zoho Form Builder -->
 
-                  <!-- Step 2: Requestor Block -->
-                  <div v-if="activeStep === 2">
+                  <!-- Step 3: Requestor Block -->
+                  <div v-if="activeStep === 3">
                     <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
-                      <button @click="prevStep(2)" class="btn btn-sm btn-light">
+                      <button @click="prevStep(3)" class="btn btn-sm btn-light">
                         <i class="bi bi-chevron-left"></i> Back
                       </button>
-                      <h1 class="font-14 fw-bold m-0">Requestor Block - Predefined Fields</h1>
+                      <h1 class="font-14 fw-bold m-0">Requestor Block</h1>
+                      <button class="btn btn-sm btn-dark" @click="nextStep">
+                        Next <i class="bi bi-chevron-right"></i>
+                      </button>
+                    </div>
+
+                    <div class="container-fluid mt-4 p-4">
+                      <!-- Workflow Selection Option -->
+                      <div class="card mb-4">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2"></i>Workflow Configuration</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <!-- Select Existing Workflow or Create New -->
+                            <div class="col-md-6">
+                              <label class="form-label fw-bold">Workflow Type</label>
+                              <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="workflowType" id="existingWorkflow" value="existing" v-model="workflowType" />
+                                <label class="btn btn-outline-primary" for="existingWorkflow">
+                                  <i class="bi bi-folder me-1"></i>Use Existing
+                                </label>
+                                <input type="radio" class="btn-check" name="workflowType" id="newWorkflow" value="new" v-model="workflowType" checked />
+                                <label class="btn btn-outline-primary" for="newWorkflow">
+                                  <i class="bi bi-plus-circle me-1"></i>Create New
+                                </label>
+                              </div>
+                            </div>
+
+                            <!-- WF Road Map Dropdown (if existing selected) -->
+                            <div class="col-md-6" v-if="workflowType === 'existing'">
+                              <label class="form-label fw-bold">Select Workflow</label>
+                              <Multiselect
+                                @open="fetchWFRoadMaps"
+                                :options="wfRoadMapOptions"
+                                v-model="selectedWFRoadMap"
+                                placeholder="Select WF Road Map"
+                                :multiple="false"
+                                class="font-11 multiselect"
+                                :searchable="true"
+                                label="display_name"
+                                track-by="roadmap_title"
+                                @select="handleWFRoadMapSelect"
+                                openDirection="bottom"
+                              />
+                              <small class="text-muted font-12 ms-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Auto-populates requestors and approvers
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Add Requestor Section (for new workflow) -->
+                      <div class="card" v-if="workflowType === 'new'">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Add Requestors</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Requestor Configuration:</strong> Define who can submit requests for this form.
+                          </div>
+
+                          <button class="btn btn-primary btn-sm" @click="addRequestor">
+                            <i class="bi bi-plus-lg me-1"></i>Add Requestor Role
+                          </button>
+
+                          <!-- Requestor List -->
+                          <div class="mt-3" v-if="requestorRoles.length > 0">
+                            <div class="table-responsive">
+                              <table class="table table-bordered">
+                                <thead class="table-light">
+                                  <tr>
+                                    <th width="40%">Role</th>
+                                    <th width="30%">Auto Approval</th>
+                                    <th width="20%">Permissions</th>
+                                    <th width="10%">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr v-for="(requestor, index) in requestorRoles" :key="index">
+                                    <td>
+                                      <input type="text" class="form-control form-control-sm" v-model="requestor.role" placeholder="Enter role name" />
+                                    </td>
+                                    <td>
+                                      <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" v-model="requestor.autoApproval" />
+                                        <label class="form-check-label font-12">Enable</label>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <button class="btn btn-sm btn-outline-secondary" @click="configurePermissions(index)">
+                                        <i class="bi bi-gear"></i> Configure
+                                      </button>
+                                    </td>
+                                    <td>
+                                      <button class="btn btn-sm btn-danger" @click="removeRequestor(index)">
+                                        <i class="bi bi-trash"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Predefined System Fields -->
+                      <div class="card mt-4">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-shield-check me-2"></i>System Generated Fields</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="alert alert-secondary mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            These fields are automatically included for all requestors.
+                          </div>
+
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Requestor Name</label>
+                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Requestor Email</label>
+                                <input type="email" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Request Date</label>
+                                <input type="text" class="form-control" value="Auto-populated on submission" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Department</label>
+                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: Approver Blocks -->
+                  <div v-if="activeStep === 4">
+                    <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
+                      <button @click="prevStep(4)" class="btn btn-sm btn-light">
+                        <i class="bi bi-chevron-left"></i> Back
+                      </button>
+                      <h1 class="font-14 fw-bold m-0">Approver Blocks</h1>
                       <button class="btn btn-sm btn-dark" @click="nextStep">
                         Next <i class="bi bi-chevron-right"></i>
                       </button>
@@ -1453,65 +1614,31 @@
                     <div class="container-fluid mt-4 p-4">
                       <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
-                        <strong>System Generated Fields:</strong> These fields are automatically included for all requestors.
+                        <strong>Approval Workflow:</strong> Configure multi-level approval process for this form.
                       </div>
 
-                      <div class="predefined-fields-container mt-4">
-                        <div class="row g-3">
-                          <div class="col-md-6">
-                            <div class="field-preview-card">
-                              <label class="form-label fw-bold">Requestor Name</label>
-                              <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
-                            </div>
-                          </div>
+                      <!-- Add Approver Level Button -->
+                      <button class="btn btn-primary mb-3" @click="addBlock">
+                        <i class="bi bi-plus-lg me-1"></i>Add Approval Level
+                      </button>
 
-                          <div class="col-md-6">
-                            <div class="field-preview-card">
-                              <label class="form-label fw-bold">Requestor Email</label>
-                              <input type="email" class="form-control" value="Auto-populated from user profile" disabled />
-                            </div>
-                          </div>
-
-                          <div class="col-md-6">
-                            <div class="field-preview-card">
-                              <label class="form-label fw-bold">Request Date</label>
-                              <input type="text" class="form-control" value="Auto-populated on submission" disabled />
-                            </div>
-                          </div>
-
-                          <div class="col-md-6">
-                            <div class="field-preview-card">
-                              <label class="form-label fw-bold">Department</label>
-                              <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
-                            </div>
-                          </div>
+                      <!-- Approver Levels List -->
+                      <div v-if="blockArr.length > 1">
+                        <div class="alert alert-secondary">
+                          <strong>{{ blockArr.length - 1 }}</strong> approval level(s) configured
+                        </div>
+                      </div>
+                      <div v-else>
+                        <div class="alert alert-warning">
+                          <i class="bi bi-exclamation-triangle me-2"></i>
+                          No approval levels configured yet. Click "Add Approval Level" to create one.
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 3: Approver Blocks -->
-                  <div v-if="activeStep === 3">
-                    <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
-                      <button @click="prevStep(3)" class="btn btn-sm btn-light">
-                        <i class="bi bi-chevron-left"></i> Back
-                      </button>
-                      <h1 class="font-14 fw-bold m-0">Approver Blocks - Workflow Setup</h1>
-                      <button class="btn btn-sm btn-dark" @click="nextStep">
-                        Next <i class="bi bi-chevron-right"></i>
-                      </button>
-                    </div>
-
-                    <div class="container-fluid mt-4 p-4">
-                      <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Coming Soon:</strong> Workflow configuration will be moved here. Currently under construction.
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 4: Print Format -->
-                  <div v-if="activeStep === 4">
+                  <!-- Step 5: Print Format -->
+                  <div v-if="activeStep === 5">
                     <div class="stepperbackground d-flex align-items-center justify-content-end gap-2 ">
 
                       <div>
@@ -1887,6 +2014,10 @@ const currentBuilderTab = ref(0);
 // WF Road Map State
 const wfRoadMapOptions = ref([]);
 const selectedWFRoadMap = ref(null);
+
+// Requestor Configuration State
+const workflowType = ref('new');
+const requestorRoles = ref([]);
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit;
@@ -3386,24 +3517,30 @@ const steps = ref([
     id: 1,
     label: "Form Info",
     stepno: "Step 1",
-    icon: "bi bi-file-text",
+    icon: "bi bi-info-circle",
   },
   {
     id: 2,
-    label: "Requestor Block",
+    label: "Form Fields",
     stepno: "Step 2",
-    icon: "bi bi-person-plus",
+    icon: "bi bi-grid-3x3-gap",
   },
   {
     id: 3,
-    label: "Approver Blocks",
+    label: "Requestor Block",
     stepno: "Step 3",
-    icon: "bi bi-people",
+    icon: "bi bi-person-plus",
   },
   {
     id: 4,
-    label: "Print Format",
+    label: "Approver Blocks",
     stepno: "Step 4",
+    icon: "bi bi-people",
+  },
+  {
+    id: 5,
+    label: "Print Format",
+    stepno: "Step 5",
     icon: "ri-checkbox-circle-line",
   },
 ]);
@@ -4021,9 +4158,9 @@ const nextStep = () => {
     return;
   }
 
-  if (activeStep.value < 4) {
+  if (activeStep.value < 5) {
     activeStep.value += 1;
-    if (activeStep.value === 4) {
+    if (activeStep.value === 5) {
       selectedform.value = blockArr;
       // console.log(selectedform.value);
     }
@@ -4995,6 +5132,28 @@ async function saveFormData(type) {
 }
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
+
+// ===== REQUESTOR MANAGEMENT HANDLERS =====
+
+// Add new requestor role
+const addRequestor = () => {
+  requestorRoles.value.push({
+    role: '',
+    autoApproval: false,
+    permissions: {}
+  });
+};
+
+// Remove requestor role
+const removeRequestor = (index) => {
+  requestorRoles.value.splice(index, 1);
+};
+
+// Configure permissions for requestor
+const configurePermissions = (index) => {
+  showInfo('Permission configuration modal will be implemented here');
+  // TODO: Open modal to configure field-level permissions
+};
 
 // ===== WF ROAD MAP HANDLERS =====
 
