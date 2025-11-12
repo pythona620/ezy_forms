@@ -23,9 +23,9 @@
             
           </div>
         </div>
-        <div class="form-container p-0 container-fluid mt-1">
-          <div class="row">
-            <div class="col-lg-2 col-md-2 col-sm-12">
+        <div class="form-container p-0 container-fluid mt-3">
+          <div class="row g-4">
+            <div class="col-lg-2 col-md-3 col-sm-12">
               <div class="steps-sticky-div">
                 <ul class="steps d-sm-inline-flex d-md-block m-0 p-0">
                   <li v-for="step in steps" :key="step.id" :class="{
@@ -46,8 +46,8 @@
                 </ul>
               </div>
             </div>
-            <div class="col-lg-10 col-md-10 col-sm-12 formbackground-color">
-              <div class="">
+            <div class="col-lg-10 col-md-9 col-sm-12 formbackground-color">
+              <div class="px-2">
                 <div class="form-content stepsDiv">
                   <!-- About Form Step -->
                   <div v-if="activeStep === 1">
@@ -5462,6 +5462,11 @@ const createFieldFromFrappeType = (frappeFieldType) => {
   position: sticky;
   z-index: 1;
   top: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
 
 input {
@@ -5584,56 +5589,98 @@ has context menu .form-container {
 }
 
 .steps {
-  /* display: flex;
-    justify-content: space-evenly; */
   list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .steps li {
-  padding: 25px 20px;
+  padding: 1rem 1.25rem;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
-  transition: 0.3s all ease;
+  transition: all 0.2s ease;
   width: 100%;
   position: relative;
+  border-radius: 8px;
+  background: transparent;
+
+  &:hover {
+    background: #f9fafb;
+  }
+
+  .step-text {
+    span:first-child {
+      color: #6b7280;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    span:last-child {
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+  }
+
+  i {
+    font-size: 20px;
+    color: #9ca3af;
+  }
 }
 
 .steps li.active {
-  color: #1b14df;
-  font-weight: bold;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+
+  .step-text {
+    span {
+      color: #1e40af;
+    }
+  }
+
+  i {
+    color: #2563eb;
+  }
 }
 
 .completedStepIcon {
-  color: #1b14df;
-  font-size: 14px;
+  color: #10b981;
+  font-size: 20px;
 }
 
 .steps li.completed {
-  color: #000;
-  font-size: 14px;
-  font-weight: 400;
-  font-weight: normal;
-  opacity: 0.7;
+  opacity: 1;
+
+  .step-text {
+    span {
+      color: #6b7280;
+    }
+  }
+
+  i {
+    color: #10b981;
+  }
 }
 
 .steps li.completed::after {
   content: "";
   display: block;
-  width: 1px;
-  height: 40px;
-  background-color: #d9d9d9;
-  /* Customize the color */
+  width: 2px;
+  height: 1.5rem;
+  background-color: #e5e7eb;
   position: absolute;
   border-radius: 2px;
-  left: 25px;
-  /* Adjust position relative to the icon */
-  top: 75%;
-  /* Position the line below the step */
+  left: 1.85rem;
+  top: calc(100% - 0.5rem);
 }
 
 .form-group {
