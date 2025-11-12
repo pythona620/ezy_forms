@@ -460,12 +460,12 @@
                                       {{
                                         getWorkflowSetup(blockIndex).roles.length > 0
                                           ? blockIndex === 0
-                                            ? "Requestor: "
-                                            : "Approver: "
+                                            ? "Requestor Roles: "
+                                            : "Approver Roles: "
                                           : ""
                                       }}
                                     </span>
-                                    <span class="role-names">
+                                    <span class="role-names text-primary">
                                       {{
                                         getWorkflowSetup(blockIndex)
                                           .roles.slice(0, 2)
@@ -474,7 +474,7 @@
                                     </span>
                                     <span data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
                                       aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)"
-                                      v-if="getWorkflowSetup(blockIndex).roles.length > 2" class="more-count">
+                                      v-if="getWorkflowSetup(blockIndex).roles.length > 2" class="more-count badge bg-primary ms-2" style="cursor: pointer;">
                                       +{{ getWorkflowSetup(blockIndex).roles.length - 2 }}
                                       more
                                     </span>
@@ -1639,15 +1639,25 @@
                               </thead>
                               <tbody>
                                 <tr v-for="(requestor, index) in loadedRequestors" :key="index">
-                                  <td><strong>{{ requestor.requestor }}</strong></td>
                                   <td>
-                                    <span v-if="requestor.auto_approval" class="badge bg-success">
-                                      <i class="bi bi-check-circle me-1"></i>Enabled
-                                    </span>
-                                    <span v-else class="badge bg-secondary">Disabled</span>
+                                    <div class="d-flex align-items-center">
+                                      <i class="bi bi-person-circle me-2 text-primary"></i>
+                                      <strong class="text-primary">{{ requestor.requestor }}</strong>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                      <i class="bi bi-info-circle me-1"></i>Click "Add Requestors" in Step 2 to select specific designations
+                                    </small>
                                   </td>
                                   <td>
-                                    <small class="text-muted">{{ requestor.columns_allowed || 'All fields' }}</small>
+                                    <span v-if="requestor.auto_approval" class="badge bg-success shadow-sm">
+                                      <i class="bi bi-check-circle-fill me-1"></i>Enabled
+                                    </span>
+                                    <span v-else class="badge bg-secondary shadow-sm">Disabled</span>
+                                  </td>
+                                  <td>
+                                    <small class="text-muted">
+                                      <i class="bi bi-grid-3x3-gap me-1"></i>{{ requestor.columns_allowed || 'All fields' }}
+                                    </small>
                                   </td>
                                 </tr>
                               </tbody>
@@ -1784,7 +1794,13 @@
                                     </span>
                                   </td>
                                   <td>
-                                    <strong class="text-primary">{{ approver.role }}</strong>
+                                    <div class="d-flex align-items-center">
+                                      <i class="bi bi-person-badge-fill me-2 text-primary"></i>
+                                      <strong class="text-primary">{{ approver.role }}</strong>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                      <i class="bi bi-info-circle me-1"></i>Click "Add Approvers" in Step 2 to select specific designations
+                                    </small>
                                   </td>
                                   <td class="text-center">
                                     <span v-if="approver.mandatory" class="badge bg-danger shadow-sm">
@@ -1793,19 +1809,22 @@
                                     <span v-else class="badge bg-secondary shadow-sm">Optional</span>
                                   </td>
                                   <td>
-                                    <span v-if="approver.approval_type === 'Any'" class="badge bg-info shadow-sm">
-                                      <i class="bi bi-person-fill me-1"></i>Any User
+                                    <span v-if="approver.view_only_reportee" class="badge bg-info shadow-sm">
+                                      <i class="bi bi-person-fill me-1"></i>Reporting Manager
                                     </span>
-                                    <span v-else-if="approver.approval_type === 'All'" class="badge bg-warning text-dark shadow-sm">
-                                      <i class="bi bi-people-fill me-1"></i>All Users
+                                    <span v-else-if="approver.all_approvals_required" class="badge bg-warning text-dark shadow-sm">
+                                      <i class="bi bi-people-fill me-1"></i>All Selected
+                                    </span>
+                                    <span v-else-if="approver.requester_as_a_approver" class="badge bg-success shadow-sm">
+                                      <i class="bi bi-person-check-fill me-1"></i>Requestor
                                     </span>
                                     <span v-else class="badge bg-secondary shadow-sm">
-                                      {{ approver.approval_type || 'Any' }}
+                                      <i class="bi bi-person me-1"></i>Any One
                                     </span>
                                   </td>
                                   <td>
                                     <small class="text-muted">
-                                      <i class="bi bi-tags me-1"></i>{{ approver.columns_allowed || 'All fields' }}
+                                      <i class="bi bi-grid-3x3-gap me-1"></i>{{ approver.columns_allowed || 'All fields' }}
                                     </small>
                                   </td>
                                 </tr>
@@ -5503,76 +5522,120 @@ const handleWFRoadMapSelect = async (selectedRoadmap) => {
       const roadmapData = response.data.data;
       console.log('Full Roadmap Data:', roadmapData);
 
-      // Auto-populate requestors
+      // Clear existing workflow setup
+      workflowSetup.length = 0;
+
+      // Step 1: Create requestor block if it doesn't exist
+      if (blockArr.length === 0) {
+        addBlock(); // Add first block for requestor
+      }
+
+      // Step 2: Auto-populate requestors
       if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
-        // Store loaded requestors for display
+        // Store loaded requestors for display in Step 3
         loadedRequestors.value = roadmapData.wf_requestors;
 
+        // Extract requestor roles and columns
+        const requestorRoles = roadmapData.wf_requestors.map(req => req.requestor);
+        const requestorColumns = roadmapData.wf_requestors[0].columns_allowed || '';
+        const autoApproval = roadmapData.wf_requestors.some(req => req.auto_approval);
+
+        // Initialize requestor workflow setup (index 0)
+        workflowSetup.push({
+          type: 'requestor',
+          roles: requestorRoles, // Array of requestor role names
+          auto_approval: autoApproval ? 1 : 0,
+          columns_allowed: requestorColumns,
+          fields: blockArr[0]?.sections ? blockArr[0].sections.flatMap(extractFieldnames) : [],
+          idx: 0
+        });
+
         // Extract requestor fields from the first block if it exists
-        if (blockArr.length > 0 && blockArr[0].sections && blockArr[0].sections.length > 0) {
+        if (blockArr[0]?.sections && blockArr[0].sections.length > 0) {
           requestorFields.value = [];
           blockArr[0].sections.forEach(section => {
-            section.rows.forEach(row => {
-              row.forEach(column => {
-                if (column.fields) {
-                  column.fields.forEach(field => {
-                    requestorFields.value.push({
-                      label: field.label,
-                      fieldtype: field.fieldtype
-                    });
+            if (section.rows && Array.isArray(section.rows)) {
+              section.rows.forEach(row => {
+                if (Array.isArray(row)) {
+                  row.forEach(column => {
+                    if (column.fields && Array.isArray(column.fields)) {
+                      column.fields.forEach(field => {
+                        requestorFields.value.push({
+                          label: field.label,
+                          fieldtype: field.fieldtype
+                        });
+                      });
+                    }
                   });
                 }
               });
-            });
+            }
           });
         }
 
-        // Create requestor block if it doesn't exist
-        if (blockArr.length === 0) {
-          addBlock(); // Add first block for requestor
-        }
-
-        showInfo(`Workflow loaded: ${roadmapData.wf_requestors.length} requestor(s), ${roadmapData.workflow_levels} approval level(s)`);
+        console.log('Requestor workflow setup:', workflowSetup[0]);
+      } else {
+        // No requestors defined, create empty requestor block
+        workflowSetup.push({
+          type: 'requestor',
+          roles: [],
+          fields: [],
+          idx: 0
+        });
       }
 
-      // Auto-populate approver blocks based on level setup
+      // Step 3: Auto-populate approver blocks based on level setup
       if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
-        const approverLevels = roadmapData.wf_level_setup;
+        const approverLevels = roadmapData.wf_level_setup.sort((a, b) => a.level - b.level);
 
-        // Store loaded approvers for display
+        // Store loaded approvers for display in Step 4
         loadedApprovers.value = approverLevels;
 
         // Ensure we have enough blocks (1 requestor + n approver levels)
-        const requiredBlocks = 1 + roadmapData.workflow_levels;
+        const requiredBlocks = 1 + approverLevels.length;
         while (blockArr.length < requiredBlocks) {
           addBlock();
         }
 
-        // Populate workflow setup array
-        workflowSetup.length = 0; // Clear existing
-        workflowSetup.push({ type: 'requestor', roles: [] }); // Requestor block
+        // Populate workflow setup for each approval level
+        approverLevels.forEach((levelData, index) => {
+          const blockIndex = index + 1; // Block 0 is requestor, 1+ are approvers
 
-        approverLevels.forEach((level, index) => {
-          workflowSetup.push({
+          // Create workflow setup for this approval level
+          const approverSetup = {
             type: 'approver',
-            level: level.level,
-            roles: [level.role],
-            approval_required: level.mandatory ? '1' : '0',
-            approver_can_edit: '0',
-            view_only_reportee: level.view_only_reportee || 0,
-            all_approvals_required: level.all_approvals_required || 0,
-            requester_as_a_approver: level.requester_as_a_approver || 0,
-            on_rejection: level.on_rejection || '',
-            fields: []
-          });
+            level: levelData.level,
+            roles: [levelData.role], // Array with the role name from WF Roadmap
+            approval_required: levelData.mandatory ? 1 : 0,
+            approver_can_edit: 0,
+            view_only_reportee: levelData.view_only_reportee || 0,
+            all_approvals_required: levelData.all_approvals_required || 0,
+            requester_as_a_approver: levelData.requester_as_a_approver || 0,
+            on_rejection: levelData.on_rejection || 0,
+            columns_allowed: levelData.columns_allowed || '',
+            escalation_time: levelData.escalation_time || '',
+            fields: blockArr[blockIndex]?.sections ? blockArr[blockIndex].sections.flatMap(extractFieldnames) : [],
+            idx: blockIndex
+          };
+
+          workflowSetup.push(approverSetup);
+
+          console.log(`Approver Level ${levelData.level} workflow setup:`, approverSetup);
         });
 
-        showSuccess(`Loaded workflow: ${roadmapData.workflow_levels} approval level(s) configured`);
+        // Save workflow setup to backend
+        add_Wf_roles_setup();
+
+        showSuccess(`Workflow loaded successfully!\n✓ ${roadmapData.wf_requestors?.length || 0} requestor role(s)\n✓ ${approverLevels.length} approval level(s)\n\nYou can now configure specific designations in Step 2 by clicking "Add Approvers" button for each level.`);
+      } else {
+        showInfo(`Workflow loaded: ${roadmapData.wf_requestors?.length || 0} requestor(s) configured.\n\nNo approval levels defined. You can add approval levels manually in Step 4.`);
       }
+
+      console.log('Complete workflow setup:', workflowSetup);
     }
   } catch (error) {
     console.error('Error loading WF Road Map details:', error);
-    showError('Failed to load workflow configuration');
+    showError('Failed to load workflow configuration. Please try again.');
   }
 };
 
