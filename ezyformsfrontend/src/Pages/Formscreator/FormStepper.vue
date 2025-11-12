@@ -341,6 +341,9 @@
                       </div>
 
                       <div class="toolbar-right">
+                        <button class="btn btn-sm btn-primary me-2" @click="addBlock">
+                          <i class="bi bi-plus-lg me-1"></i>Add Block
+                        </button>
                         <button v-if="isPreviewVisible" class="btn btn-sm btn-light me-2" @click="previewForm">
                           <i class="bi bi-eye me-1"></i>Preview
                         </button>
@@ -353,17 +356,22 @@
                     <!-- Main Builder Area -->
                     <div class="zoho-builder-container">
                       <!-- Left: Field Library -->
-                      <aside class="zoho-field-library">
-                        <div class="library-header">
-                          <h6 class="mb-0">Field Types</h6>
-                          <button class="btn btn-sm btn-link p-0" @click="showFieldLibrary = !showFieldLibrary">
-                            <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
-                          </button>
+                      <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
+                        <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
+                          <div class="d-flex align-items-center justify-content-between w-100">
+                            <h6 class="mb-0 font-14 fw-bold">
+                              <i class="bi bi-grid-3x3-gap me-2"></i>
+                              {{ showFieldLibrary ? 'Field Types' : 'Fields' }}
+                            </h6>
+                            <button class="btn btn-sm btn-link p-0 text-dark">
+                              <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
+                            </button>
+                          </div>
                         </div>
 
                         <div v-if="showFieldLibrary" class="library-content">
                           <FieldLibraryPanel
-                            :collapsible="false"
+                            :collapsible="true"
                             @field-add="handleFieldAddFromLibrary"
                             @field-dragstart="handleFieldDragStart"
                           />
@@ -4787,8 +4795,10 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 // ===== DRAG-AND-DROP FIELD LIBRARY HANDLERS =====
 
 // Handle field added from library (click)
-const handleFieldAddFromLibrary = (fieldType) => {
-  console.log('Field added from library:', fieldType);
+const handleFieldAddFromLibrary = (data) => {
+  // Extract field type - can be either a string or an object
+  const fieldType = typeof data === 'string' ? data : (data.fieldType || data.id);
+  console.log('Field added from library:', fieldType, data);
 
   // Get current block based on active tab
   const currentBlockIndex = currentBuilderTab.value;
@@ -4834,18 +4844,24 @@ const handleFieldAddFromLibrary = (fieldType) => {
 };
 
 // Handle drag start from library
-const handleFieldDragStart = (fieldType) => {
-  console.log('Drag started:', fieldType);
+const handleFieldDragStart = (data) => {
+  // Extract field type - can be either a string or an object
+  const fieldType = typeof data === 'string' ? data : (data.fieldType || data.id);
+  console.log('Drag started:', fieldType, data);
   draggedFieldType.value = fieldType;
 };
 
 // Create field object from library field type
 const createFieldFromLibraryType = (fieldType) => {
+  console.log('Creating field from type:', fieldType);
+  console.log('Available field types:', Object.keys(FIELD_TYPES));
+
   const fieldDef = FIELD_TYPES[fieldType];
 
   if (!fieldDef) {
     console.error('Field type not found:', fieldType);
-    showError('Field type not found');
+    console.error('Attempted to find:', fieldType, 'in', FIELD_TYPES);
+    showError(`Field type "${fieldType}" not found. Please try again.`);
     return null;
   }
 
@@ -4979,20 +4995,36 @@ const createFieldFromLibraryType = (fieldType) => {
 
 // Left: Field Library
 .zoho-field-library {
-  width: 280px;
-  background: #f9fafb;
-  border-right: 1px solid #e5e7eb;
+  width: 300px;
+  background: #ffffff;
+  border-right: 2px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 0.3s ease;
+
+  &.collapsed {
+    width: 60px;
+
+    .library-header h6 {
+      font-size: 12px;
+      writing-mode: vertical-rl;
+    }
+  }
 
   .library-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #ffffff;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #f3f4f6;
+    }
 
     h6 {
       font-size: 14px;
@@ -5003,6 +5035,7 @@ const createFieldFromLibraryType = (fieldType) => {
     .btn-link {
       color: #6b7280;
       text-decoration: none;
+      transition: color 0.2s;
 
       &:hover {
         color: #111827;
@@ -5013,7 +5046,7 @@ const createFieldFromLibraryType = (fieldType) => {
   .library-content {
     flex: 1;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 0;
 
     &::-webkit-scrollbar {
       width: 6px;
@@ -5030,12 +5063,14 @@ const createFieldFromLibraryType = (fieldType) => {
 .zoho-form-canvas {
   flex: 1;
   overflow-y: auto;
-  background: #ffffff;
-  padding: 0;
+  background: #f9fafb;
+  padding: 1.5rem;
 
   .canvas-inner {
     min-height: 100%;
     background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
     // Remove extra padding/margin from block content
     .block-level {
@@ -5043,10 +5078,11 @@ const createFieldFromLibraryType = (fieldType) => {
     }
 
     .requestandAppHeader {
-      margin-bottom: 1.5rem;
-      padding: 1rem 1.5rem;
+      margin-bottom: 0;
+      padding: 1.25rem 1.5rem;
       background: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 2px solid #e5e7eb;
+      border-radius: 8px 8px 0 0;
     }
 
     .section_block {
@@ -5061,6 +5097,10 @@ const createFieldFromLibraryType = (fieldType) => {
   &::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 4px;
+
+    &:hover {
+      background: #9ca3af;
+    }
   }
 }
 
