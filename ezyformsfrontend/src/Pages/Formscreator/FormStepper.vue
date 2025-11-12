@@ -49,22 +49,19 @@
             <div class="col-lg-10 col-md-9 col-sm-12 formbackground-color">
               <div class="px-2">
                 <div class="form-content stepsDiv">
-                  <!-- About Form Step -->
+                  <!-- Step 1: Form Info -->
                   <div v-if="activeStep === 1">
                     <div class="">
                       <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
                         <div></div>
-                        <!-- <h1 class="font-14 m-0" @click="cancelForm()">
-                          <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel Form</span>
-                        </h1> -->
-                        <h1 class="font-14 fw-bold m-0">About Form</h1>
+                        <h1 class="font-14 fw-bold m-0">Form Info & Fields</h1>
                         <div>
                           <button v-if="!$route.query.id && !$route.query.preId" class=" btn btn-light font-12 mx-2" type="button"
                             @click="clearForm">Clear
                             Form</button>
 
                           <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                            v-if="activeStep < 3" @click="nextStep" />
+                            v-if="activeStep < 4" @click="nextStep" />
                         </div>
                         <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
                         <!-- :disabled="isNextDisabled" -->
@@ -317,8 +314,8 @@
                     </div>
                   </div>
 
-                  <!-- Questions in Form Step - NEW ZOHO-STYLE LAYOUT -->
-                  <div v-if="activeStep === 2" class="zoho-form-builder">
+                  <!-- Form Builder Section (still in Step 1) -->
+                  <div v-if="activeStep === 1" class="zoho-form-builder mt-4">
                     <!-- Top Toolbar -->
                     <div class="zoho-toolbar">
                       <div class="toolbar-left">
@@ -1419,7 +1416,80 @@
                   </div>
                   <!-- End Zoho Form Builder -->
 
+                  <!-- Step 2: Requestor Block -->
+                  <div v-if="activeStep === 2">
+                    <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
+                      <button @click="prevStep(2)" class="btn btn-sm btn-light">
+                        <i class="bi bi-chevron-left"></i> Back
+                      </button>
+                      <h1 class="font-14 fw-bold m-0">Requestor Block - Predefined Fields</h1>
+                      <button class="btn btn-sm btn-dark" @click="nextStep">
+                        Next <i class="bi bi-chevron-right"></i>
+                      </button>
+                    </div>
+
+                    <div class="container-fluid mt-4 p-4">
+                      <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>System Generated Fields:</strong> These fields are automatically included for all requestors.
+                      </div>
+
+                      <div class="predefined-fields-container mt-4">
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <div class="field-preview-card">
+                              <label class="form-label fw-bold">Requestor Name</label>
+                              <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <div class="field-preview-card">
+                              <label class="form-label fw-bold">Requestor Email</label>
+                              <input type="email" class="form-control" value="Auto-populated from user profile" disabled />
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <div class="field-preview-card">
+                              <label class="form-label fw-bold">Request Date</label>
+                              <input type="text" class="form-control" value="Auto-populated on submission" disabled />
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <div class="field-preview-card">
+                              <label class="form-label fw-bold">Department</label>
+                              <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Approver Blocks -->
                   <div v-if="activeStep === 3">
+                    <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
+                      <button @click="prevStep(3)" class="btn btn-sm btn-light">
+                        <i class="bi bi-chevron-left"></i> Back
+                      </button>
+                      <h1 class="font-14 fw-bold m-0">Approver Blocks - Workflow Setup</h1>
+                      <button class="btn btn-sm btn-dark" @click="nextStep">
+                        Next <i class="bi bi-chevron-right"></i>
+                      </button>
+                    </div>
+
+                    <div class="container-fluid mt-4 p-4">
+                      <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Coming Soon:</strong> Workflow configuration will be moved here. Currently under construction.
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: Print Format -->
+                  <div v-if="activeStep === 4">
                     <div class="stepperbackground d-flex align-items-center justify-content-end gap-2 ">
 
                       <div>
@@ -1471,6 +1541,24 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-dark " @click="SetPrintFormatFn">Add Print Format</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Preview Modal -->
+    <div class="modal fade" id="formViewModal" tabindex="-1" aria-labelledby="formViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="formViewModalLabel">Form Preview</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <FormPreviewComp :blockArr="selectedform" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -3270,20 +3358,26 @@ const toggleEdit = (tableName, description) => {
 const steps = ref([
   {
     id: 1,
-    label: "About Form",
+    label: "Form Info",
     stepno: "Step 1",
-    icon: "bi bi-info-circle",
+    icon: "bi bi-file-text",
   },
   {
     id: 2,
-    label: "Fields & Workflow",
+    label: "Requestor Block",
     stepno: "Step 2",
-    icon: "bi bi-question-circle",
+    icon: "bi bi-person-plus",
   },
   {
     id: 3,
-    label: "Print Format",
+    label: "Approver Blocks",
     stepno: "Step 3",
+    icon: "bi bi-people",
+  },
+  {
+    id: 4,
+    label: "Print Format",
+    stepno: "Step 4",
     icon: "ri-checkbox-circle-line",
   },
 ]);
@@ -3901,9 +3995,9 @@ const nextStep = () => {
     return;
   }
 
-  if (activeStep.value < 3) {
+  if (activeStep.value < 4) {
     activeStep.value += 1;
-    if (activeStep.value === 3) {
+    if (activeStep.value === 4) {
       selectedform.value = blockArr;
       // console.log(selectedform.value);
     }
@@ -6249,6 +6343,33 @@ td {
 ::v-deep(.vs__selected-options) {
   scrollbar-color: #ccc transparent;
   scrollbar-width: thin;
+}
+
+/* Predefined Fields Styles */
+.predefined-fields-container {
+  background: #f9fafb;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.field-preview-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.field-preview-card label {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.field-preview-card input {
+  font-size: 13px;
+  color: #6b7280;
+  background-color: #f9fafb;
 }
 
 </style>
