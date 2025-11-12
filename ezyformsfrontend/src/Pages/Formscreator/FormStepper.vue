@@ -338,9 +338,6 @@
                           {{ index === 0 ? 'Requestor Block' : `Approver Block ${index}` }}
                           <i v-if="blockArr.length > 1" class="bi bi-x-lg ms-2" @click.stop="removeBlock(index)"></i>
                         </button>
-                        <button class="zoho-tab zoho-tab-add" @click="addBlock">
-                          <i class="bi bi-plus-lg"></i> Add Block
-                        </button>
                       </div>
 
                       <div class="toolbar-right">
@@ -376,9 +373,6 @@
                       <!-- Center: Form Canvas -->
                       <div class="zoho-form-canvas">
                         <div class="canvas-inner" ref="mainBlockRef">
-                          <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
-                            :childHeaders="childtableHeaders" />
-
                           <!-- Current Block Content -->
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex" v-show="blockIndex === currentBuilderTab">
@@ -1392,22 +1386,7 @@
                           </div>
                         </div>
 
-                        <div :class="[
-                          'd-flex justify-content-center align-items-center add-block-btn-div py-4  ',
-                          {
-                            'background-color-white': blockArr.length,
-                          },
-                        ]">
-                          <button class="btn btn-light border d-flex align-items-center font-12" @click="addBlock">
-                            <i class="bi bi-plus-circle me-1 fs-6"></i>
-                            {{
-                              blockArr.length === 0
-                                ? "Add Requestor Block"
-                                : "Add Approval Block"
-                            }}
-                          </button>
-                        </div>
-                        <!-- End Add Block Button -->
+                        <!-- Add Approval Block button removed - use tabs instead -->
                       </div>
                       <!-- End Canvas Inner -->
                     </div>
@@ -4901,8 +4880,10 @@ const createFieldFromLibraryType = (fieldType) => {
 .zoho-form-builder {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 120px);
   background: #ffffff;
+  margin: -1rem;
+  margin-top: 0;
 }
 
 // Top Toolbar
@@ -5049,16 +5030,28 @@ const createFieldFromLibraryType = (fieldType) => {
 .zoho-form-canvas {
   flex: 1;
   overflow-y: auto;
-  background: #f9fafb;
-  padding: 1.5rem;
+  background: #ffffff;
+  padding: 0;
 
   .canvas-inner {
-    max-width: 900px;
-    margin: 0 auto;
+    min-height: 100%;
     background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+
+    // Remove extra padding/margin from block content
+    .block-level {
+      padding: 0;
+    }
+
+    .requestandAppHeader {
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section_block {
+      padding: 1.5rem;
+    }
   }
 
   &::-webkit-scrollbar {
