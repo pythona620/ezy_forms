@@ -1956,7 +1956,92 @@ const handleFieldDropAtIndex = (
   targetColumn,
   insertIndex
 ) => {
-  if (!draggedField.value) return;
+  event.preventDefault();
+  event.stopPropagation();
+
+  console.log('Field dropped at index:', {
+    targetBlock,
+    targetSection,
+    targetRow,
+    targetColumn,
+    insertIndex,
+    draggedField: draggedField.value,
+    draggedFieldType: draggedFieldType.value
+  });
+
+  // Check if we're dragging from the field library
+  if (draggedFieldType.value) {
+    console.log('Dropping from field library:', draggedFieldType.value);
+
+    // Create new field from library
+    const newField = createFieldFromLibraryType(draggedFieldType.value);
+
+    if (!newField) {
+      console.error('Failed to create field from type:', draggedFieldType.value);
+      return;
+    }
+
+    // Get target location
+    const currentBlock = blockArr[targetBlock];
+    if (!currentBlock) {
+      showError('Target block not found');
+      return;
+    }
+
+    // Ensure sections exist
+    if (!currentBlock.sections) {
+      currentBlock.sections = [];
+    }
+
+    if (!currentBlock.sections[targetSection]) {
+      currentBlock.sections[targetSection] = {
+        label: '',
+        rows: []
+      };
+    }
+
+    // Ensure rows exist
+    if (!currentBlock.sections[targetSection].rows) {
+      currentBlock.sections[targetSection].rows = [];
+    }
+
+    if (!currentBlock.sections[targetSection].rows[targetRow]) {
+      currentBlock.sections[targetSection].rows[targetRow] = {
+        label: '',
+        columns: []
+      };
+    }
+
+    // Ensure columns exist
+    if (!currentBlock.sections[targetSection].rows[targetRow].columns) {
+      currentBlock.sections[targetSection].rows[targetRow].columns = [];
+    }
+
+    if (!currentBlock.sections[targetSection].rows[targetRow].columns[targetColumn]) {
+      currentBlock.sections[targetSection].rows[targetRow].columns[targetColumn] = {
+        label: '',
+        fields: []
+      };
+    }
+
+    const targetFields = currentBlock.sections[targetSection].rows[targetRow].columns[targetColumn].fields;
+
+    // Insert field at specific index
+    targetFields.splice(insertIndex, 0, newField);
+
+    console.log('Field added successfully:', newField);
+    showSuccess(`${newField.label} field added`);
+
+    // Clear dragged field type
+    draggedFieldType.value = null;
+    return;
+  }
+
+  // Handle existing field reordering
+  if (!draggedField.value) {
+    console.log('No dragged field found');
+    return;
+  }
 
   const {
     blockIndex: fromBlock,
