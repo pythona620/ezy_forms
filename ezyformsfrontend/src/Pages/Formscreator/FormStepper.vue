@@ -1451,180 +1451,114 @@
                     </div>
 
                     <div class="container-fluid mt-4 p-4">
-                      <!-- Step Progress Indicator -->
-                      <div class="alert alert-info mb-4">
-                        <div class="d-flex align-items-center">
-                          <i class="bi bi-info-circle me-2 fs-5"></i>
-                          <div>
-                            <strong>Define Approval Process</strong>
-                            <p class="mb-0 font-12 mt-1">Configure who can submit requests and set up multi-level approval workflow</p>
-                          </div>
+                      <!-- Workflow Selection -->
+                      <div class="card mb-4">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2"></i>Workflow Configuration</h6>
                         </div>
-                      </div>
-
-                      <!-- Workflow Selection Option -->
-                      <div class="card mb-4 border-primary">
-                        <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-diagram-3 me-2 fs-5"></i>
-                              <h6 class="mb-0 fw-bold">Workflow Configuration</h6>
-                            </div>
-                            <span v-if="selectedWFRoadMap" class="badge bg-light text-dark">
-                              <i class="bi bi-check-circle-fill me-1"></i>Workflow Selected
-                            </span>
-                          </div>
-                        </div>
-                        <div class="card-body p-4">
-                          <div class="row g-4">
-                            <!-- Select Existing Workflow or Create New -->
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <!-- Workflow Type Toggle -->
                             <div class="col-md-6">
-                              <label class="form-label fw-bold mb-3">
-                                <i class="bi bi-box me-2"></i>Workflow Type
-                              </label>
-                              <div class="btn-group w-100 shadow-sm" role="group">
+                              <label class="form-label fw-bold">Workflow Type</label>
+                              <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="workflowType" id="existingWorkflow" value="existing" v-model="workflowType" />
-                                <label class="btn btn-outline-primary py-3" for="existingWorkflow">
-                                  <i class="bi bi-folder-fill me-2"></i>
-                                  <span class="fw-bold">Use Existing</span>
-                                  <small class="d-block mt-1 text-muted font-11">Select from saved workflows</small>
+                                <label class="btn btn-outline-primary" for="existingWorkflow">
+                                  <i class="bi bi-folder me-1"></i>Use Existing
                                 </label>
                                 <input type="radio" class="btn-check" name="workflowType" id="newWorkflow" value="new" v-model="workflowType" checked />
-                                <label class="btn btn-outline-primary py-3" for="newWorkflow">
-                                  <i class="bi bi-plus-circle-fill me-2"></i>
-                                  <span class="fw-bold">Create New</span>
-                                  <small class="d-block mt-1 text-muted font-11">Build custom workflow</small>
+                                <label class="btn btn-outline-primary" for="newWorkflow">
+                                  <i class="bi bi-plus-circle me-1"></i>Create New
                                 </label>
                               </div>
                             </div>
 
-                            <!-- WF Road Map Dropdown (if existing selected) -->
+                            <!-- WF Road Map Selector -->
                             <div class="col-md-6" v-if="workflowType === 'existing'">
-                              <label class="form-label fw-bold mb-3">
-                                <i class="bi bi-list-check me-2"></i>Select Workflow
-                              </label>
+                              <label class="form-label fw-bold">Select Workflow</label>
                               <Multiselect
                                 @open="fetchWFRoadMaps"
                                 :options="wfRoadMapOptions"
                                 v-model="selectedWFRoadMap"
-                                placeholder="Choose a workflow road map..."
+                                placeholder="Select WF Road Map"
                                 :multiple="false"
-                                class="font-11 multiselect shadow-sm"
+                                class="font-11 multiselect"
                                 :searchable="true"
                                 label="display_name"
                                 track-by="roadmap_title"
                                 @select="handleWFRoadMapSelect"
                                 openDirection="bottom"
                               />
-                              <div class="mt-2 p-2 rounded" style="background-color: #f8f9fa;">
-                                <small class="text-muted font-12">
-                                  <i class="bi bi-lightbulb me-1 text-warning"></i>
-                                  <strong>Tip:</strong> Selecting a workflow will automatically populate requestor and approver configurations
-                                </small>
-                              </div>
+                              <small class="text-muted font-12 mt-1 d-block">
+                                <i class="bi bi-info-circle me-1"></i>Auto-populates requestors and approvers
+                              </small>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <!-- Add Requestor Section (for new workflow) -->
-                      <div class="card shadow-sm mb-4" v-if="workflowType === 'new'">
-                        <div class="card-header" style="background-color: #e3f2fd; border-bottom: 2px solid #2196f3;">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-person-plus-fill me-2 text-primary fs-5"></i>
-                              <h6 class="mb-0 fw-bold text-primary">Requestor Configuration</h6>
-                            </div>
-                            <span class="badge bg-primary" v-if="requestorRoles.length > 0">
-                              {{ requestorRoles.length }} Role(s)
-                            </span>
-                          </div>
+                      <!-- Requestor Configuration (for new workflow) -->
+                      <div class="card mb-4" v-if="workflowType === 'new'">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus me-2"></i>Requestor Configuration</h6>
                         </div>
-                        <div class="card-body p-4">
-                          <div class="alert alert-light border border-info mb-4">
-                            <div class="d-flex align-items-start">
-                              <i class="bi bi-info-circle-fill me-2 text-info fs-5"></i>
-                              <div>
-                                <strong class="text-info">About Requestors</strong>
-                                <p class="mb-0 font-12 mt-1">Requestors are users who can initiate and submit form requests. Configure roles and permissions based on your WF Requestors setup.</p>
-                              </div>
-                            </div>
-                          </div>
+                        <div class="card-body">
+                          <p class="text-muted font-12 mb-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Define who can submit requests for this form based on WF Requestors
+                          </p>
 
-                          <button class="btn btn-primary shadow-sm mb-3" @click="addRequestor">
-                            <i class="bi bi-plus-circle-fill me-2"></i>Add Requestor Role
+                          <button class="btn btn-primary btn-sm mb-3" @click="addRequestor">
+                            <i class="bi bi-plus-lg me-1"></i>Add Requestor Role
                           </button>
 
-                          <!-- Requestor List -->
-                          <div class="mt-4" v-if="requestorRoles.length > 0">
-                            <div class="table-responsive">
-                              <table class="table table-hover table-bordered align-middle">
-                                <thead style="background-color: #f5f5f5;">
-                                  <tr>
-                                    <th width="5%" class="text-center">#</th>
-                                    <th width="35%"><i class="bi bi-tag me-1"></i>Role Name</th>
-                                    <th width="25%"><i class="bi bi-check-square me-1"></i>Auto Approval</th>
-                                    <th width="25%"><i class="bi bi-gear me-1"></i>Permissions</th>
-                                    <th width="10%" class="text-center">Actions</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr v-for="(requestor, index) in requestorRoles" :key="index">
-                                    <td class="text-center fw-bold">{{ index + 1 }}</td>
-                                    <td>
-                                      <input
-                                        type="text"
-                                        class="form-control form-control-sm shadow-sm"
-                                        v-model="requestor.role"
-                                        placeholder="e.g., Common Email, Sales, HR"
-                                      />
-                                    </td>
-                                    <td>
-                                      <div class="form-check form-switch">
-                                        <input
-                                          class="form-check-input"
-                                          type="checkbox"
-                                          v-model="requestor.autoApproval"
-                                          :id="`autoApproval-${index}`"
-                                        />
-                                        <label class="form-check-label font-12" :for="`autoApproval-${index}`">
-                                          {{ requestor.autoApproval ? 'Enabled' : 'Disabled' }}
-                                        </label>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <button class="btn btn-sm btn-outline-secondary shadow-sm" @click="configurePermissions(index)">
-                                        <i class="bi bi-gear-fill me-1"></i> Configure
-                                      </button>
-                                    </td>
-                                    <td class="text-center">
-                                      <button class="btn btn-sm btn-danger shadow-sm" @click="removeRequestor(index)" title="Remove role">
-                                        <i class="bi bi-trash-fill"></i>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-
-                          <!-- Empty State -->
-                          <div v-else class="text-center py-5">
-                            <i class="bi bi-inbox display-4 text-muted"></i>
-                            <p class="text-muted mt-3 mb-0">No requestor roles configured yet</p>
-                            <small class="text-muted">Click "Add Requestor Role" to get started</small>
+                          <!-- Requestor Table -->
+                          <div v-if="requestorRoles.length > 0" class="table-responsive">
+                            <table class="table table-bordered">
+                              <thead class="table-light">
+                                <tr>
+                                  <th width="40%">Role</th>
+                                  <th width="30%">Auto Approval</th>
+                                  <th width="20%">Permissions</th>
+                                  <th width="10%">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="(requestor, index) in requestorRoles" :key="index">
+                                  <td>
+                                    <input type="text" class="form-control form-control-sm" v-model="requestor.role" placeholder="Enter role name" />
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input class="form-check-input" type="checkbox" v-model="requestor.autoApproval" />
+                                      <label class="form-check-label font-12">{{ requestor.autoApproval ? 'Yes' : 'No' }}</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <button class="btn btn-sm btn-outline-secondary" @click="configurePermissions(index)">
+                                      <i class="bi bi-gear"></i> Configure
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <button class="btn btn-sm btn-danger" @click="removeRequestor(index)">
+                                      <i class="bi bi-trash"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
 
                       <!-- Loaded Requestors from WF Road Map -->
-                      <div class="card mt-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedRequestors.length > 0">
+                      <div class="card mb-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedRequestors.length > 0">
                         <div class="card-header bg-success text-white">
-                          <h6 class="mb-0 fw-bold"><i class="bi bi-check-circle me-2"></i>Loaded Requestors from Workflow</h6>
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-check-circle me-2"></i>Loaded Requestors</h6>
                         </div>
                         <div class="card-body">
-                          <div class="alert alert-success mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
+                          <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-1"></i>
                             <strong>{{ loadedRequestors.length }}</strong> requestor role(s) loaded from <strong>{{ selectedWFRoadMap.display_name }}</strong>
                           </div>
 
@@ -1639,43 +1573,24 @@
                               </thead>
                               <tbody>
                                 <tr v-for="(requestor, index) in loadedRequestors" :key="index">
+                                  <td><strong>{{ requestor.requestor }}</strong></td>
                                   <td>
-                                    <div class="d-flex align-items-center">
-                                      <i class="bi bi-person-circle me-2 text-primary"></i>
-                                      <strong class="text-primary">{{ requestor.requestor }}</strong>
-                                    </div>
-                                    <small class="text-muted d-block mt-1">
-                                      <i class="bi bi-info-circle me-1"></i>Click "Add Requestors" in Step 2 to select specific designations
-                                    </small>
-                                  </td>
-                                  <td>
-                                    <span v-if="requestor.auto_approval" class="badge bg-success shadow-sm">
-                                      <i class="bi bi-check-circle-fill me-1"></i>Enabled
+                                    <span v-if="requestor.auto_approval" class="badge bg-success">
+                                      <i class="bi bi-check-circle me-1"></i>Yes
                                     </span>
-                                    <span v-else class="badge bg-secondary shadow-sm">Disabled</span>
+                                    <span v-else class="badge bg-secondary">No</span>
                                   </td>
                                   <td>
-                                    <small class="text-muted">
-                                      <i class="bi bi-grid-3x3-gap me-1"></i>{{ requestor.columns_allowed || 'All fields' }}
-                                    </small>
+                                    <small class="text-muted">{{ requestor.columns_allowed || 'All fields' }}</small>
                                   </td>
                                 </tr>
                               </tbody>
                             </table>
                           </div>
 
-                          <!-- Requestor Field Configuration -->
-                          <div class="mt-3">
-                            <h6 class="fw-bold"><i class="bi bi-pencil me-2"></i>Requestor Fields Configuration</h6>
-                            <p class="text-muted font-12">These fields will be available for requestors to fill:</p>
-
-                            <div class="row g-2">
-                              <div class="col-md-3" v-for="(field, idx) in requestorFields" :key="idx">
-                                <div class="field-badge">
-                                  <i class="bi bi-tag me-1"></i>{{ field.label }}
-                                </div>
-                              </div>
-                            </div>
+                          <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Go to <strong>Step 2</strong> and click <strong>"Add Requestors"</strong> to select specific designations for these roles
                           </div>
                         </div>
                       </div>
@@ -1738,168 +1653,101 @@
                     </div>
 
                     <div class="container-fluid mt-4 p-4">
-                      <!-- Step Information -->
-                      <div class="alert alert-info mb-4">
-                        <div class="d-flex align-items-center">
-                          <i class="bi bi-info-circle me-2 fs-5"></i>
-                          <div>
-                            <strong>Approval Workflow</strong>
-                            <p class="mb-0 font-12 mt-1">Configure multi-level approval process. Each level represents an approval stage based on WF Level Setup.</p>
-                          </div>
-                        </div>
+                      <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Approval Workflow:</strong> Configure multi-level approval process based on WF Level Setup
                       </div>
 
                       <!-- Loaded Approvers from WF Road Map -->
-                      <div class="card shadow-sm mb-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedApprovers.length > 0">
-                        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-diagram-3-fill me-2 fs-5"></i>
-                              <h6 class="mb-0 fw-bold">Loaded Approval Workflow</h6>
-                            </div>
-                            <span class="badge bg-light text-dark">
-                              <i class="bi bi-check-circle-fill me-1"></i>{{ loadedApprovers.length }} Level(s)
-                            </span>
-                          </div>
+                      <div class="card mb-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedApprovers.length > 0">
+                        <div class="card-header bg-primary text-white">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2"></i>Loaded Approval Workflow</h6>
                         </div>
-                        <div class="card-body p-4">
-                          <div class="alert alert-success border border-success mb-4">
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                              <div>
-                                <strong>Successfully Loaded</strong>
-                                <p class="mb-0 font-12 mt-1">
-                                  <strong>{{ loadedApprovers.length }}</strong> approval level(s) loaded from <strong>{{ selectedWFRoadMap.display_name }}</strong>
-                                </p>
-                              </div>
-                            </div>
+                        <div class="card-body">
+                          <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-1"></i>
+                            <strong>{{ loadedApprovers.length }}</strong> approval level(s) loaded from <strong>{{ selectedWFRoadMap.display_name }}</strong>
                           </div>
 
                           <div class="table-responsive">
-                            <table class="table table-hover table-bordered align-middle">
-                              <thead style="background-color: #f5f5f5;">
+                            <table class="table table-bordered table-hover">
+                              <thead class="table-light">
                                 <tr>
-                                  <th width="10%" class="text-center"><i class="bi bi-layer-forward me-1"></i>Level</th>
-                                  <th width="25%"><i class="bi bi-person-badge me-1"></i>Role</th>
-                                  <th width="15%" class="text-center"><i class="bi bi-exclamation-circle me-1"></i>Mandatory</th>
-                                  <th width="20%"><i class="bi bi-check2-square me-1"></i>Approval Type</th>
-                                  <th width="30%"><i class="bi bi-grid me-1"></i>Columns Allowed</th>
+                                  <th width="10%">Level</th>
+                                  <th width="25%">Role</th>
+                                  <th width="15%">Mandatory</th>
+                                  <th width="20%">Approval Type</th>
+                                  <th width="30%">Columns Allowed</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr v-for="(approver, index) in loadedApprovers" :key="index">
-                                  <td class="text-center">
-                                    <span class="badge bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                      <i class="bi bi-star-fill me-1"></i>Level {{ approver.level }}
+                                  <td>
+                                    <span class="badge bg-dark">Level {{ approver.level }}</span>
+                                  </td>
+                                  <td>
+                                    <strong>{{ approver.role }}</strong>
+                                  </td>
+                                  <td>
+                                    <span v-if="approver.mandatory" class="badge bg-danger">
+                                      <i class="bi bi-exclamation-circle me-1"></i>Required
+                                    </span>
+                                    <span v-else class="badge bg-secondary">Optional</span>
+                                  </td>
+                                  <td>
+                                    <span v-if="approver.view_only_reportee" class="badge bg-info">
+                                      <i class="bi bi-person me-1"></i>Reporting Manager
+                                    </span>
+                                    <span v-else-if="approver.all_approvals_required" class="badge bg-warning text-dark">
+                                      <i class="bi bi-people me-1"></i>All Users
+                                    </span>
+                                    <span v-else-if="approver.requester_as_a_approver" class="badge bg-success">
+                                      <i class="bi bi-person-check me-1"></i>Requestor
+                                    </span>
+                                    <span v-else class="badge bg-secondary">
+                                      Any One
                                     </span>
                                   </td>
                                   <td>
-                                    <div class="d-flex align-items-center">
-                                      <i class="bi bi-person-badge-fill me-2 text-primary"></i>
-                                      <strong class="text-primary">{{ approver.role }}</strong>
-                                    </div>
-                                    <small class="text-muted d-block mt-1">
-                                      <i class="bi bi-info-circle me-1"></i>Click "Add Approvers" in Step 2 to select specific designations
-                                    </small>
-                                  </td>
-                                  <td class="text-center">
-                                    <span v-if="approver.mandatory" class="badge bg-danger shadow-sm">
-                                      <i class="bi bi-exclamation-triangle-fill me-1"></i>Required
-                                    </span>
-                                    <span v-else class="badge bg-secondary shadow-sm">Optional</span>
-                                  </td>
-                                  <td>
-                                    <span v-if="approver.view_only_reportee" class="badge bg-info shadow-sm">
-                                      <i class="bi bi-person-fill me-1"></i>Reporting Manager
-                                    </span>
-                                    <span v-else-if="approver.all_approvals_required" class="badge bg-warning text-dark shadow-sm">
-                                      <i class="bi bi-people-fill me-1"></i>All Selected
-                                    </span>
-                                    <span v-else-if="approver.requester_as_a_approver" class="badge bg-success shadow-sm">
-                                      <i class="bi bi-person-check-fill me-1"></i>Requestor
-                                    </span>
-                                    <span v-else class="badge bg-secondary shadow-sm">
-                                      <i class="bi bi-person me-1"></i>Any One
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <small class="text-muted">
-                                      <i class="bi bi-grid-3x3-gap me-1"></i>{{ approver.columns_allowed || 'All fields' }}
-                                    </small>
+                                    <small class="text-muted">{{ approver.columns_allowed || 'All fields' }}</small>
                                   </td>
                                 </tr>
                               </tbody>
                             </table>
                           </div>
 
-                          <!-- Field Attachment Info -->
-                          <div class="alert alert-light border mt-4">
-                            <div class="d-flex align-items-start">
-                              <i class="bi bi-lightbulb-fill me-2 text-warning fs-5"></i>
-                              <div>
-                                <strong>Configuration Note</strong>
-                                <p class="mb-0 font-12 mt-1">
-                                  Approvers can view and approve based on the fields configured above.
-                                  To modify field permissions or approval settings, edit the selected workflow road map.
-                                </p>
-                              </div>
-                            </div>
+                          <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Go to <strong>Step 2</strong> and click <strong>"Add Approvers"</strong> for each level to select specific designations
                           </div>
                         </div>
                       </div>
 
                       <!-- Manual Approver Block Management -->
-                      <div class="card shadow-sm" v-if="workflowType === 'new' || !selectedWFRoadMap || loadedApprovers.length === 0">
-                        <div class="card-header" style="background-color: #fff3cd; border-bottom: 2px solid #ffc107;">
-                          <div class="d-flex align-items-center">
-                            <i class="bi bi-gear-fill me-2 text-warning fs-5"></i>
-                            <h6 class="mb-0 fw-bold text-dark">Manual Approval Configuration</h6>
-                          </div>
+                      <div class="card" v-if="workflowType === 'new' || !selectedWFRoadMap || loadedApprovers.length === 0">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>Manual Approval Configuration</h6>
                         </div>
-                        <div class="card-body p-4">
-                          <div class="alert alert-light border border-warning mb-4">
-                            <div class="d-flex align-items-start">
-                              <i class="bi bi-info-circle-fill me-2 text-warning fs-5"></i>
-                              <div>
-                                <strong>About Approver Levels</strong>
-                                <p class="mb-0 font-12 mt-1">
-                                  Create approval levels to define your workflow. Each level can have specific approvers with different permissions.
-                                  Configure approval settings by clicking the "Add Approvers" button in the form builder (Step 2).
-                                </p>
-                              </div>
-                            </div>
-                          </div>
+                        <div class="card-body">
+                          <p class="text-muted font-12 mb-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Create approval levels and configure them in Step 2 (Form Builder)
+                          </p>
 
-                          <!-- Add Approver Level Button -->
-                          <button class="btn btn-primary shadow-sm mb-4" @click="addBlock">
-                            <i class="bi bi-plus-circle-fill me-2"></i>Add Approval Level
+                          <button class="btn btn-primary mb-3" @click="addBlock">
+                            <i class="bi bi-plus-lg me-1"></i>Add Approval Level
                           </button>
 
-                          <!-- Approver Levels List -->
                           <div v-if="blockArr.length > 1">
-                            <div class="card bg-light border-0">
-                              <div class="card-body text-center">
-                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
-                                <h5 class="mt-3 mb-2">Approval Levels Configured</h5>
-                                <p class="text-muted mb-0">
-                                  <strong class="text-success">{{ blockArr.length - 1 }}</strong> approval level(s) have been created
-                                </p>
-                                <small class="text-muted d-block mt-2">
-                                  Go to Step 2 (Form Fields) to configure approver settings for each level
-                                </small>
-                              </div>
+                            <div class="alert alert-success">
+                              <i class="bi bi-check-circle me-1"></i>
+                              <strong>{{ blockArr.length - 1 }}</strong> approval level(s) configured
                             </div>
                           </div>
                           <div v-else>
-                            <div class="card bg-light border-0">
-                              <div class="card-body text-center py-5">
-                                <i class="bi bi-inbox display-4 text-muted"></i>
-                                <h5 class="mt-3 mb-2">No Approval Levels Yet</h5>
-                                <p class="text-muted mb-3">Create your first approval level to get started with the workflow</p>
-                                <button class="btn btn-outline-primary" @click="addBlock">
-                                  <i class="bi bi-plus-circle me-2"></i>Create First Level
-                                </button>
-                              </div>
+                            <div class="alert alert-warning">
+                              <i class="bi bi-exclamation-triangle me-2"></i>
+                              No approval levels configured yet
                             </div>
                           </div>
                         </div>
@@ -1984,63 +1832,26 @@
     </div>
 
     <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
-      aria-labelledby="offcanvasRightLabel" style="width: 450px;">
-      <div class="offcanvas-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: 3px solid #5568d3;">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-gear-fill me-2 fs-5"></i>
-          <h5 id="offcanvasRightLabel" class="mb-0 fw-bold">
-            {{ selectedBlockIndex == 0 ? "Configure Requestors" : `Approval Settings - Level ${selectedBlockIndex}` }}
-          </h5>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+      aria-labelledby="offcanvasRightLabel">
+      <div class="offcanvas-header add_designationHeader">
+        <span id="offcanvasRightLabel" class="font-14 fw-bold">
+          {{ selectedBlockIndex == 0 ? "Add Requestors" : `Approval Settings - Level ${selectedBlockIndex}` }}
+        </span>
+        <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
           aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body p-0">
-        <!-- Info Banner -->
-        <div class="alert alert-info m-3 mb-2">
-          <div class="d-flex align-items-start">
-            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-            <div>
-              <strong>{{ selectedBlockIndex == 0 ? "Requestor Setup" : "Approver Setup" }}</strong>
-              <p class="mb-0 font-12 mt-1">
-                {{ selectedBlockIndex == 0
-                  ? "Select designations that can submit requests for this form"
-                  : "Configure approval settings and select approvers for this level"
-                }}
-              </p>
-            </div>
+      <div class="offcanvas-body add_desig_offCanvas_body p-0">
+        <div class="">
+          <!-- Approver Type (for approvers only) -->
+          <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom">
+            <label class="fw-bold font-12 mb-2">Approver Type</label>
+            <select v-model="selectedApproverType" class="form-select shadow-none font-12">
+              <option value="">Any one of the selected approvers</option>
+              <option value="ViewOnlyReportee">Reporting Manager only</option>
+              <option value="all_approvals_required">All of the selected approvers</option>
+              <option value="requester_as_a_approver">Approval by Requestor</option>
+            </select>
           </div>
-        </div>
-
-        <!-- Configuration Sections -->
-        <div class="px-3">
-          <!-- Approver Type Section (Only for Approvers) -->
-          <div v-if="selectedBlockIndex !== 0" class="mb-4">
-            <div class="card border-primary shadow-sm">
-              <div class="card-header bg-light border-bottom border-primary">
-                <h6 class="mb-0 fw-bold">
-                  <i class="bi bi-diagram-3 me-2 text-primary"></i>Approver Type
-                </h6>
-              </div>
-              <div class="card-body">
-                <label class="form-label font-12 text-muted mb-2">
-                  <i class="bi bi-chevron-right me-1"></i>Select approval requirement
-                </label>
-                <select v-model="selectedApproverType" class="form-select shadow-sm">
-                  <option value="">Any one of the selected approvers</option>
-                  <option value="ViewOnlyReportee">Reporting Manager only</option>
-                  <option value="all_approvals_required">All of the selected approvers</option>
-                  <option value="requester_as_a_approver">Approval by Requestor</option>
-                </select>
-                <small class="text-muted d-block mt-2">
-                  <i class="bi bi-lightbulb me-1 text-warning"></i>
-                  Defines who needs to approve at this level
-                </small>
-              </div>
-            </div>
-          </div>
-
-        </div>
           <!-- <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
             type="text" placeholder="Search Designation" />
             <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span> -->
@@ -2066,180 +1877,118 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
-         <!-- Select Approvers Section -->
-         <div class="px-3 mb-4">
-           <div class="card border-success shadow-sm">
-             <div class="card-header bg-light border-bottom border-success">
-               <div class="d-flex align-items-center justify-content-between">
-                 <h6 class="mb-0 fw-bold">
-                   <i class="bi bi-people-fill me-2 text-success"></i>
-                   Select {{ selectedBlockIndex === 0 ? "Requestors" : "Approvers" }}
-                 </h6>
-                 <span class="badge bg-success">
-                   {{ designationValue.length }} Selected
-                 </span>
+         <!-- Select Designations -->
+         <div class="px-3 listofdesignations">
+           <div class="my-1 d-flex justify-content-between">
+             <span class="font-12 fw-bold">
+               Select {{ selectedBlockIndex === 0 ? "Requestors" : "Approvers" }}
+             </span>
+             <span class="italic-style text-secondary font-12">
+               {{ designationValue.length }} Selected
+             </span>
+           </div>
+
+           <div ref="resizableDiv" class="my-1 disgnationlist_div" v-if="DesignationList.length">
+             <div class="d-flex align-items-center justify-content-between gap-1">
+               <!-- Select All -->
+               <div class="form-check ps-1 d-flex align-items-center m-0">
+                 <input
+                   type="checkbox"
+                   id="selectAll"
+                   :checked="isAllSelected"
+                   @change="toggleSelectAll"
+                   class="form-check-input me-2 designationCheckBox"
+                 />
+                 <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">
+                   Select all designation ({{ filteredDesignationList.length }})
+                 </label>
+               </div>
+
+               <!-- Show HODs Only -->
+               <div v-if="selectedBlockIndex !== 0" class="form-check d-flex align-items-center m-0">
+                 <input
+                   type="checkbox"
+                   id="showHods"
+                   v-model="showHods"
+                   class="form-check-input me-2 designationCheckBox"
+                 />
+                 <label for="showHods" class="form-check-label mt-2 fw-bold">
+                   Show HODs Only
+                 </label>
+               </div>
+
+               <!-- Clear All -->
+               <div>
+                 <button v-if="designationValue.length"
+                   type="button"
+                   class="btn btn-sm font-12 text-danger"
+                   @click="clearall_designations"
+                 >
+                   <i class="bi bi-x"></i> Clear all
+                 </button>
                </div>
              </div>
-             <div class="card-body">
-               <div v-if="DesignationList.length">
-                 <!-- Selection Options -->
-                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3 p-2 bg-light rounded">
-                   <!-- Select All Checkbox -->
-                   <div class="form-check">
-                     <input
-                       type="checkbox"
-                       id="selectAll"
-                       :checked="isAllSelected"
-                       @change="toggleSelectAll"
-                       class="form-check-input"
-                     />
-                     <label for="selectAll" class="form-check-label font-12 fw-bold">
-                       <i class="bi bi-check-square me-1"></i>
-                       Select all ({{ filteredDesignationList.length }})
-                     </label>
-                   </div>
 
-                   <!-- Show HODs Only (for approvers) -->
-                   <div v-if="selectedBlockIndex !== 0" class="form-check">
-                     <input
-                       type="checkbox"
-                       id="showHods"
-                       v-model="showHods"
-                       class="form-check-input"
-                     />
-                     <label for="showHods" class="form-check-label font-12 fw-bold">
-                       <i class="bi bi-star me-1"></i>Show HODs Only
-                     </label>
-                   </div>
+             <!-- Multi-select -->
+             <Vue3Select
+               v-if="DesignationList.length"
+               :multiple="true"
+               v-model="designationValue"
+               :options="filteredDesignationList"
+               :close-on-select="false"
+               :clear-search-on-select="true"
+               placeholder="Search & Select Designations"
+             />
+           </div>
 
-                   <!-- Clear All Button -->
-                   <button
-                     v-if="designationValue.length"
-                     type="button"
-                     class="btn btn-sm btn-outline-danger ms-auto"
-                     @click="clearall_designations"
-                   >
-                     <i class="bi bi-x-circle me-1"></i> Clear all
-                   </button>
-                 </div>
-
-                 <!-- Multi-select Dropdown -->
-                 <div class="mb-2">
-                   <Vue3Select
-                     :multiple="true"
-                     v-model="designationValue"
-                     :options="filteredDesignationList"
-                     :close-on-select="false"
-                     :clear-search-on-select="true"
-                     placeholder="Search & Select Designations..."
-                   />
-                 </div>
-
-                 <!-- Helper Text -->
-                 <small class="text-muted d-block mt-2">
-                   <i class="bi bi-search me-1"></i>
-                   Type to search for specific designations
-                 </small>
-               </div>
-
-               <!-- Empty State -->
-               <div v-else class="text-center py-4">
-                 <i class="bi bi-inbox display-6 text-muted"></i>
-                 <p class="text-muted mt-2 mb-0">No designations available</p>
-               </div>
+           <div v-else>
+             <div class="d-flex justify-content-center">
+               <span>No Designations Found</span>
              </div>
            </div>
          </div>
-         <!-- On Rejection Section (for approvers) -->
-         <div v-if="selectedBlockIndex !== 0" class="px-3 mb-4">
-           <div class="card border-warning shadow-sm">
-             <div class="card-header bg-light border-bottom border-warning">
-               <h6 class="mb-0 fw-bold">
-                 <i class="bi bi-arrow-return-left me-2 text-warning"></i>On Rejection
-               </h6>
-             </div>
-             <div class="card-body">
-               <label class="form-label font-12 text-muted mb-2">
-                 <i class="bi bi-chevron-right me-1"></i>Escalate rejected requests to
-               </label>
-               <select v-model.number="OnRejection" class="form-select shadow-sm">
-                 <option v-for="level in lowerApproverLevels" :key="level" :value="level">
-                   {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
-                 </option>
-               </select>
-               <small class="text-muted d-block mt-2">
-                 <i class="bi bi-lightbulb me-1 text-warning"></i>
-                 Defines where rejected requests are sent
-               </small>
-             </div>
+         <!-- On Rejection (for approvers) -->
+         <div v-if="selectedBlockIndex !== 0" class="p-3">
+           <div>
+             <label for="" class="fw-bold font-12">On Rejection</label>
            </div>
+           <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1 me-2">
+             <option v-for="level in lowerApproverLevels" :key="level" :value="level">
+               {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
+             </option>
+           </select>
          </div>
 
          <!-- Configuration Checkboxes (for approvers) -->
-         <div v-if="selectedBlockIndex !== 0" class="px-3 mb-4">
-           <div class="card border-info shadow-sm">
-             <div class="card-header bg-light border-bottom border-info">
-               <h6 class="mb-0 fw-bold">
-                 <i class="bi bi-sliders me-2 text-info"></i>Configuration Options
-               </h6>
+         <div v-if="selectedBlockIndex !== 0">
+           <div class="">
+             <div class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+               <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver" class="me-2 m-0 form-check-input designationCheckBox" />
+               <label for="Approver" class="m-0">Approval Mandatory</label>
              </div>
-             <div class="card-body">
-               <!-- Approval Mandatory -->
-               <div class="form-check form-switch mb-3 p-3 bg-light rounded">
-                 <input
-                   v-model="approval_required"
-                   type="checkbox"
-                   :true-value="1"
-                   :false-value="0"
-                   id="Approver"
-                   class="form-check-input"
-                 />
-                 <label for="Approver" class="form-check-label fw-bold">
-                   <i class="bi bi-exclamation-circle me-1"></i>Approval Mandatory
-                 </label>
-                 <small class="d-block text-muted mt-1 ms-4">
-                   When enabled, this approval level is required
-                 </small>
-               </div>
-
-               <!-- Allow Edit -->
-               <div v-if="allowEditSettingType === true" class="form-check form-switch p-3 bg-light rounded">
-                 <input
-                   v-model="approver_can_edit"
-                   type="checkbox"
-                   :true-value="1"
-                   :false-value="0"
-                   id="approver_can_edit"
-                   class="form-check-input"
-                 />
-                 <label for="approver_can_edit" class="form-check-label fw-bold">
-                   <i class="bi bi-pencil-square me-1"></i>Allow this approver to edit the form
-                 </label>
-                 <small class="d-block text-muted mt-1 ms-4">
-                   Permits approvers to modify form fields
-                 </small>
-               </div>
+             <div v-if="allowEditSettingType === true" class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+               <input
+                 v-model="approver_can_edit"
+                 type="checkbox"
+                 :true-value="1"
+                 :false-value="0"
+                 id="approver_can_edit"
+                 class="me-2 m-0 form-check-input designationCheckBox"
+               />
+               <label for="approver_can_edit" class="m-0">
+                 Allow this approver to edit the form
+               </label>
              </div>
            </div>
          </div>
 
       </div>
 
-      <!-- Footer with Action Button -->
-      <div class="offcanvas-footer border-top bg-light p-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <small class="text-muted">
-            <i class="bi bi-info-circle me-1"></i>
-            Click save to apply changes
-          </small>
-          <button
-            class="btn btn-primary shadow-sm px-4"
-            data-bs-dismiss="offcanvas"
-            @click="addDesignationBtn"
-          >
-            <i class="bi bi-check-circle-fill me-2"></i>
-            {{ selectedBlockIndex === 0 ? 'Save Requestors' : 'Save Approvers' }}
-          </button>
+      <!-- Footer -->
+      <div class="offcanvas-footer">
+        <div class="text-end p-3">
+          <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
+            :name="selectedBlockIndex === 0 ? 'Add Requestor' : 'Add Approvers'" />
         </div>
       </div>
     </div>
