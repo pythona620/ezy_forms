@@ -1438,13 +1438,13 @@
                   </div>
                   <!-- End Zoho Form Builder -->
 
-                  <!-- Step 3: Requestor Block -->
+                  <!-- Step 3: Workflow Setup -->
                   <div v-if="activeStep === 3">
                     <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
                       <button @click="prevStep(3)" class="btn btn-sm btn-light">
                         <i class="bi bi-chevron-left"></i> Back
                       </button>
-                      <h1 class="font-14 fw-bold m-0">Requestor Block</h1>
+                      <h1 class="font-14 fw-bold m-0">Workflow Setup</h1>
                       <button class="btn btn-sm btn-dark" @click="nextStep">
                         Next <i class="bi bi-chevron-right"></i>
                       </button>
@@ -1554,6 +1554,59 @@
                         </div>
                       </div>
 
+                      <!-- Loaded Requestors from WF Road Map -->
+                      <div class="card mt-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedRequestors.length > 0">
+                        <div class="card-header bg-success text-white">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-check-circle me-2"></i>Loaded Requestors from Workflow</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="alert alert-success mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>{{ loadedRequestors.length }}</strong> requestor role(s) loaded from <strong>{{ selectedWFRoadMap.display_name }}</strong>
+                          </div>
+
+                          <div class="table-responsive">
+                            <table class="table table-bordered">
+                              <thead class="table-light">
+                                <tr>
+                                  <th>Role</th>
+                                  <th>Auto Approval</th>
+                                  <th>Columns Allowed</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="(requestor, index) in loadedRequestors" :key="index">
+                                  <td><strong>{{ requestor.requestor }}</strong></td>
+                                  <td>
+                                    <span v-if="requestor.auto_approval" class="badge bg-success">
+                                      <i class="bi bi-check-circle me-1"></i>Enabled
+                                    </span>
+                                    <span v-else class="badge bg-secondary">Disabled</span>
+                                  </td>
+                                  <td>
+                                    <small class="text-muted">{{ requestor.columns_allowed || 'All fields' }}</small>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <!-- Requestor Field Configuration -->
+                          <div class="mt-3">
+                            <h6 class="fw-bold"><i class="bi bi-pencil me-2"></i>Requestor Fields Configuration</h6>
+                            <p class="text-muted font-12">These fields will be available for requestors to fill:</p>
+
+                            <div class="row g-2">
+                              <div class="col-md-3" v-for="(field, idx) in requestorFields" :key="idx">
+                                <div class="field-badge">
+                                  <i class="bi bi-tag me-1"></i>{{ field.label }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <!-- Predefined System Fields -->
                       <div class="card mt-4">
                         <div class="card-header bg-light">
@@ -1617,21 +1670,93 @@
                         <strong>Approval Workflow:</strong> Configure multi-level approval process for this form.
                       </div>
 
-                      <!-- Add Approver Level Button -->
-                      <button class="btn btn-primary mb-3" @click="addBlock">
-                        <i class="bi bi-plus-lg me-1"></i>Add Approval Level
-                      </button>
+                      <!-- Loaded Approvers from WF Road Map -->
+                      <div class="card mb-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedApprovers.length > 0">
+                        <div class="card-header bg-primary text-white">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2"></i>Loaded Approval Workflow</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="alert alert-success mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>{{ loadedApprovers.length }}</strong> approval level(s) loaded from <strong>{{ selectedWFRoadMap.display_name }}</strong>
+                          </div>
 
-                      <!-- Approver Levels List -->
-                      <div v-if="blockArr.length > 1">
-                        <div class="alert alert-secondary">
-                          <strong>{{ blockArr.length - 1 }}</strong> approval level(s) configured
+                          <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                              <thead class="table-light">
+                                <tr>
+                                  <th width="10%">Level</th>
+                                  <th width="25%">Role</th>
+                                  <th width="15%">Mandatory</th>
+                                  <th width="20%">Approval Type</th>
+                                  <th width="30%">Columns Allowed</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="(approver, index) in loadedApprovers" :key="index">
+                                  <td>
+                                    <span class="badge bg-dark">Level {{ approver.level }}</span>
+                                  </td>
+                                  <td>
+                                    <strong>{{ approver.role }}</strong>
+                                  </td>
+                                  <td>
+                                    <span v-if="approver.mandatory" class="badge bg-danger">
+                                      <i class="bi bi-exclamation-circle me-1"></i>Required
+                                    </span>
+                                    <span v-else class="badge bg-secondary">Optional</span>
+                                  </td>
+                                  <td>
+                                    <span v-if="approver.approval_type === 'Any'" class="badge bg-info">
+                                      <i class="bi bi-person me-1"></i>Any User
+                                    </span>
+                                    <span v-else-if="approver.approval_type === 'All'" class="badge bg-warning text-dark">
+                                      <i class="bi bi-people me-1"></i>All Users
+                                    </span>
+                                    <span v-else class="badge bg-secondary">
+                                      {{ approver.approval_type || 'Any' }}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <small class="text-muted">{{ approver.columns_allowed || 'All fields' }}</small>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <!-- Field Attachment Info -->
+                          <div class="alert alert-light mt-3">
+                            <i class="bi bi-paperclip me-2"></i>
+                            <strong>Note:</strong> Approvers can view and approve based on the fields configured above.
+                            To modify field permissions, edit the selected workflow road map.
+                          </div>
                         </div>
                       </div>
-                      <div v-else>
-                        <div class="alert alert-warning">
-                          <i class="bi bi-exclamation-triangle me-2"></i>
-                          No approval levels configured yet. Click "Add Approval Level" to create one.
+
+                      <!-- Manual Approver Block Management -->
+                      <div class="card" v-if="workflowType === 'new' || !selectedWFRoadMap || loadedApprovers.length === 0">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>Manual Approval Configuration</h6>
+                        </div>
+                        <div class="card-body">
+                          <!-- Add Approver Level Button -->
+                          <button class="btn btn-primary mb-3" @click="addBlock">
+                            <i class="bi bi-plus-lg me-1"></i>Add Approval Level
+                          </button>
+
+                          <!-- Approver Levels List -->
+                          <div v-if="blockArr.length > 1">
+                            <div class="alert alert-secondary">
+                              <strong>{{ blockArr.length - 1 }}</strong> approval level(s) configured
+                            </div>
+                          </div>
+                          <div v-else>
+                            <div class="alert alert-warning">
+                              <i class="bi bi-exclamation-triangle me-2"></i>
+                              No approval levels configured yet. Click "Add Approval Level" to create one.
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2018,6 +2143,11 @@ const selectedWFRoadMap = ref(null);
 // Requestor Configuration State
 const workflowType = ref('new');
 const requestorRoles = ref([]);
+const loadedRequestors = ref([]);
+const requestorFields = ref([]);
+
+// Approver Configuration State
+const loadedApprovers = ref([]);
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit;
@@ -3527,9 +3657,9 @@ const steps = ref([
   },
   {
     id: 3,
-    label: "Requestor Block",
+    label: "Workflow Setup",
     stepno: "Step 3",
-    icon: "bi bi-person-plus",
+    icon: "bi bi-diagram-3",
   },
   {
     id: 4,
@@ -5203,8 +5333,30 @@ const handleWFRoadMapSelect = async (selectedRoadmap) => {
       const roadmapData = response.data.data;
       console.log('Full Roadmap Data:', roadmapData);
 
-      // Auto-populate workflow configurations
+      // Auto-populate requestors
       if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
+        // Store loaded requestors for display
+        loadedRequestors.value = roadmapData.wf_requestors;
+
+        // Extract requestor fields from the first block if it exists
+        if (blockArr.length > 0 && blockArr[0].sections && blockArr[0].sections.length > 0) {
+          requestorFields.value = [];
+          blockArr[0].sections.forEach(section => {
+            section.rows.forEach(row => {
+              row.forEach(column => {
+                if (column.fields) {
+                  column.fields.forEach(field => {
+                    requestorFields.value.push({
+                      label: field.label,
+                      fieldtype: field.fieldtype
+                    });
+                  });
+                }
+              });
+            });
+          });
+        }
+
         // Create requestor block if it doesn't exist
         if (blockArr.length === 0) {
           addBlock(); // Add first block for requestor
@@ -5216,6 +5368,9 @@ const handleWFRoadMapSelect = async (selectedRoadmap) => {
       // Auto-populate approver blocks based on level setup
       if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
         const approverLevels = roadmapData.wf_level_setup;
+
+        // Store loaded approvers for display
+        loadedApprovers.value = approverLevels;
 
         // Ensure we have enough blocks (1 requestor + n approver levels)
         const requiredBlocks = 1 + roadmapData.workflow_levels;
@@ -6651,6 +6806,25 @@ td {
   font-size: 13px;
   color: #6b7280;
   background-color: #f9fafb;
+}
+
+/* Field Badge Styles */
+.field-badge {
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-badge i {
+  font-size: 14px;
 }
 
 </style>
