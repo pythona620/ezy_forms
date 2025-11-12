@@ -370,10 +370,11 @@
                         </div>
 
                         <div v-if="showFieldLibrary" class="library-content">
-                          <FieldLibraryPanel
-                            :collapsible="true"
+                          <SimpleFieldLibrary
+                            :fields="fieldTypes"
                             @field-add="handleFieldAddFromLibrary"
                             @field-dragstart="handleFieldDragStart"
+                            @field-dragend="handleFieldDragEnd"
                           />
                         </div>
                       </aside>
@@ -1723,9 +1724,7 @@ import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 
 // Drag-and-Drop Field Library
-import FieldLibraryPanel from "../../Components/FormBuilder/FieldLibrary/FieldLibraryPanel.vue";
-import DropZone from "../../Components/FormBuilder/Canvas/DropZone.vue";
-import { FIELD_TYPES, FIELD_CATEGORIES } from "../../Components/FormBuilder/FieldLibrary/fieldTypes.js";
+import SimpleFieldLibrary from "../../Components/FormBuilder/SimpleFieldLibrary.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -1973,8 +1972,8 @@ const handleFieldDropAtIndex = (
   if (draggedFieldType.value) {
     console.log('Dropping from field library:', draggedFieldType.value);
 
-    // Create new field from library
-    const newField = createFieldFromLibraryType(draggedFieldType.value);
+    // Create new field from Frappe fieldtype
+    const newField = createFieldFromFrappeType(draggedFieldType.value);
 
     if (!newField) {
       console.error('Failed to create field from type:', draggedFieldType.value);
@@ -4880,10 +4879,8 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 // ===== DRAG-AND-DROP FIELD LIBRARY HANDLERS =====
 
 // Handle field added from library (click)
-const handleFieldAddFromLibrary = (data) => {
-  // Extract field type - can be either a string or an object
-  const fieldType = typeof data === 'string' ? data : (data.fieldType || data.id);
-  console.log('Field added from library:', fieldType, data);
+const handleFieldAddFromLibrary = (frappeFieldType) => {
+  console.log('Field added from library:', frappeFieldType);
 
   // Get current block based on active tab
   const currentBlockIndex = currentBuilderTab.value;
@@ -4894,8 +4891,8 @@ const handleFieldAddFromLibrary = (data) => {
     return;
   }
 
-  // Create field from type
-  const newField = createFieldFromLibraryType(fieldType);
+  // Create field from Frappe fieldtype
+  const newField = createFieldFromFrappeType(frappeFieldType);
 
   if (!newField) {
     return;
@@ -4909,7 +4906,7 @@ const handleFieldAddFromLibrary = (data) => {
   if (currentBlock.sections.length === 0) {
     currentBlock.sections.push({
       label: '',
-      rows: [[{ fields: [] }]]
+      rows: [[{ label: '', fields: [] }]]
     });
   }
 
@@ -4929,45 +4926,48 @@ const handleFieldAddFromLibrary = (data) => {
 };
 
 // Handle drag start from library
-const handleFieldDragStart = (data) => {
-  // Extract field type - can be either a string or an object
-  const fieldType = typeof data === 'string' ? data : (data.fieldType || data.id);
-  console.log('Drag started:', fieldType, data);
-  draggedFieldType.value = fieldType;
+const handleFieldDragStart = (frappeFieldType) => {
+  console.log('Drag started:', frappeFieldType);
+  draggedFieldType.value = frappeFieldType;
 };
 
-// Create field object from library field type
-const createFieldFromLibraryType = (fieldType) => {
-  console.log('Creating field from type:', fieldType);
-  console.log('Available field types:', Object.keys(FIELD_TYPES));
+// Handle drag end from library
+const handleFieldDragEnd = () => {
+  // Don't clear draggedFieldType here, let the drop handler do it
+  console.log('Drag ended');
+};
 
-  const fieldDef = FIELD_TYPES[fieldType];
+// Create field object from Frappe fieldtype
+const createFieldFromFrappeType = (frappeFieldType) => {
+  console.log('Creating field from Frappe type:', frappeFieldType);
+
+  // Find the field definition from fieldTypes array
+  const fieldDef = fieldTypes.find(ft => ft.type === frappeFieldType);
 
   if (!fieldDef) {
-    console.error('Field type not found:', fieldType);
-    console.error('Attempted to find:', fieldType, 'in', FIELD_TYPES);
-    showError(`Field type "${fieldType}" not found. Please try again.`);
+    console.error('Field type not found:', frappeFieldType);
+    console.error('Available types:', fieldTypes.map(ft => ft.type));
+    showError(`Field type "${frappeFieldType}" not found. Please try again.`);
     return null;
   }
 
   // Generate unique field name
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 6);
-  const fieldname = `${fieldType}_${timestamp}_${randomSuffix}`;
+  const fieldname = `field_${timestamp}_${randomSuffix}`;
 
   return {
     id: `field_${timestamp}_${randomSuffix}`,
     fieldname: fieldname,
-    label: fieldDef.name,
-    fieldtype: fieldDef.frappe_fieldtype,
-    options: fieldDef.defaultProps?.options || '',
-    reqd: fieldDef.defaultProps?.required ? 1 : 0,
+    label: fieldDef.label,
+    fieldtype: fieldDef.type,
+    options: '',
+    reqd: 0,
     read_only: 0,
     hidden: 0,
-    description: fieldDef.description || '',
-    default: fieldDef.defaultProps?.default || '',
-    placeholder: fieldDef.defaultProps?.placeholder || '',
-    // Add other properties as needed based on existing field structure
+    description: '',
+    default: '',
+    placeholder: '',
   };
 };
 
