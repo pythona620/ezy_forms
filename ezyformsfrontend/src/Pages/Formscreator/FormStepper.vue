@@ -3989,8 +3989,33 @@ function addDesignationBtn() {
 // };
 
 function getWorkflowSetup(blockIndex) {
+  // Find ALL entries with this block index (there can be multiple roles per block)
+  const matchingSetups = workflowSetup.filter((setup) => setup.idx === blockIndex);
 
-  return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
+  if (matchingSetups.length === 0) {
+    return { roles: [] };
+  }
+
+  // If there's only one entry, return it
+  if (matchingSetups.length === 1) {
+    return matchingSetups[0];
+  }
+
+  // If there are multiple entries, merge all roles together
+  const mergedSetup = { ...matchingSetups[0] }; // Start with first entry
+  const allRoles = [];
+
+  matchingSetups.forEach((setup) => {
+    if (setup.roles && Array.isArray(setup.roles)) {
+      allRoles.push(...setup.roles);
+    }
+  });
+
+  mergedSetup.roles = allRoles;
+
+  console.log(`getWorkflowSetup(${blockIndex}): Found ${matchingSetups.length} entries, merged roles:`, allRoles);
+
+  return mergedSetup;
 }
 
 function initializeDesignationValue(blockIndex) {
