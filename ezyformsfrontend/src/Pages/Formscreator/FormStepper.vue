@@ -5228,6 +5228,8 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
     const roadmapData = response?.data?.data || response?.data || {};
     console.log("WF Road Map Data:", roadmapData);
 
+    let currentBlockIndex = 0; // Track the actual block index
+
     // 1️⃣ Create Requestor Block and load roles
     if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
       loadedRequestors.value = roadmapData.wf_requestors;
@@ -5235,22 +5237,25 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
 
       // Create one requestor block
       addBlock();
+      const requestorBlockIndex = currentBlockIndex;
+      currentBlockIndex++;
 
       // Populate workflowSetup array for all requestor roles
-      roadmapData.wf_requestors.forEach((req, index) => {
+      roadmapData.wf_requestors.forEach((req) => {
         workflowSetup.push({
           type: 'requestor',
           roles: [req.requestor],
           auto_approval: req.auto_approval || 0,
           columns_allowed: req.columns_allowed || '',
           fields: [],
-          idx: 0
+          idx: requestorBlockIndex
         });
       });
     } else {
       console.warn("No Requestors found in roadmap");
       // Create at least one requestor block even if no requestors defined
       addBlock();
+      currentBlockIndex++;
     }
 
     // 2️⃣ Create Approver Blocks based on levels
@@ -5268,14 +5273,18 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
       });
 
       // Create a block for each unique level
-      const sortedLevels = Object.keys(levelGroups).sort((a, b) => a - b);
+      const sortedLevels = Object.keys(levelGroups).sort((a, b) => parseInt(a) - parseInt(b));
       sortedLevels.forEach((lvl) => {
         const approversForLevel = levelGroups[lvl];
 
-        // Create approver block
+        // Create approver block for this level
         addBlock();
+        const approverBlockIndex = currentBlockIndex;
+        currentBlockIndex++;
 
-        // Add to workflowSetup (one entry per level, multiple roles if needed)
+        console.log(`Level ${lvl} → Block Index ${approverBlockIndex}, Roles: ${approversForLevel.length}`);
+
+        // Add each role at this level to workflowSetup with the same block index
         approversForLevel.forEach((levelData) => {
           workflowSetup.push({
             type: 'approver',
@@ -5289,7 +5298,7 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
             on_rejection: levelData.on_rejection || 0,
             columns_allowed: levelData.columns_allowed || '',
             fields: [],
-            idx: parseInt(lvl)
+            idx: approverBlockIndex // Use actual block index, not level number
           });
         });
       });
@@ -5302,7 +5311,10 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
       currentBuilderTab.value = 0;
     });
 
-    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Blocks created in Step 2.`);
+    console.log("Final blockArr length:", blockArr.length);
+    console.log("Final workflowSetup:", workflowSetup);
+
+    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Created ${blockArr.length} blocks in Step 2.`);
   } catch (error) {
     console.error("Error in handleWFRoadMapSelect:", error);
     showError("Failed to load workflow. Please try again.");
