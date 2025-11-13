@@ -360,6 +360,13 @@
                       </div>
 
                       <div class="toolbar-right">
+                        <button
+                          :class="['btn btn-sm me-2', advancedBuilderMode ? 'btn-dark' : 'btn-outline-dark']"
+                          @click="advancedBuilderMode = !advancedBuilderMode"
+                          title="Toggle Advanced Field Builder">
+                          <i :class="advancedBuilderMode ? 'bi bi-tools' : 'bi bi-grid-3x3-gap'"></i>
+                          {{ advancedBuilderMode ? 'Advanced' : 'Simple' }}
+                        </button>
                         <button class="btn btn-sm btn-primary me-2" @click="addBlock">
                           <i class="bi bi-plus-lg me-1"></i>Add Block
                         </button>
@@ -374,31 +381,48 @@
 
                     <!-- Main Builder Area -->
                     <div class="zoho-builder-container">
-                      <!-- Left: Field Library -->
-                      <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
-                        <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
-                          <div class="d-flex align-items-center justify-content-between w-100">
-                            <h6 class="mb-0 font-14 fw-bold">
-                              <i class="bi bi-grid-3x3-gap me-2"></i>
-                              {{ showFieldLibrary ? 'Field Types' : 'Fields' }}
-                            </h6>
-                            <button class="btn btn-sm btn-link p-0 text-dark">
-                              <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
-                            </button>
+                      <!-- Advanced Mode: Frappe Form Builder -->
+                      <div v-if="advancedBuilderMode" class="advanced-builder-wrapper">
+                        <div class="alert alert-info mb-3">
+                          <i class="bi bi-info-circle me-2"></i>
+                          <strong>Advanced Mode:</strong> Use this mode to access all Frappe field types and advanced field properties.
+                          Fields created here will be added to the current block.
+                        </div>
+                        <FrappeFormBuilder
+                          ref="frappeBuilderRef"
+                          :formName="formNameModel"
+                          @save="handleAdvancedBuilderSave"
+                          @update="handleAdvancedBuilderUpdate"
+                        />
+                      </div>
+
+                      <!-- Simple Mode: Original Builder -->
+                      <template v-else>
+                        <!-- Left: Field Library -->
+                        <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
+                          <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                              <h6 class="mb-0 font-14 fw-bold">
+                                <i class="bi bi-grid-3x3-gap me-2"></i>
+                                {{ showFieldLibrary ? 'Field Types' : 'Fields' }}
+                              </h6>
+                              <button class="btn btn-sm btn-link p-0 text-dark">
+                                <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
+                              </button>
+                            </div>
                           </div>
-                        </div>
 
-                        <div v-if="showFieldLibrary" class="library-content">
-                          <SimpleFieldLibrary
-                            :fields="fieldTypes"
-                            @field-add="handleFieldAddFromLibrary"
-                            @field-dragstart="handleFieldDragStart"
-                            @field-dragend="handleFieldDragEnd"
-                          />
-                        </div>
-                      </aside>
+                          <div v-if="showFieldLibrary" class="library-content">
+                            <SimpleFieldLibrary
+                              :fields="fieldTypes"
+                              @field-add="handleFieldAddFromLibrary"
+                              @field-dragstart="handleFieldDragStart"
+                              @field-dragend="handleFieldDragEnd"
+                            />
+                          </div>
+                        </aside>
 
-                      <!-- Center: Form Canvas -->
+                        <!-- Center: Form Canvas -->
                       <div class="zoho-form-canvas">
                         <div class="canvas-inner" ref="mainBlockRef">
                           <!-- Current Block Content -->
@@ -1433,6 +1457,8 @@
                           <p class="text-muted small">Select a field to edit its properties</p>
                         </div>
                       </aside>
+                      </template>
+                      <!-- End Simple Mode -->
                     </div>
                     <!-- End Zoho Builder Container -->
                   </div>
@@ -1976,6 +2002,7 @@ import 'vue3-select/dist/vue3-select.css';
 
 // Drag-and-Drop Field Library
 import SimpleFieldLibrary from "../../Components/FormBuilder/SimpleFieldLibrary.vue";
+import FrappeFormBuilder from "../../Components/FrappeFormBuilder.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -2020,9 +2047,12 @@ let paramId = ref("");
 // Drag-and-Drop State
 const draggedFieldType = ref(null);
 const selectedFieldForEdit = ref(null);
+const frappeBuilderRef = ref(null); // Reference to FrappeFormBuilder component
 
 // Zoho-style Tab State
 const currentBuilderTab = ref(0);
+const advancedBuilderMode = ref(false); // Toggle between simple and advanced field builder
+const showFieldLibrary = ref(true); // Toggle field library visibility
 
 // WF Road Map State
 const wfRoadMapOptions = ref([]);
@@ -5414,6 +5444,19 @@ const handleFieldDragStart = (frappeFieldType) => {
 const handleFieldDragEnd = () => {
   // Don't clear draggedFieldType here, let the drop handler do it
   console.log('Drag ended');
+};
+
+// Handle advanced builder save
+const handleAdvancedBuilderSave = (fields) => {
+  console.log('Advanced builder fields saved:', fields);
+  showSuccess(`${fields.length} field(s) saved successfully!`);
+  // Fields are already managed by the FrappeFormBuilder component
+};
+
+// Handle advanced builder update
+const handleAdvancedBuilderUpdate = (fields) => {
+  console.log('Advanced builder fields updated:', fields);
+  // Real-time update, fields are managed by the component
 };
 
 // Create field object from Frappe fieldtype

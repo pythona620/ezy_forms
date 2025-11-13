@@ -284,7 +284,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import draggable from 'vuedraggable';
-import { api_req_data, api_post_data } from '@/shared/services/api_req_data';
+import axiosInstance from '@/shared/services/interceptor';
 import { apis } from '@/shared/apiurls';
 import { showSuccess, showError } from '@/shared/services/toast';
 
@@ -600,10 +600,10 @@ const saveFormSchema = async () => {
 
     if (apis.saveFormDefinition) {
       loading.value = true;
-      const response = await api_post_data(apis.saveFormDefinition, payload);
+      const response = await axiosInstance.post(apis.saveFormDefinition, payload);
       loading.value = false;
 
-      if (response && response.success) {
+      if (response && response.data && response.data.message && response.data.message.success) {
         showSuccess('Form schema saved successfully!');
         emit('save', schema);
       } else {
@@ -645,13 +645,14 @@ const loadExistingForm = async () => {
     loading.value = true;
 
     if (apis.getFormDefinition) {
-      const response = await api_post_data(apis.getFormDefinition, { form_name: formName });
+      const response = await axiosInstance.post(apis.getFormDefinition, { form_name: formName });
       loading.value = false;
 
-      if (response && response.success && response.fields) {
-        const fields = typeof response.fields === 'string'
-          ? JSON.parse(response.fields)
-          : response.fields;
+      const data = response.data.message;
+      if (data && data.success && data.fields) {
+        const fields = typeof data.fields === 'string'
+          ? JSON.parse(data.fields)
+          : data.fields;
 
         formFields.value = fields.map((field, idx) => ({
           ...field,
