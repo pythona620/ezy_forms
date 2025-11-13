@@ -2020,7 +2020,6 @@ let paramId = ref("");
 // Drag-and-Drop State
 const draggedFieldType = ref(null);
 const selectedFieldForEdit = ref(null);
-const showFieldLibrary = ref(true);
 
 // Zoho-style Tab State
 const currentBuilderTab = ref(0);
