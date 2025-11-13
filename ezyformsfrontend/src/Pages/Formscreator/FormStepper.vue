@@ -5238,12 +5238,13 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
   try {
     console.log("Selected WF Road Map:", selectedRoadMap);
 
-    // Clear existing data
-    blockArr.splice(0, blockArr.length);
+    // Only clear workflow setup, preserve existing blocks and fields
     workflowSetup = [];
     loadedRequestors.value = [];
     loadedApprovers.value = [];
-    currentBuilderTab.value = 0;
+
+    // If no blocks exist yet, we'll create them. Otherwise preserve existing blocks.
+    const hasExistingBlocks = blockArr.length > 0;
 
     // Fetch workflow roadmap data
     const response = await axiosInstance.get(
@@ -5260,8 +5261,10 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
       loadedRequestors.value = roadmapData.wf_requestors;
       console.log(`Loaded ${roadmapData.wf_requestors.length} requestor role(s)`);
 
-      // Create one requestor block
-      addBlock();
+      // Only create requestor block if no blocks exist yet
+      if (!hasExistingBlocks) {
+        addBlock();
+      }
       const requestorBlockIndex = currentBlockIndex;
       currentBlockIndex++;
 
@@ -5278,8 +5281,10 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
       });
     } else {
       console.warn("No Requestors found in roadmap");
-      // Create at least one requestor block even if no requestors defined
-      addBlock();
+      // Create at least one requestor block if no blocks exist
+      if (!hasExistingBlocks) {
+        addBlock();
+      }
       currentBlockIndex++;
     }
 
@@ -5299,11 +5304,14 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
 
       // Create a block for each unique level
       const sortedLevels = Object.keys(levelGroups).sort((a, b) => parseInt(a) - parseInt(b));
-      sortedLevels.forEach((lvl) => {
+      sortedLevels.forEach((lvl, levelIndex) => {
         const approversForLevel = levelGroups[lvl];
 
-        // Create approver block for this level
-        addBlock();
+        // Create approver block only if needed
+        // If blocks exist and we need more blocks for this level
+        if (!hasExistingBlocks || (hasExistingBlocks && currentBlockIndex >= blockArr.length)) {
+          addBlock();
+        }
         const approverBlockIndex = currentBlockIndex;
         currentBlockIndex++;
 
@@ -5331,15 +5339,14 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
       console.warn("No approver levels found in roadmap");
     }
 
-    // Switch to the first block (requestor)
-    nextTick(() => {
-      currentBuilderTab.value = 0;
-    });
-
     console.log("Final blockArr length:", blockArr.length);
     console.log("Final workflowSetup:", workflowSetup);
 
-    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Created ${blockArr.length} blocks in Step 2.`);
+    if (hasExistingBlocks) {
+      showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Existing fields preserved.`);
+    } else {
+      showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Created ${blockArr.length} blocks in Step 2.`);
+    }
   } catch (error) {
     console.error("Error in handleWFRoadMapSelect:", error);
     showError("Failed to load workflow. Please try again.");
@@ -5500,33 +5507,47 @@ const createFieldFromFrappeType = (frappeFieldType) => {
 .zoho-tab {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px 6px 0 0;
-  font-size: 13px;
+  padding: 12px 20px;
+  background: #f1f3f5;
+  border: 2px solid #dee2e6;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   cursor: pointer;
+  color: #6c757d;
+  margin-right: 4px;
 
   &:hover {
-    background: #f3f4f6;
+    background: #e9ecef;
+    color: #495057;
+    transform: translateY(-2px);
   }
 
   &.active {
     background: #ffffff;
-    border-bottom-color: #ffffff;
-    font-weight: 500;
-    margin-bottom: -1px;
+    border-bottom: 3px solid #0d6efd;
+    font-weight: 600;
+    color: #0d6efd;
+    box-shadow: 0 -2px 8px rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+  }
+
+  i.bi-file-earmark-text {
+    font-size: 16px;
   }
 
   i.bi-x-lg {
-    font-size: 10px;
-    opacity: 0.6;
+    font-size: 11px;
+    opacity: 0.5;
+    transition: all 0.2s;
 
     &:hover {
       opacity: 1;
-      color: #ef4444;
+      color: #dc3545;
+      transform: scale(1.2);
     }
   }
 }
@@ -5619,14 +5640,15 @@ const createFieldFromFrappeType = (frappeFieldType) => {
 .zoho-form-canvas {
   flex: 1;
   overflow-y: auto;
-  background: #f9fafb;
-  padding: 1.5rem;
+  background: #f5f7f9;
+  padding: 24px;
 
   .canvas-inner {
     min-height: 100%;
     background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
 
     // Remove extra padding/margin from block content
     .block-level {
@@ -5635,14 +5657,15 @@ const createFieldFromFrappeType = (frappeFieldType) => {
 
     .requestandAppHeader {
       margin-bottom: 0;
-      padding: 1.25rem 1.5rem;
-      background: #f9fafb;
-      border-bottom: 2px solid #e5e7eb;
-      border-radius: 8px 8px 0 0;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 3px solid #e9ecef;
+      border-radius: 12px 12px 0 0;
     }
 
     .section_block {
-      padding: 1.5rem;
+      padding: 24px;
+      margin: 16px;
     }
   }
 
@@ -6430,12 +6453,62 @@ select {
 }
 
 .requestandAppHeader {
-  padding: 12px 6px;
-  // box-shadow: 0px 4px 4px 0px #0000000d; 
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 3px solid #e9ecef;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-radius: 8px 8px 0 0;
+
+  .blockTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+
+  .approver_type_div {
+    background: #e7f3ff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    color: #0066cc;
+    font-weight: 500;
+  }
+
+  .role-container {
+    background: #f8f9fa;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-right: 12px;
+    border: 1px solid #dee2e6;
+
+    .role-label {
+      color: #495057;
+      margin-right: 8px;
+    }
+
+    .role-names {
+      font-weight: 600;
+    }
+  }
 }
 
 .section_block {
-  padding: 10px;
+  padding: 24px 20px;
+  background: #ffffff;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  .sectionTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f1f3f5;
+  }
 }
 
 .border-less-input:focus {
