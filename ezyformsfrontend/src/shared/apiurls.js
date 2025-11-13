@@ -120,7 +120,16 @@ export const apis = {
   DataUpdate:domain + `/method/ezy_forms.api.v1.doc_operations.doc_operation`,
   // repostListData: domain + `/method/frappe.desk.query_report.run`,
   repostListData: domain + `/method/ezy_forms.api.v1.generate_report.generate_custom_report`,
-  getReportList: domain + `/method/ezy_forms.api.v1.get_report_list.get_reports_list`
+  getReportList: domain + `/method/ezy_forms.api.v1.get_report_list.get_reports_list`,
+
+  // Form Builder APIs
+  getFieldTypes: domain + `/method/ezy_forms.api.v1.form_builder.get_field_types`,
+  saveFormDefinition: domain + `/method/ezy_forms.api.v1.form_builder.save_form_definition`,
+  getFormDefinition: domain + `/method/ezy_forms.api.v1.form_builder.get_form_definition`,
+  getDocfieldMeta: domain + `/method/ezy_forms.api.v1.form_builder.get_docfield_meta`,
+  validateFieldname: domain + `/method/ezy_forms.api.v1.form_builder.validate_fieldname`,
+  getLinkOptions: domain + `/method/ezy_forms.api.v1.form_builder.get_link_options`,
+  getChildTableOptions: domain + `/method/ezy_forms.api.v1.form_builder.get_child_table_options`
 };
 
 // export const tokens = {
