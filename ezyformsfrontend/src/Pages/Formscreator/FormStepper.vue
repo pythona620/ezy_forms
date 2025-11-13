@@ -1595,69 +1595,6 @@
                         </div>
                       </div>
 
-                      <!-- Predefined System Fields -->
-                      <div class="card mt-4">
-                        <div class="card-header bg-light">
-                          <h6 class="mb-0 fw-bold"><i class="bi bi-shield-check me-2"></i>System Generated Fields</h6>
-                        </div>
-                        <div class="card-body">
-                          <div class="alert alert-secondary mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
-                            These fields are automatically included for all requestors.
-                          </div>
-
-                          <div class="row g-3">
-                            <div class="col-md-6">
-                              <div class="field-preview-card">
-                                <label class="form-label fw-bold">Requestor Name</label>
-                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
-                              </div>
-                            </div>
-
-                            <div class="col-md-6">
-                              <div class="field-preview-card">
-                                <label class="form-label fw-bold">Requestor Email</label>
-                                <input type="email" class="form-control" value="Auto-populated from user profile" disabled />
-                              </div>
-                            </div>
-
-                            <div class="col-md-6">
-                              <div class="field-preview-card">
-                                <label class="form-label fw-bold">Request Date</label>
-                                <input type="text" class="form-control" value="Auto-populated on submission" disabled />
-                              </div>
-                            </div>
-
-                            <div class="col-md-6">
-                              <div class="field-preview-card">
-                                <label class="form-label fw-bold">Department</label>
-                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 4: Approver Blocks -->
-                  <div v-if="activeStep === 4">
-                    <div class="stepperbackground d-flex align-items-center justify-content-between p-3">
-                      <button @click="prevStep(4)" class="btn btn-sm btn-light">
-                        <i class="bi bi-chevron-left"></i> Back
-                      </button>
-                      <h1 class="font-14 fw-bold m-0">Approver Blocks</h1>
-                      <button class="btn btn-sm btn-dark" @click="nextStep">
-                        Next <i class="bi bi-chevron-right"></i>
-                      </button>
-                    </div>
-
-                    <div class="container-fluid mt-4 p-4">
-                      <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Approval Workflow:</strong> Configure multi-level approval process based on WF Level Setup
-                      </div>
-
                       <!-- Loaded Approvers from WF Road Map -->
                       <div class="card mb-4" v-if="workflowType === 'existing' && selectedWFRoadMap && loadedApprovers.length > 0">
                         <div class="card-header bg-primary text-white">
@@ -1723,31 +1660,44 @@
                         </div>
                       </div>
 
-                      <!-- Manual Approver Block Management -->
-                      <div class="card" v-if="workflowType === 'new' || !selectedWFRoadMap || loadedApprovers.length === 0">
+                      <!-- Predefined System Fields -->
+                      <div class="card mt-4">
                         <div class="card-header bg-light">
-                          <h6 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>Manual Approval Configuration</h6>
+                          <h6 class="mb-0 fw-bold"><i class="bi bi-shield-check me-2"></i>System Generated Fields</h6>
                         </div>
                         <div class="card-body">
-                          <p class="text-muted font-12 mb-3">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Create approval levels and configure them in Step 2 (Form Builder)
-                          </p>
-
-                          <button class="btn btn-primary mb-3" @click="addBlock">
-                            <i class="bi bi-plus-lg me-1"></i>Add Approval Level
-                          </button>
-
-                          <div v-if="blockArr.length > 1">
-                            <div class="alert alert-success">
-                              <i class="bi bi-check-circle me-1"></i>
-                              <strong>{{ blockArr.length - 1 }}</strong> approval level(s) configured
-                            </div>
+                          <div class="alert alert-secondary mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            These fields are automatically included for all requestors.
                           </div>
-                          <div v-else>
-                            <div class="alert alert-warning">
-                              <i class="bi bi-exclamation-triangle me-2"></i>
-                              No approval levels configured yet
+
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Requestor Name</label>
+                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Requestor Email</label>
+                                <input type="email" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Request Date</label>
+                                <input type="text" class="form-control" value="Auto-populated on submission" disabled />
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <div class="field-preview-card">
+                                <label class="form-label fw-bold">Department</label>
+                                <input type="text" class="form-control" value="Auto-populated from user profile" disabled />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1755,8 +1705,8 @@
                     </div>
                   </div>
 
-                  <!-- Step 5: Print Format -->
-                  <div v-if="activeStep === 5">
+                  <!-- Step 4: Print Format -->
+                  <div v-if="activeStep === 4">
                     <div class="stepperbackground d-flex align-items-center justify-content-end gap-2 ">
 
                       <div>
@@ -1991,6 +1941,7 @@
             :name="selectedBlockIndex === 0 ? 'Add Requestor' : 'Add Approvers'" />
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -2247,7 +2198,13 @@ watch(() => filterObj.value.form_short_name, (newVal) => {
 watch(() => filterObj.value.series, (newVal) => {
   filterObj.value.series = newVal.trim()
 })
-
+watch(() => workflowType.value, (newVal) => {
+  if (newVal === 'existing') {
+    blockArr.splice(0, blockArr.length);
+    loadedApprovers.value = [];
+    workflowSetup.length = 0;
+  }
+});
 const draggedField = ref(null);
 
 const handleDragStart = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
@@ -3601,14 +3558,8 @@ const steps = ref([
   },
   {
     id: 4,
-    label: "Approver Blocks",
-    stepno: "Step 4",
-    icon: "bi bi-people",
-  },
-  {
-    id: 5,
     label: "Print Format",
-    stepno: "Step 5",
+    stepno: "Step 4",
     icon: "ri-checkbox-circle-line",
   },
 ]);
@@ -4226,9 +4177,9 @@ const nextStep = () => {
     return;
   }
 
-  if (activeStep.value < 5) {
+  if (activeStep.value < 4) {
     activeStep.value += 1;
-    if (activeStep.value === 5) {
+    if (activeStep.value === 4) {
       selectedform.value = blockArr;
       // console.log(selectedform.value);
     }
@@ -5258,135 +5209,79 @@ const fetchWFRoadMaps = async () => {
 };
 
 // Handle WF Road Map selection
-const handleWFRoadMapSelect = async (selectedRoadmap) => {
-  if (!selectedRoadmap) return;
-
-  console.log('Selected WF Road Map:', selectedRoadmap);
-
+const handleWFRoadMapSelect = async (selectedRoadMap) => {
   try {
-    // Fetch full roadmap details including requestors and level setup
-    const response = await axiosInstance.get(`/api/resource/WF Roadmap/${selectedRoadmap.roadmap_title}`);
+    console.log("Selected WF Road Map:", selectedRoadMap);
 
-    if (response?.data?.data) {
-      const roadmapData = response.data.data;
-      console.log('Full Roadmap Data:', roadmapData);
+    // Clear previous loaded data
+    loadedRequestors.value = [];
+    loadedApprovers.value = [];
 
-      // Clear existing workflow setup
-      workflowSetup.length = 0;
+    // Fetch workflow roadmap data
+    const response = await axiosInstance.get(
+      `${apis.resource}${doctypes.wfRoadmap}/${selectedRoadMap.roadmap_title}`
+    );
 
-      // Step 1: Create requestor block if it doesn't exist
-      if (blockArr.length === 0) {
-        addBlock(); // Add first block for requestor
-      }
+    const roadmapData = response?.data?.data || response?.data || {};
+    console.log("WF Road Map Data:", roadmapData);
 
-      // Step 2: Auto-populate requestors
-      if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
-        // Store loaded requestors for display in Step 3
-        loadedRequestors.value = roadmapData.wf_requestors;
+    // Load Requestor roles data (don't create blocks)
+    if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
+      loadedRequestors.value = roadmapData.wf_requestors;
+      console.log(`Loaded ${roadmapData.wf_requestors.length} requestor role(s)`);
 
-        // Extract requestor roles and columns
-        const requestorRoles = roadmapData.wf_requestors.map(req => req.requestor);
-        const requestorColumns = roadmapData.wf_requestors[0].columns_allowed || '';
-        const autoApproval = roadmapData.wf_requestors.some(req => req.auto_approval);
-
-        // Initialize requestor workflow setup (index 0)
-        workflowSetup.push({
-          type: 'requestor',
-          roles: requestorRoles, // Array of requestor role names
-          auto_approval: autoApproval ? 1 : 0,
-          columns_allowed: requestorColumns,
-          fields: blockArr[0]?.sections ? blockArr[0].sections.flatMap(extractFieldnames) : [],
-          idx: 0
-        });
-
-        // Extract requestor fields from the first block if it exists
-        if (blockArr[0]?.sections && blockArr[0].sections.length > 0) {
-          requestorFields.value = [];
-          blockArr[0].sections.forEach(section => {
-            if (section.rows && Array.isArray(section.rows)) {
-              section.rows.forEach(row => {
-                if (Array.isArray(row)) {
-                  row.forEach(column => {
-                    if (column.fields && Array.isArray(column.fields)) {
-                      column.fields.forEach(field => {
-                        requestorFields.value.push({
-                          label: field.label,
-                          fieldtype: field.fieldtype
-                        });
-                      });
-                    }
-                  });
-                }
-              });
-            }
+      // Populate workflowSetup array for requestor roles
+      roadmapData.wf_requestors.forEach((req) => {
+        if (!workflowSetup.find(ws => ws.type === 'requestor' && ws.roles.includes(req.requestor))) {
+          workflowSetup.push({
+            type: 'requestor',
+            roles: [req.requestor],
+            auto_approval: req.auto_approval || 0,
+            columns_allowed: req.columns_allowed || '',
+            fields: [],
+            idx: 0
           });
         }
-
-        console.log('Requestor workflow setup:', workflowSetup[0]);
-      } else {
-        // No requestors defined, create empty requestor block
-        workflowSetup.push({
-          type: 'requestor',
-          roles: [],
-          fields: [],
-          idx: 0
-        });
-      }
-
-      // Step 3: Auto-populate approver blocks based on level setup
-      if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
-        const approverLevels = roadmapData.wf_level_setup.sort((a, b) => a.level - b.level);
-
-        // Store loaded approvers for display in Step 4
-        loadedApprovers.value = approverLevels;
-
-        // Ensure we have enough blocks (1 requestor + n approver levels)
-        const requiredBlocks = 1 + approverLevels.length;
-        while (blockArr.length < requiredBlocks) {
-          addBlock();
-        }
-
-        // Populate workflow setup for each approval level
-        approverLevels.forEach((levelData, index) => {
-          const blockIndex = index + 1; // Block 0 is requestor, 1+ are approvers
-
-          // Create workflow setup for this approval level
-          const approverSetup = {
-            type: 'approver',
-            level: levelData.level,
-            roles: [levelData.role], // Array with the role name from WF Roadmap
-            approval_required: levelData.mandatory ? 1 : 0,
-            approver_can_edit: 0,
-            view_only_reportee: levelData.view_only_reportee || 0,
-            all_approvals_required: levelData.all_approvals_required || 0,
-            requester_as_a_approver: levelData.requester_as_a_approver || 0,
-            on_rejection: levelData.on_rejection || 0,
-            columns_allowed: levelData.columns_allowed || '',
-            escalation_time: levelData.escalation_time || '',
-            fields: blockArr[blockIndex]?.sections ? blockArr[blockIndex].sections.flatMap(extractFieldnames) : [],
-            idx: blockIndex
-          };
-
-          workflowSetup.push(approverSetup);
-
-          console.log(`Approver Level ${levelData.level} workflow setup:`, approverSetup);
-        });
-
-        // Save workflow setup to backend
-        add_Wf_roles_setup();
-
-        showSuccess(`Workflow loaded successfully!\n✓ ${roadmapData.wf_requestors?.length || 0} requestor role(s)\n✓ ${approverLevels.length} approval level(s)\n\nYou can now configure specific designations in Step 2 by clicking "Add Approvers" button for each level.`);
-      } else {
-        showInfo(`Workflow loaded: ${roadmapData.wf_requestors?.length || 0} requestor(s) configured.\n\nNo approval levels defined. You can add approval levels manually in Step 4.`);
-      }
-
-      console.log('Complete workflow setup:', workflowSetup);
+      });
+    } else {
+      console.warn("No Requestors found in roadmap");
     }
+
+    // Load Approver levels data (don't create blocks)
+    if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
+      loadedApprovers.value = roadmapData.wf_level_setup.sort((a, b) => a.level - b.level);
+      console.log(`Loaded ${roadmapData.wf_level_setup.length} approver level(s)`);
+
+      // Populate workflowSetup array for approver levels
+      roadmapData.wf_level_setup.forEach((level) => {
+        if (!workflowSetup.find(ws => ws.type === 'approver' && ws.level === level.level)) {
+          workflowSetup.push({
+            type: 'approver',
+            level: level.level,
+            roles: [level.role],
+            approval_required: level.mandatory ? 1 : 0,
+            approver_can_edit: 0,
+            view_only_reportee: level.view_only_reportee || 0,
+            all_approvals_required: level.all_approvals_required || 0,
+            requester_as_a_approver: level.requester_as_a_approver || 0,
+            on_rejection: level.on_rejection || 0,
+            columns_allowed: level.columns_allowed || '',
+            fields: [],
+            idx: level.level
+          });
+        }
+      });
+    } else {
+      console.warn("No approver levels found in roadmap");
+    }
+
+    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s)`);
   } catch (error) {
-    console.error('Error loading WF Road Map details:', error);
-    showError('Failed to load workflow configuration. Please try again.');
+    console.error("Error in handleWFRoadMapSelect:", error);
+    showError("Failed to load workflow. Please try again.");
   }
 };
+
 
 // ===== DRAG-AND-DROP FIELD LIBRARY HANDLERS =====
 
