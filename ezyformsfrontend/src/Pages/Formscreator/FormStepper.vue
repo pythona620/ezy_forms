@@ -5213,9 +5213,12 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
   try {
     console.log("Selected WF Road Map:", selectedRoadMap);
 
-    // Clear previous loaded data
+    // Clear existing data
+    blockArr.splice(0, blockArr.length);
+    workflowSetup = [];
     loadedRequestors.value = [];
     loadedApprovers.value = [];
+    currentBuilderTab.value = 0;
 
     // Fetch workflow roadmap data
     const response = await axiosInstance.get(
@@ -5225,57 +5228,81 @@ const handleWFRoadMapSelect = async (selectedRoadMap) => {
     const roadmapData = response?.data?.data || response?.data || {};
     console.log("WF Road Map Data:", roadmapData);
 
-    // Load Requestor roles data (don't create blocks)
+    // 1️⃣ Create Requestor Block and load roles
     if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
       loadedRequestors.value = roadmapData.wf_requestors;
       console.log(`Loaded ${roadmapData.wf_requestors.length} requestor role(s)`);
 
-      // Populate workflowSetup array for requestor roles
-      roadmapData.wf_requestors.forEach((req) => {
-        if (!workflowSetup.find(ws => ws.type === 'requestor' && ws.roles.includes(req.requestor))) {
-          workflowSetup.push({
-            type: 'requestor',
-            roles: [req.requestor],
-            auto_approval: req.auto_approval || 0,
-            columns_allowed: req.columns_allowed || '',
-            fields: [],
-            idx: 0
-          });
-        }
+      // Create one requestor block
+      addBlock();
+
+      // Populate workflowSetup array for all requestor roles
+      roadmapData.wf_requestors.forEach((req, index) => {
+        workflowSetup.push({
+          type: 'requestor',
+          roles: [req.requestor],
+          auto_approval: req.auto_approval || 0,
+          columns_allowed: req.columns_allowed || '',
+          fields: [],
+          idx: 0
+        });
       });
     } else {
       console.warn("No Requestors found in roadmap");
+      // Create at least one requestor block even if no requestors defined
+      addBlock();
     }
 
-    // Load Approver levels data (don't create blocks)
+    // 2️⃣ Create Approver Blocks based on levels
     if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
       loadedApprovers.value = roadmapData.wf_level_setup.sort((a, b) => a.level - b.level);
       console.log(`Loaded ${roadmapData.wf_level_setup.length} approver level(s)`);
 
-      // Populate workflowSetup array for approver levels
+      // Group approvers by level
+      const levelGroups = {};
       roadmapData.wf_level_setup.forEach((level) => {
-        if (!workflowSetup.find(ws => ws.type === 'approver' && ws.level === level.level)) {
+        if (!levelGroups[level.level]) {
+          levelGroups[level.level] = [];
+        }
+        levelGroups[level.level].push(level);
+      });
+
+      // Create a block for each unique level
+      const sortedLevels = Object.keys(levelGroups).sort((a, b) => a - b);
+      sortedLevels.forEach((lvl) => {
+        const approversForLevel = levelGroups[lvl];
+
+        // Create approver block
+        addBlock();
+
+        // Add to workflowSetup (one entry per level, multiple roles if needed)
+        approversForLevel.forEach((levelData) => {
           workflowSetup.push({
             type: 'approver',
-            level: level.level,
-            roles: [level.role],
-            approval_required: level.mandatory ? 1 : 0,
+            level: parseInt(lvl),
+            roles: [levelData.role],
+            approval_required: levelData.mandatory ? 1 : 0,
             approver_can_edit: 0,
-            view_only_reportee: level.view_only_reportee || 0,
-            all_approvals_required: level.all_approvals_required || 0,
-            requester_as_a_approver: level.requester_as_a_approver || 0,
-            on_rejection: level.on_rejection || 0,
-            columns_allowed: level.columns_allowed || '',
+            view_only_reportee: levelData.view_only_reportee || 0,
+            all_approvals_required: levelData.all_approvals_required || 0,
+            requester_as_a_approver: levelData.requester_as_a_approver || 0,
+            on_rejection: levelData.on_rejection || 0,
+            columns_allowed: levelData.columns_allowed || '',
             fields: [],
-            idx: level.level
+            idx: parseInt(lvl)
           });
-        }
+        });
       });
     } else {
       console.warn("No approver levels found in roadmap");
     }
 
-    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s)`);
+    // Switch to the first block (requestor)
+    nextTick(() => {
+      currentBuilderTab.value = 0;
+    });
+
+    showSuccess(`Workflow loaded: ${loadedRequestors.value.length} requestor(s) and ${loadedApprovers.value.length} approver level(s). Blocks created in Step 2.`);
   } catch (error) {
     console.error("Error in handleWFRoadMapSelect:", error);
     showError("Failed to load workflow. Please try again.");
