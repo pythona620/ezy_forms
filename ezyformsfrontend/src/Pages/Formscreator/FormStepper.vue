@@ -5462,7 +5462,7 @@ const handleAdvancedBuilderUpdate = (fields) => {
 };
 
 // Handle adding fields from advanced builder to current block
-const handleAdvancedBuilderAddFields = (fields) => {
+const handleAdvancedBuilderAddFields = (sectionsData) => {
   const currentBlockIndex = currentBuilderTab.value;
   const currentBlock = blockArr[currentBlockIndex];
 
@@ -5472,69 +5472,78 @@ const handleAdvancedBuilderAddFields = (fields) => {
   }
 
   // Initialize sections array if it doesn't exist
-  if (!currentBlock.sections || currentBlock.sections.length === 0) {
-    currentBlock.sections = [{
-      label: '',
+  if (!currentBlock.sections) {
+    currentBlock.sections = [];
+  }
+
+  let totalFieldsAdded = 0;
+
+  // Process each section from the advanced builder
+  sectionsData.forEach((builderSection) => {
+    // Create a new section in the block
+    const sectionIndex = currentBlock.sections.length;
+    const newSection = {
+      label: builderSection.label || '',
       parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
       rows: []
-    }];
-  }
-
-  // Get the first section
-  const firstSection = currentBlock.sections[0];
-
-  // Initialize rows array if it doesn't exist
-  if (!firstSection.rows || firstSection.rows.length === 0) {
-    firstSection.rows = [{
-      label: `row_0_0_${currentBlockIndex}`,
-      columns: []
-    }];
-  }
-
-  // Get the first row
-  const firstRow = firstSection.rows[0];
-
-  // Initialize columns array if it doesn't exist
-  if (!firstRow.columns || firstRow.columns.length === 0) {
-    firstRow.columns = [{
-      label: '',
-      fields: []
-    }];
-  }
-
-  // Get the first column
-  const firstColumn = firstRow.columns[0];
-
-  // Initialize fields array if it doesn't exist
-  if (!firstColumn.fields) {
-    firstColumn.fields = [];
-  }
-
-  // Add all fields from advanced builder
-  fields.forEach(field => {
-    // Map Frappe field structure to FormStepper field structure
-    const formStepperField = {
-      label: field.label,
-      fieldname: field.fieldname,
-      fieldtype: field.fieldtype,
-      options: field.options || '',
-      reqd: field.reqd || 0,
-      unique: field.unique || 0,
-      description: field.description || '',
-      default: field.default || '',
-      read_only: field.read_only || 0,
-      hidden: field.hidden || 0,
-      depends_on: field.depends_on || '',
-      mandatory_depends_on: field.mandatory_depends_on || '',
-      read_only_depends_on: field.read_only_depends_on || '',
-      // Add any other properties that exist in the field
-      ...field
     };
 
-    firstColumn.fields.push(formStepperField);
+    // Create one row for this section
+    const rowLabel = `row_0_${sectionIndex}_${currentBlockIndex}`;
+    const newRow = {
+      label: rowLabel,
+      columns: []
+    };
+
+    // Determine number of columns based on section.columns setting
+    const numColumns = builderSection.columns || 1;
+    const fieldsPerColumn = Math.ceil(builderSection.fields.length / numColumns);
+
+    // Create columns and distribute fields
+    for (let colIndex = 0; colIndex < numColumns; colIndex++) {
+      const column = {
+        label: '',
+        fields: []
+      };
+
+      // Get fields for this column
+      const startIdx = colIndex * fieldsPerColumn;
+      const endIdx = Math.min(startIdx + fieldsPerColumn, builderSection.fields.length);
+      const columnFields = builderSection.fields.slice(startIdx, endIdx);
+
+      // Add fields to this column
+      columnFields.forEach(field => {
+        // Map Frappe field structure to FormStepper field structure
+        const formStepperField = {
+          label: field.label,
+          fieldname: field.fieldname,
+          fieldtype: field.fieldtype,
+          options: field.options || '',
+          reqd: field.reqd || 0,
+          unique: field.unique || 0,
+          description: field.description || '',
+          default: field.default || '',
+          read_only: field.read_only || 0,
+          hidden: field.hidden || 0,
+          depends_on: field.depends_on || '',
+          mandatory_depends_on: field.mandatory_depends_on || '',
+          read_only_depends_on: field.read_only_depends_on || '',
+          // Add any other properties that exist in the field
+          ...field
+        };
+
+        column.fields.push(formStepperField);
+        totalFieldsAdded++;
+      });
+
+      newRow.columns.push(column);
+    }
+
+    newSection.rows.push(newRow);
+    currentBlock.sections.push(newSection);
   });
 
-  showSuccess(`Added ${fields.length} field(s) to ${currentBlockIndex === 0 ? 'Requestor' : `Approver ${currentBlockIndex}`} Block`);
+  showSuccess(`Added ${sectionsData.length} section(s) with ${totalFieldsAdded} field(s) to ${currentBlockIndex === 0 ? 'Requestor' : `Approver ${currentBlockIndex}`} Block`);
 
   // Switch back to simple mode to see the added fields
   advancedBuilderMode.value = false;

@@ -1,153 +1,191 @@
 <template>
   <div class="frappe-form-builder">
-    <!-- Simplified Toolbar -->
-    <div class="builder-toolbar-simple">
-      <button @click="addNewField" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-circle"></i> Add Field
-      </button>
-      <button @click="addFieldsToCurrentBlock" class="btn btn-success btn-sm" :disabled="formFields.length === 0">
-        <i class="bi bi-check-circle"></i> Add to Form ({{ formFields.length }})
-      </button>
-      <button @click="clearAllFields" class="btn btn-outline-secondary btn-sm" :disabled="formFields.length === 0">
-        <i class="bi bi-trash"></i> Clear All
-      </button>
+    <!-- Toolbar -->
+    <div class="builder-toolbar">
+      <div class="d-flex gap-2">
+        <button @click="addNewSection" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-circle"></i> Add Section
+        </button>
+        <button @click="addFieldsToCurrentBlock" class="btn btn-success btn-sm" :disabled="sections.length === 0">
+          <i class="bi bi-check-circle"></i> Add to Form
+        </button>
+        <button @click="clearAll" class="btn btn-outline-secondary btn-sm" :disabled="sections.length === 0">
+          <i class="bi bi-trash"></i> Clear All
+        </button>
+      </div>
     </div>
 
-    <!-- Field List with Drag & Drop -->
-    <div class="fields-container-simple">
+    <!-- Sections Container -->
+    <div class="sections-container">
+      <div v-if="sections.length === 0" class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>No sections yet. Click "Add Section" to start building your form.</p>
+      </div>
+
+      <!-- Section List -->
       <draggable
-        v-if="formFields.length > 0"
-        v-model="formFields"
-        :item-key="(item) => item.idx"
-        handle=".drag-handle"
+        v-if="sections.length > 0"
+        v-model="sections"
+        :item-key="(item) => item.id"
+        handle=".section-drag-handle"
         @start="drag = true"
         @end="drag = false"
         :animation="200"
-        ghost-class="ghost-field"
+        ghost-class="ghost-section"
       >
-        <template #item="{ element, index }">
-          <div
-            class="field-item-simple"
-            :class="{ 'dragging': drag }"
-            @mouseenter="hoveredField = index"
-            @mouseleave="hoveredField = null"
-          >
-            <div class="field-content">
-              <!-- Drag Handle -->
-              <div class="drag-handle">
+        <template #item="{ element: section, index: sectionIndex }">
+          <div class="section-card" :class="{ 'dragging': drag }">
+            <!-- Section Header -->
+            <div class="section-header">
+              <div class="section-drag-handle">
                 <i class="bi bi-grip-vertical"></i>
               </div>
-
-              <!-- Field Editor (Always Visible) -->
-              <div class="field-editor-inline">
-                <!-- Label -->
+              <div class="section-info flex-grow-1">
                 <input
-                  v-model="element.label"
-                  placeholder="Field Label"
-                  class="form-control form-control-sm mb-1"
-                  @input="generateFieldnameFromLabel(index)"
-                />
-
-                <div class="row g-2">
-                  <!-- Field Type -->
-                  <div class="col-md-4">
-                    <select
-                      v-model="element.fieldtype"
-                      class="form-select form-select-sm"
-                      @change="onFieldTypeChange(index)"
-                    >
-                      <option value="">Select Type</option>
-                      <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
-                        {{ ft.label }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Fieldname -->
-                  <div class="col-md-4">
-                    <input
-                      v-model="element.fieldname"
-                      type="text"
-                      class="form-control form-control-sm"
-                      placeholder="fieldname"
-                    />
-                  </div>
-
-                  <!-- Validation Checkboxes -->
-                  <div class="col-md-4">
-                    <div class="d-flex gap-2 flex-wrap">
-                      <div class="form-check form-check-inline">
-                        <input
-                          v-model="element.reqd"
-                          type="checkbox"
-                          class="form-check-input"
-                          :id="`reqd-${index}`"
-                          :true-value="1"
-                          :false-value="0"
-                        />
-                        <label class="form-check-label small" :for="`reqd-${index}`">Required</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input
-                          v-model="element.unique"
-                          type="checkbox"
-                          class="form-check-input"
-                          :id="`unique-${index}`"
-                          :true-value="1"
-                          :false-value="0"
-                        />
-                        <label class="form-check-label small" :for="`unique-${index}`">Unique</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Options (for Select, Link, etc.) -->
-                <div v-if="requiresOptions(element.fieldtype)" class="mt-2">
-                  <textarea
-                    v-if="element.fieldtype === 'Select' || element.fieldtype === 'Small Text'"
-                    v-model="element.options"
-                    class="form-control form-control-sm"
-                    rows="2"
-                    :placeholder="getOptionsPlaceholder(element.fieldtype)"
-                  ></textarea>
-                  <input
-                    v-else
-                    v-model="element.options"
-                    type="text"
-                    class="form-control form-control-sm"
-                    :placeholder="getOptionsPlaceholder(element.fieldtype)"
-                  />
-                </div>
-
-                <!-- Description -->
-                <input
-                  v-model="element.description"
-                  type="text"
-                  class="form-control form-control-sm mt-1"
-                  placeholder="Description (optional)"
+                  v-model="section.label"
+                  placeholder="Section Label (e.g., Customer Details)"
+                  class="form-control form-control-sm fw-bold"
                 />
               </div>
-
-              <!-- Action Icons -->
-              <div class="field-actions">
-                <button class="btn btn-sm btn-link text-primary p-0" @click="duplicateField(index)" title="Duplicate">
-                  <i class="bi bi-files"></i>
-                </button>
-                <button class="btn btn-sm btn-link text-danger p-0" @click="deleteField(index)" title="Delete">
+              <div class="section-actions d-flex gap-2 align-items-center">
+                <!-- Column Layout Selector -->
+                <select v-model.number="section.columns" class="form-select form-select-sm" style="width: auto;">
+                  <option :value="1">1 Column</option>
+                  <option :value="2">2 Columns</option>
+                  <option :value="3">3 Columns</option>
+                  <option :value="4">4 Columns</option>
+                </select>
+                <button class="btn btn-sm btn-link text-danger p-0" @click="removeSection(sectionIndex)" title="Remove Section">
                   <i class="bi bi-trash"></i>
                 </button>
+              </div>
+            </div>
+
+            <!-- Section Fields -->
+            <div class="section-body">
+              <!-- Add Field Button -->
+              <button @click="addFieldToSection(sectionIndex)" class="btn btn-outline-primary btn-sm mb-3">
+                <i class="bi bi-plus"></i> Add Field to Section
+              </button>
+
+              <!-- Fields Grid -->
+              <div v-if="section.fields.length > 0" class="fields-grid" :style="{ gridTemplateColumns: `repeat(${section.columns}, 1fr)` }">
+                <draggable
+                  v-model="section.fields"
+                  :item-key="(item) => item.id"
+                  handle=".field-drag-handle"
+                  :animation="200"
+                  ghost-class="ghost-field"
+                  class="fields-draggable-container"
+                  :style="{ display: 'contents' }"
+                >
+                  <template #item="{ element: field, index: fieldIndex }">
+                    <div class="field-card">
+                      <div class="field-header">
+                        <div class="field-drag-handle">
+                          <i class="bi bi-grip-vertical"></i>
+                        </div>
+                        <div class="field-actions">
+                          <button class="btn btn-sm btn-link text-primary p-0" @click="duplicateField(sectionIndex, fieldIndex)" title="Duplicate">
+                            <i class="bi bi-files"></i>
+                          </button>
+                          <button class="btn btn-sm btn-link text-danger p-0" @click="deleteField(sectionIndex, fieldIndex)" title="Delete">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="field-body">
+                        <!-- Label -->
+                        <input
+                          v-model="field.label"
+                          placeholder="Field Label"
+                          class="form-control form-control-sm mb-2"
+                          @input="generateFieldnameFromLabel(sectionIndex, fieldIndex)"
+                        />
+
+                        <!-- Field Type -->
+                        <select
+                          v-model="field.fieldtype"
+                          class="form-select form-select-sm mb-2"
+                          @change="onFieldTypeChange(sectionIndex, fieldIndex)"
+                        >
+                          <option value="">Select Type</option>
+                          <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
+                            {{ ft.label }}
+                          </option>
+                        </select>
+
+                        <!-- Fieldname (auto-generated, read-only display) -->
+                        <div class="mb-2">
+                          <small class="text-muted d-block">Fieldname:</small>
+                          <code class="small">{{ field.fieldname }}</code>
+                        </div>
+
+                        <!-- Options (for Select, Link, etc.) -->
+                        <div v-if="requiresOptions(field.fieldtype)" class="mb-2">
+                          <textarea
+                            v-if="field.fieldtype === 'Select' || field.fieldtype === 'Small Text'"
+                            v-model="field.options"
+                            class="form-control form-control-sm"
+                            rows="3"
+                            :placeholder="getOptionsPlaceholder(field.fieldtype)"
+                          ></textarea>
+                          <input
+                            v-else
+                            v-model="field.options"
+                            type="text"
+                            class="form-control form-control-sm"
+                            :placeholder="getOptionsPlaceholder(field.fieldtype)"
+                          />
+                        </div>
+
+                        <!-- Validation Checkboxes -->
+                        <div class="d-flex gap-2 mb-2 flex-wrap">
+                          <div class="form-check">
+                            <input
+                              v-model="field.reqd"
+                              type="checkbox"
+                              class="form-check-input"
+                              :id="`reqd-${sectionIndex}-${fieldIndex}`"
+                              :true-value="1"
+                              :false-value="0"
+                            />
+                            <label class="form-check-label small" :for="`reqd-${sectionIndex}-${fieldIndex}`">Required</label>
+                          </div>
+                          <div class="form-check">
+                            <input
+                              v-model="field.unique"
+                              type="checkbox"
+                              class="form-check-input"
+                              :id="`unique-${sectionIndex}-${fieldIndex}`"
+                              :true-value="1"
+                              :false-value="0"
+                            />
+                            <label class="form-check-label small" :for="`unique-${sectionIndex}-${fieldIndex}`">Unique</label>
+                          </div>
+                        </div>
+
+                        <!-- Description -->
+                        <input
+                          v-model="field.description"
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="Description (optional)"
+                        />
+                      </div>
+                    </div>
+                  </template>
+                </draggable>
+              </div>
+
+              <div v-else class="empty-fields-state">
+                <small class="text-muted">No fields in this section. Click "Add Field to Section" above.</small>
               </div>
             </div>
           </div>
         </template>
       </draggable>
-
-      <!-- Empty State -->
-      <div v-if="formFields.length === 0" class="empty-state-simple">
-        <i class="bi bi-inbox"></i>
-        <p>No fields yet. Click "Add Field" to start.</p>
-      </div>
     </div>
   </div>
 </template>
@@ -179,7 +217,7 @@ const props = defineProps({
 const emit = defineEmits(['save', 'update', 'addFields']);
 
 // State
-const formFields = ref([]);
+const sections = ref([]);
 const fieldTypes = ref([
   { label: "Text", type: "Data" },
   { label: "Time", type: "Time" },
@@ -195,26 +233,50 @@ const fieldTypes = ref([
   { label: "Link", type: "Link" }
 ]);
 const drag = ref(false);
-const loading = ref(false);
-const hoveredField = ref(null);
+const nextFieldId = ref(1);
+const nextSectionId = ref(1);
 
-// Load existing fields
-onMounted(async () => {
-  if (props.existingFields && props.existingFields.length > 0) {
-    formFields.value = props.existingFields.map((field, idx) => ({
-      ...field,
-      idx: idx + 1
-    }));
+/**
+ * Create a new section
+ */
+const createNewSection = () => {
+  return {
+    id: `section_${nextSectionId.value++}`,
+    label: '',
+    columns: 2, // Default to 2 columns
+    fields: []
+  };
+};
+
+/**
+ * Add a new section
+ */
+const addNewSection = () => {
+  const newSection = createNewSection();
+  sections.value.push(newSection);
+  emit('update', getAllFields());
+};
+
+/**
+ * Remove a section
+ */
+const removeSection = (sectionIndex) => {
+  const section = sections.value[sectionIndex];
+  const label = section.label || 'this section';
+
+  if (confirm(`Delete "${label}" and all its fields?`)) {
+    sections.value.splice(sectionIndex, 1);
+    emit('update', getAllFields());
   }
-});
+};
 
 /**
  * Create a new field with default values
  */
-const createNewField = (idx) => {
+const createNewField = () => {
   return {
-    idx: idx,
-    fieldname: `field_${idx}`,
+    id: `field_${nextFieldId.value++}`,
+    fieldname: '',
     fieldtype: 'Data',
     label: '',
     description: '',
@@ -258,54 +320,46 @@ const createNewField = (idx) => {
 };
 
 /**
- * Add a new field
+ * Add a new field to a section
  */
-const addNewField = () => {
-  const newIdx = formFields.value.length + 1;
-  const newField = createNewField(newIdx);
-  formFields.value.push(newField);
-  emit('update', getCleanFields());
+const addFieldToSection = (sectionIndex) => {
+  const newField = createNewField();
+  sections.value[sectionIndex].fields.push(newField);
+  emit('update', getAllFields());
 };
 
 /**
  * Duplicate a field
  */
-const duplicateField = (index) => {
-  const fieldToDuplicate = { ...formFields.value[index] };
-  const newIdx = formFields.value.length + 1;
+const duplicateField = (sectionIndex, fieldIndex) => {
+  const fieldToDuplicate = { ...sections.value[sectionIndex].fields[fieldIndex] };
 
-  fieldToDuplicate.idx = newIdx;
+  fieldToDuplicate.id = `field_${nextFieldId.value++}`;
   fieldToDuplicate.fieldname = `${fieldToDuplicate.fieldname}_copy`;
   fieldToDuplicate.label = `${fieldToDuplicate.label} (Copy)`;
 
-  formFields.value.push(fieldToDuplicate);
-  emit('update', getCleanFields());
+  sections.value[sectionIndex].fields.push(fieldToDuplicate);
+  emit('update', getAllFields());
 };
 
 /**
  * Delete a field
  */
-const deleteField = (index) => {
-  const fieldName = formFields.value[index].label || 'this field';
+const deleteField = (sectionIndex, fieldIndex) => {
+  const fieldName = sections.value[sectionIndex].fields[fieldIndex].label || 'this field';
 
   if (confirm(`Delete "${fieldName}"?`)) {
-    formFields.value.splice(index, 1);
-
-    // Re-index remaining fields
-    formFields.value.forEach((field, idx) => {
-      field.idx = idx + 1;
-    });
-
-    emit('update', getCleanFields());
+    sections.value[sectionIndex].fields.splice(fieldIndex, 1);
+    emit('update', getAllFields());
   }
 };
 
 /**
- * Clear all fields
+ * Clear all sections and fields
  */
-const clearAllFields = () => {
-  if (confirm('Clear all fields?')) {
-    formFields.value = [];
+const clearAll = () => {
+  if (confirm('Clear all sections and fields?')) {
+    sections.value = [];
     emit('update', []);
   }
 };
@@ -313,29 +367,29 @@ const clearAllFields = () => {
 /**
  * Generate fieldname from label
  */
-const generateFieldnameFromLabel = (index) => {
-  const field = formFields.value[index];
+const generateFieldnameFromLabel = (sectionIndex, fieldIndex) => {
+  const field = sections.value[sectionIndex].fields[fieldIndex];
   if (!field.label) return;
 
-  if (!field.fieldname || field.fieldname.startsWith('field_')) {
-    field.fieldname = field.label
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '');
-  }
-  emit('update', getCleanFields());
+  // Always generate fieldname from label
+  field.fieldname = field.label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  emit('update', getAllFields());
 };
 
 /**
  * Handle field type change
  */
-const onFieldTypeChange = (index) => {
-  const field = formFields.value[index];
+const onFieldTypeChange = (sectionIndex, fieldIndex) => {
+  const field = sections.value[sectionIndex].fields[fieldIndex];
 
   if (!requiresOptions(field.fieldtype)) {
     field.options = '';
   }
-  emit('update', getCleanFields());
+  emit('update', getAllFields());
 };
 
 /**
@@ -367,52 +421,58 @@ const isValidFieldname = (fieldname) => {
 };
 
 /**
- * Get clean fields (without editing flag)
+ * Get all fields from all sections
  */
-const getCleanFields = () => {
-  return formFields.value.map((field, idx) => {
-    const cleanField = { ...field };
-    cleanField.idx = idx + 1;
-    return cleanField;
+const getAllFields = () => {
+  const allFields = [];
+  sections.value.forEach(section => {
+    section.fields.forEach(field => {
+      allFields.push(field);
+    });
   });
+  return allFields;
 };
 
 /**
  * Add fields to current block
  */
 const addFieldsToCurrentBlock = () => {
-  // Validate all fields
-  for (const field of formFields.value) {
-    if (!field.label || !field.fieldname || !field.fieldtype) {
-      showError('All fields must have a label, fieldname, and type');
-      return;
-    }
+  // Validate all sections and fields
+  for (const section of sections.value) {
+    for (const field of section.fields) {
+      if (!field.label || !field.fieldname || !field.fieldtype) {
+        showError('All fields must have a label, fieldname, and type');
+        return;
+      }
 
-    if (!isValidFieldname(field.fieldname)) {
-      showError(`Invalid fieldname: ${field.fieldname}`);
-      return;
-    }
+      if (!isValidFieldname(field.fieldname)) {
+        showError(`Invalid fieldname: ${field.fieldname}`);
+        return;
+      }
 
-    if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
-      showError(`Options required for ${field.fieldtype} field: ${field.label}`);
-      return;
+      if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
+        showError(`Options required for ${field.fieldtype} field: ${field.label}`);
+        return;
+      }
     }
   }
 
-  const cleanFields = getCleanFields();
-  emit('addFields', cleanFields);
-  showSuccess(`${cleanFields.length} field(s) added to form!`);
+  // Emit sections with their layout information
+  emit('addFields', sections.value);
 
-  // Clear fields after adding
-  formFields.value = [];
+  const totalFields = getAllFields().length;
+  showSuccess(`${sections.value.length} section(s) with ${totalFields} field(s) added to form!`);
+
+  // Clear sections after adding
+  sections.value = [];
 };
 
 // Expose methods
 defineExpose({
-  formFields,
+  sections,
   addFieldsToCurrentBlock,
-  addNewField,
-  getFields: () => getCleanFields()
+  addNewSection,
+  getAllFields: () => getAllFields()
 });
 </script>
 
@@ -424,77 +484,136 @@ defineExpose({
   flex-direction: column;
 }
 
-.builder-toolbar-simple {
+.builder-toolbar {
   padding: 15px;
   background: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
-  display: flex;
-  gap: 10px;
   flex-shrink: 0;
 }
 
-.fields-container-simple {
+.sections-container {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: 20px;
 }
 
-.field-item-simple {
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 12px;
-  transition: all 0.2s ease;
-}
-
-.field-item-simple:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.1);
-}
-
-.field-item-simple.dragging {
-  opacity: 0.5;
-}
-
-.field-content {
-  display: flex;
-  gap: 12px;
-  align-items: start;
-}
-
-.drag-handle {
-  color: #6c757d;
-  cursor: move;
-  padding-top: 8px;
-  flex-shrink: 0;
-}
-
-.drag-handle:hover {
-  color: #007bff;
-}
-
-.field-editor-inline {
-  flex: 1;
-}
-
-.field-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  padding-top: 8px;
-}
-
-.empty-state-simple {
+.empty-state {
   text-align: center;
   padding: 60px 20px;
   color: #6c757d;
 }
 
-.empty-state-simple i {
+.empty-state i {
   font-size: 48px;
   margin-bottom: 16px;
   display: block;
+}
+
+.section-card {
+  background: #fff;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.section-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 12px rgba(0,123,255,0.15);
+}
+
+.section-card.dragging {
+  opacity: 0.5;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 8px 8px 0 0;
+}
+
+.section-drag-handle {
+  color: #6c757d;
+  cursor: move;
+  flex-shrink: 0;
+}
+
+.section-drag-handle:hover {
+  color: #007bff;
+}
+
+.section-info {
+  flex: 1;
+}
+
+.section-body {
+  padding: 20px;
+}
+
+.fields-grid {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.fields-draggable-container {
+  display: contents;
+}
+
+.field-card {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.field-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.field-drag-handle {
+  color: #6c757d;
+  cursor: move;
+  font-size: 14px;
+}
+
+.field-drag-handle:hover {
+  color: #007bff;
+}
+
+.field-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.field-body {
+  /* Field content */
+}
+
+.empty-fields-state {
+  text-align: center;
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px dashed #dee2e6;
+}
+
+.ghost-section {
+  opacity: 0.4;
+  background: #e7f3ff;
 }
 
 .ghost-field {
@@ -508,6 +627,13 @@ defineExpose({
 }
 
 .form-check-label {
+  font-size: 12px;
+}
+
+code {
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
   font-size: 12px;
 }
 </style>
