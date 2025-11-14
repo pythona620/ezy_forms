@@ -2,185 +2,412 @@
   <div class="frappe-form-builder">
     <!-- Toolbar -->
     <div class="builder-toolbar">
-      <div class="d-flex gap-2">
-        <button @click="addNewSection" class="btn btn-primary btn-sm">
-          <i class="bi bi-plus-circle"></i> Add Section
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button @click="addField('field')" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-circle"></i> Add Field
         </button>
-        <button @click="addFieldsToCurrentBlock" class="btn btn-success btn-sm" :disabled="sections.length === 0">
-          <i class="bi bi-check-circle"></i> Add to Form
+        <button @click="addField('section_break')" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-layout-split"></i> Section Break
         </button>
-        <button @click="clearAll" class="btn btn-outline-secondary btn-sm" :disabled="sections.length === 0">
+        <button @click="addField('column_break')" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-layout-three-columns"></i> Column Break
+        </button>
+        <button @click="addField('html')" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-code-square"></i> HTML
+        </button>
+        <div class="vr"></div>
+        <button @click="addFieldsToBlock" class="btn btn-success btn-sm" :disabled="fields.length === 0">
+          <i class="bi bi-check-circle"></i> Add to Form ({{ fields.length }})
+        </button>
+        <button @click="clearAll" class="btn btn-outline-secondary btn-sm" :disabled="fields.length === 0">
           <i class="bi bi-trash"></i> Clear All
         </button>
+        <div class="ms-auto">
+          <span class="badge bg-secondary">{{ fields.length }} field(s)</span>
+        </div>
       </div>
     </div>
 
-    <!-- Sections Container -->
-    <div class="sections-container">
-      <div v-if="sections.length === 0" class="empty-state">
+    <!-- Fields Container -->
+    <div class="fields-container">
+      <div v-if="fields.length === 0" class="empty-state">
         <i class="bi bi-inbox"></i>
-        <p>No sections yet. Click "Add Section" to start building your form.</p>
+        <p>No fields yet. Click "Add Field" or add Section/Column breaks to start.</p>
       </div>
 
-      <!-- Section List -->
+      <!-- Fields List with Index -->
       <draggable
-        v-if="sections.length > 0"
-        v-model="sections"
+        v-if="fields.length > 0"
+        v-model="fields"
         :item-key="(item) => item.id"
-        handle=".section-drag-handle"
+        handle=".field-drag-handle"
         @start="drag = true"
-        @end="drag = false"
+        @end="onDragEnd"
         :animation="200"
-        ghost-class="ghost-section"
+        ghost-class="ghost-field"
       >
-        <template #item="{ element: section, index: sectionIndex }">
-          <div class="section-card" :class="{ 'dragging': drag }">
-            <!-- Section Header -->
-            <div class="section-header">
-              <div class="section-drag-handle">
-                <i class="bi bi-grip-vertical"></i>
-              </div>
-              <div class="section-info flex-grow-1">
-                <input
-                  v-model="section.label"
-                  placeholder="Section Label (e.g., Customer Details)"
-                  class="form-control form-control-sm fw-bold"
-                />
-              </div>
-              <div class="section-actions d-flex gap-2 align-items-center">
-                <!-- Column Layout Selector -->
-                <select v-model.number="section.columns" class="form-select form-select-sm" style="width: auto;">
-                  <option :value="1">1 Column</option>
-                  <option :value="2">2 Columns</option>
-                  <option :value="3">3 Columns</option>
-                  <option :value="4">4 Columns</option>
-                </select>
-                <button class="btn btn-sm btn-link text-danger p-0" @click="removeSection(sectionIndex)" title="Remove Section">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
+        <template #item="{ element: field, index }">
+          <div
+            class="field-item"
+            :class="{
+              'dragging': drag,
+              'field-section-break': field.fieldtype === 'Section Break',
+              'field-column-break': field.fieldtype === 'Column Break',
+              'field-html': field.fieldtype === 'HTML'
+            }"
+            @mouseenter="hoveredField = index"
+            @mouseleave="hoveredField = null"
+          >
+            <!-- Index Badge -->
+            <div class="field-index-badge">{{ field.idx }}</div>
+
+            <!-- Field Type Indicator -->
+            <div class="field-type-indicator" :title="field.fieldtype">
+              <i :class="getFieldTypeIcon(field.fieldtype)"></i>
             </div>
 
-            <!-- Section Fields -->
-            <div class="section-body">
-              <!-- Add Field Button -->
-              <button @click="addFieldToSection(sectionIndex)" class="btn btn-outline-primary btn-sm mb-3">
-                <i class="bi bi-plus"></i> Add Field to Section
-              </button>
-
-              <!-- Fields Grid -->
-              <div v-if="section.fields.length > 0" class="fields-grid" :style="{ gridTemplateColumns: `repeat(${section.columns}, 1fr)` }">
-                <draggable
-                  v-model="section.fields"
-                  :item-key="(item) => item.id"
-                  handle=".field-drag-handle"
-                  :animation="200"
-                  ghost-class="ghost-field"
-                  class="fields-draggable-container"
-                  :style="{ display: 'contents' }"
-                >
-                  <template #item="{ element: field, index: fieldIndex }">
-                    <div class="field-card">
-                      <div class="field-header">
-                        <div class="field-drag-handle">
-                          <i class="bi bi-grip-vertical"></i>
-                        </div>
-                        <div class="field-actions">
-                          <button class="btn btn-sm btn-link text-primary p-0" @click="duplicateField(sectionIndex, fieldIndex)" title="Duplicate">
-                            <i class="bi bi-files"></i>
-                          </button>
-                          <button class="btn btn-sm btn-link text-danger p-0" @click="deleteField(sectionIndex, fieldIndex)" title="Delete">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div class="field-body">
-                        <!-- Label -->
-                        <input
-                          v-model="field.label"
-                          placeholder="Field Label"
-                          class="form-control form-control-sm mb-2"
-                          @input="generateFieldnameFromLabel(sectionIndex, fieldIndex)"
-                        />
-
-                        <!-- Field Type -->
-                        <select
-                          v-model="field.fieldtype"
-                          class="form-select form-select-sm mb-2"
-                          @change="onFieldTypeChange(sectionIndex, fieldIndex)"
-                        >
-                          <option value="">Select Type</option>
-                          <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
-                            {{ ft.label }}
-                          </option>
-                        </select>
-
-                        <!-- Fieldname (auto-generated, read-only display) -->
-                        <div class="mb-2">
-                          <small class="text-muted d-block">Fieldname:</small>
-                          <code class="small">{{ field.fieldname }}</code>
-                        </div>
-
-                        <!-- Options (for Select, Link, etc.) -->
-                        <div v-if="requiresOptions(field.fieldtype)" class="mb-2">
-                          <textarea
-                            v-if="field.fieldtype === 'Select' || field.fieldtype === 'Small Text'"
-                            v-model="field.options"
-                            class="form-control form-control-sm"
-                            rows="3"
-                            :placeholder="getOptionsPlaceholder(field.fieldtype)"
-                          ></textarea>
-                          <input
-                            v-else
-                            v-model="field.options"
-                            type="text"
-                            class="form-control form-control-sm"
-                            :placeholder="getOptionsPlaceholder(field.fieldtype)"
-                          />
-                        </div>
-
-                        <!-- Validation Checkboxes -->
-                        <div class="d-flex gap-2 mb-2 flex-wrap">
-                          <div class="form-check">
-                            <input
-                              v-model="field.reqd"
-                              type="checkbox"
-                              class="form-check-input"
-                              :id="`reqd-${sectionIndex}-${fieldIndex}`"
-                              :true-value="1"
-                              :false-value="0"
-                            />
-                            <label class="form-check-label small" :for="`reqd-${sectionIndex}-${fieldIndex}`">Required</label>
-                          </div>
-                          <div class="form-check">
-                            <input
-                              v-model="field.unique"
-                              type="checkbox"
-                              class="form-check-input"
-                              :id="`unique-${sectionIndex}-${fieldIndex}`"
-                              :true-value="1"
-                              :false-value="0"
-                            />
-                            <label class="form-check-label small" :for="`unique-${sectionIndex}-${fieldIndex}`">Unique</label>
-                          </div>
-                        </div>
-
-                        <!-- Description -->
-                        <input
-                          v-model="field.description"
-                          type="text"
-                          class="form-control form-control-sm"
-                          placeholder="Description (optional)"
-                        />
-                      </div>
-                    </div>
-                  </template>
-                </draggable>
+            <div class="field-content">
+              <!-- Drag Handle -->
+              <div class="field-drag-handle">
+                <i class="bi bi-grip-vertical"></i>
               </div>
 
-              <div v-else class="empty-fields-state">
-                <small class="text-muted">No fields in this section. Click "Add Field to Section" above.</small>
+              <!-- Field Editor -->
+              <div class="field-editor">
+                <!-- Basic Info Row -->
+                <div class="row g-2 mb-2">
+                  <div class="col-md-4">
+                    <input
+                      v-model="field.label"
+                      :placeholder="getFieldPlaceholder(field.fieldtype)"
+                      class="form-control form-control-sm"
+                      @input="generateFieldname(index)"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <select
+                      v-model="field.fieldtype"
+                      class="form-select form-select-sm"
+                      @change="onFieldTypeChange(index)"
+                    >
+                      <option value="">Select Type</option>
+                      <optgroup label="Text">
+                        <option value="Data">Data (Single Line)</option>
+                        <option value="Small Text">Small Text (Multi-select)</option>
+                        <option value="Text">Text (Multi Line)</option>
+                        <option value="Long Text">Long Text (Large)</option>
+                        <option value="Text Editor">Text Editor (Rich Text)</option>
+                        <option value="Markdown Editor">Markdown Editor</option>
+                        <option value="HTML Editor">HTML Editor</option>
+                        <option value="Code">Code</option>
+                      </optgroup>
+                      <optgroup label="Number">
+                        <option value="Int">Int (Integer)</option>
+                        <option value="Float">Float (Decimal)</option>
+                        <option value="Currency">Currency</option>
+                        <option value="Percent">Percent</option>
+                        <option value="Duration">Duration</option>
+                        <option value="Rating">Rating</option>
+                      </optgroup>
+                      <optgroup label="Date & Time">
+                        <option value="Date">Date</option>
+                        <option value="Datetime">Datetime</option>
+                        <option value="Time">Time</option>
+                      </optgroup>
+                      <optgroup label="Link">
+                        <option value="Link">Link (Foreign Key)</option>
+                        <option value="Dynamic Link">Dynamic Link</option>
+                        <option value="Table">Table (Child Table)</option>
+                        <option value="Table MultiSelect">Table MultiSelect</option>
+                      </optgroup>
+                      <optgroup label="Select">
+                        <option value="Select">Select (Dropdown)</option>
+                        <option value="Autocomplete">Autocomplete</option>
+                      </optgroup>
+                      <optgroup label="Boolean">
+                        <option value="Check">Check (Checkbox)</option>
+                      </optgroup>
+                      <optgroup label="Attachment">
+                        <option value="Attach">Attach (File)</option>
+                        <option value="Attach Image">Attach Image</option>
+                      </optgroup>
+                      <optgroup label="Layout">
+                        <option value="Section Break">Section Break</option>
+                        <option value="Column Break">Column Break</option>
+                        <option value="HTML">HTML</option>
+                      </optgroup>
+                      <optgroup label="Other">
+                        <option value="Button">Button</option>
+                        <option value="Geolocation">Geolocation</option>
+                        <option value="Barcode">Barcode</option>
+                        <option value="Color">Color</option>
+                        <option value="Icon">Icon</option>
+                        <option value="Signature">Signature</option>
+                        <option value="JSON">JSON</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <div class="col-md-3" v-if="!isLayoutField(field.fieldtype)">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                      <input
+                        v-model="field.fieldname"
+                        type="text"
+                        class="form-control form-control-sm font-monospace"
+                        placeholder="fieldname"
+                        :readonly="!field.label"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-sm btn-outline-primary flex-fill"
+                        @click="toggleAdvanced(index)"
+                        title="Advanced Options"
+                      >
+                        <i class="bi bi-sliders"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="duplicateField(index)"
+                        title="Duplicate"
+                      >
+                        <i class="bi bi-files"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        @click="deleteField(index)"
+                        title="Delete"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quick Options Row (for non-layout fields) -->
+                <div v-if="!isLayoutField(field.fieldtype)" class="quick-options mb-2">
+                  <div class="row g-2">
+                    <!-- Options (for Select, Link, etc.) -->
+                    <div v-if="requiresOptions(field.fieldtype)" class="col-md-6">
+                      <textarea
+                        v-if="field.fieldtype === 'Select' || field.fieldtype === 'Small Text'"
+                        v-model="field.options"
+                        class="form-control form-control-sm"
+                        rows="2"
+                        :placeholder="getOptionsPlaceholder(field.fieldtype)"
+                      ></textarea>
+                      <input
+                        v-else
+                        v-model="field.options"
+                        type="text"
+                        class="form-control form-control-sm"
+                        :placeholder="getOptionsPlaceholder(field.fieldtype)"
+                      />
+                    </div>
+
+                    <!-- Quick Checkboxes -->
+                    <div class="col-md-6">
+                      <div class="d-flex gap-3 flex-wrap">
+                        <div class="form-check">
+                          <input v-model="field.reqd" type="checkbox" class="form-check-input" :id="`reqd-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`reqd-${index}`">Mandatory</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.read_only" type="checkbox" class="form-check-input" :id="`ro-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`ro-${index}`">Read Only</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.hidden" type="checkbox" class="form-check-input" :id="`hide-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`hide-${index}`">Hidden</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.unique" type="checkbox" class="form-check-input" :id="`uniq-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`uniq-${index}`">Unique</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.bold" type="checkbox" class="form-check-input" :id="`bold-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`bold-${index}`">Bold</label>
+                        </div>
+                        <div class="form-check" v-if="field.fieldtype === 'Section Break'">
+                          <input v-model="field.collapsible" type="checkbox" class="form-check-input" :id="`coll-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`coll-${index}`">Collapsible</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- HTML Content (for HTML field type) -->
+                <div v-if="field.fieldtype === 'HTML'" class="mb-2">
+                  <textarea
+                    v-model="field.options"
+                    class="form-control form-control-sm font-monospace"
+                    rows="4"
+                    placeholder="Enter HTML content here..."
+                  ></textarea>
+                </div>
+
+                <!-- Advanced Options Panel -->
+                <div v-if="field.showAdvanced" class="advanced-panel">
+                  <ul class="nav nav-tabs nav-tabs-sm mb-2">
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ active: field.advancedTab === 'config' }" @click="field.advancedTab = 'config'" href="javascript:void(0)">
+                        Config
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ active: field.advancedTab === 'conditional' }" @click="field.advancedTab = 'conditional'" href="javascript:void(0)">
+                        Conditional
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ active: field.advancedTab === 'validation' }" @click="field.advancedTab = 'validation'" href="javascript:void(0)">
+                        Validation
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ active: field.advancedTab === 'formatting' }" @click="field.advancedTab = 'formatting'" href="javascript:void(0)">
+                        Formatting
+                      </a>
+                    </li>
+                  </ul>
+
+                  <!-- Config Tab -->
+                  <div v-if="field.advancedTab === 'config'" class="tab-content">
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="form-label small">Description</label>
+                        <textarea v-model="field.description" class="form-control form-control-sm" rows="2" placeholder="Help text for this field"></textarea>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small">Default Value</label>
+                        <input v-model="field.default" type="text" class="form-control form-control-sm" placeholder="Default value" />
+                      </div>
+                      <div class="col-md-6" v-if="isNumericField(field.fieldtype)">
+                        <label class="form-label small">Precision</label>
+                        <input v-model.number="field.precision" type="number" class="form-control form-control-sm" placeholder="Decimal places" />
+                      </div>
+                      <div class="col-md-6" v-if="field.fieldtype === 'Data'">
+                        <label class="form-label small">Max Length</label>
+                        <input v-model.number="field.length" type="number" class="form-control form-control-sm" placeholder="Maximum characters" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small">Placeholder</label>
+                        <input v-model="field.placeholder" type="text" class="form-control form-control-sm" placeholder="Placeholder text" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small">Columns (Grid Width)</label>
+                        <input v-model.number="field.columns" type="number" class="form-control form-control-sm" placeholder="1-12" min="1" max="12" />
+                      </div>
+                      <div class="col-md-12">
+                        <div class="form-check">
+                          <input v-model="field.in_list_view" type="checkbox" class="form-check-input" :id="`list-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`list-${index}`">Show in List View</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.in_standard_filter" type="checkbox" class="form-check-input" :id="`filt-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`filt-${index}`">In Standard Filter</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.allow_on_submit" type="checkbox" class="form-check-input" :id="`subm-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`subm-${index}`">Allow on Submit</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Conditional Tab -->
+                  <div v-if="field.advancedTab === 'conditional'" class="tab-content">
+                    <div class="row g-2">
+                      <div class="col-md-12">
+                        <label class="form-label small">Depends On (Visibility)</label>
+                        <input v-model="field.depends_on" type="text" class="form-control form-control-sm font-monospace" placeholder="eval:doc.field_name=='value'" />
+                        <small class="text-muted">Example: eval:doc.status=='Active'</small>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="form-label small">Mandatory Depends On</label>
+                        <input v-model="field.mandatory_depends_on" type="text" class="form-control form-control-sm font-monospace" placeholder="eval:doc.field_name=='value'" />
+                      </div>
+                      <div class="col-md-12">
+                        <label class="form-label small">Read Only Depends On</label>
+                        <input v-model="field.read_only_depends_on" type="text" class="form-control form-control-sm font-monospace" placeholder="eval:doc.field_name=='value'" />
+                      </div>
+                      <div class="col-md-12" v-if="field.fieldtype === 'Section Break'">
+                        <label class="form-label small">Collapsible Depends On</label>
+                        <input v-model="field.collapsible_depends_on" type="text" class="form-control form-control-sm font-monospace" placeholder="eval:doc.field_name=='value'" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Validation Tab -->
+                  <div v-if="field.advancedTab === 'validation'" class="tab-content">
+                    <div class="row g-2">
+                      <div class="col-md-12">
+                        <label class="form-label small">Validation Rule (Regex)</label>
+                        <div class="input-group input-group-sm mb-2">
+                          <input v-model="field.validation_regex" type="text" class="form-control font-monospace" placeholder="^[A-Z0-9]+$" />
+                          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Presets
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="javascript:void(0)" @click="field.validation_regex = '^[A-Za-z ]+$'">Letters Only</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" @click="field.validation_regex = '^[0-9]+$'">Numbers Only</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" @click="field.validation_regex = '^[A-Z0-9]+$'">Uppercase Alphanumeric</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" @click="field.validation_regex = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'">Email</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" @click="field.validation_regex = '^[0-9]{10}$'">Phone (10 digits)</a></li>
+                          </ul>
+                        </div>
+                        <small class="text-muted">Regex pattern for validation</small>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="form-label small">Validation Message</label>
+                        <input v-model="field.validation_message" type="text" class="form-control form-control-sm" placeholder="Custom error message" />
+                      </div>
+                      <div class="col-md-6" v-if="isNumericField(field.fieldtype)">
+                        <div class="form-check">
+                          <input v-model="field.non_negative" type="checkbox" class="form-check-input" :id="`nonneg-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`nonneg-${index}`">Non-Negative Only</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Formatting Tab -->
+                  <div v-if="field.advancedTab === 'formatting'" class="tab-content">
+                    <div class="row g-2">
+                      <div class="col-md-6" v-if="field.fieldtype === 'Data'">
+                        <label class="form-label small">Text Transform</label>
+                        <select v-model="field.text_transform" class="form-select form-select-sm">
+                          <option value="">None</option>
+                          <option value="uppercase">UPPERCASE</option>
+                          <option value="lowercase">lowercase</option>
+                          <option value="titlecase">Title Case</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6" v-if="field.fieldtype === 'Data'">
+                        <label class="form-label small">Auto Trim</label>
+                        <select v-model="field.auto_trim" class="form-select form-select-sm">
+                          <option value="">No Trim</option>
+                          <option value="trim">Trim Both Ends</option>
+                          <option value="trim_start">Trim Start</option>
+                          <option value="trim_end">Trim End</option>
+                        </select>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="form-check">
+                          <input v-model="field.translatable" type="checkbox" class="form-check-input" :id="`trans-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`trans-${index}`">Translatable</label>
+                        </div>
+                        <div class="form-check">
+                          <input v-model="field.print_hide" type="checkbox" class="form-check-input" :id="`prthide-${index}`" :true-value="1" :false-value="0" />
+                          <label class="form-check-label small" :for="`prthide-${index}`">Hide in Print</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -199,218 +426,291 @@ import { showSuccess, showError } from '@/shared/services/toast';
 
 // Props
 const props = defineProps({
-  formName: {
-    type: String,
-    default: ''
-  },
-  existingFields: {
-    type: Array,
-    default: () => []
-  },
-  currentBlockIndex: {
-    type: Number,
-    default: 0
-  }
+  formName: { type: String, default: '' },
+  existingFields: { type: Array, default: () => [] },
+  currentBlockIndex: { type: Number, default: 0 }
 });
 
 // Emits
 const emit = defineEmits(['save', 'update', 'addFields']);
 
 // State
-const sections = ref([]);
-const fieldTypes = ref([
-  { label: "Text", type: "Data" },
-  { label: "Time", type: "Time" },
-  { label: "Text Area", type: "Text" },
-  { label: "Date", type: "Date" },
-  { label: "Datetime", type: "Datetime" },
-  { label: "Attach", type: "Attach" },
-  { label: "Phone", type: "Data" },
-  { label: "Check", type: "Check" },
-  { label: "Number", type: "Int" },
-  { label: "Select", type: "Select" },
-  { label: "Multi Select", type: "Small Text" },
-  { label: "Link", type: "Link" }
-]);
+const fields = ref([]);
 const drag = ref(false);
+const hoveredField = ref(null);
 const nextFieldId = ref(1);
-const nextSectionId = ref(1);
 
 /**
- * Create a new section
+ * Create a new field with complete Frappe metadata
  */
-const createNewSection = () => {
-  return {
-    id: `section_${nextSectionId.value++}`,
-    label: '',
-    columns: 2, // Default to 2 columns
-    fields: []
-  };
-};
-
-/**
- * Add a new section
- */
-const addNewSection = () => {
-  const newSection = createNewSection();
-  sections.value.push(newSection);
-  emit('update', getAllFields());
-};
-
-/**
- * Remove a section
- */
-const removeSection = (sectionIndex) => {
-  const section = sections.value[sectionIndex];
-  const label = section.label || 'this section';
-
-  if (confirm(`Delete "${label}" and all its fields?`)) {
-    sections.value.splice(sectionIndex, 1);
-    emit('update', getAllFields());
-  }
-};
-
-/**
- * Create a new field with default values
- */
-const createNewField = () => {
+const createNewField = (fieldtype = 'Data') => {
   return {
     id: `field_${nextFieldId.value++}`,
+    idx: fields.value.length + 1,
     fieldname: '',
-    fieldtype: 'Data',
+    fieldtype: fieldtype,
     label: '',
     description: '',
     options: '',
+
+    // Validation
     reqd: 0,
+    unique: 0,
     read_only: 0,
     hidden: 0,
+
+    // Defaults
     default: '',
+
+    // Conditional Logic
     depends_on: '',
     mandatory_depends_on: '',
     read_only_depends_on: '',
-    permlevel: 0,
+
+    // Formatting
+    bold: 0,
+    placeholder: '',
+
+    // Layout
+    collapsible: 0,
+    collapsible_depends_on: '',
+
+    // Numeric Fields
+    precision: '',
+    length: 0,
+    non_negative: 0,
+
+    // List/Grid
     in_list_view: 0,
     in_standard_filter: 0,
     in_global_search: 0,
-    bold: 0,
     allow_bulk_edit: 0,
-    allow_in_quick_entry: 0,
+    columns: 0,
+
+    // Permissions
+    permlevel: 0,
     allow_on_submit: 0,
     ignore_user_permissions: 0,
     ignore_xss_filter: 0,
+
+    // Other
     translatable: 0,
-    unique: 0,
     fetch_from: '',
     fetch_if_empty: 0,
-    columns: 0,
-    length: 0,
-    precision: '',
-    non_negative: 0,
     report_hide: 0,
-    collapsible: 0,
-    collapsible_depends_on: '',
     print_hide: 0,
     print_hide_if_no_value: 0,
     sort_options: 0,
     remember_last_selected_value: 0,
     is_virtual: 0,
     search_index: 0,
-    documentation_url: ''
+    documentation_url: '',
+
+    // Custom Validation
+    validation_regex: '',
+    validation_message: '',
+
+    // Custom Formatting
+    text_transform: '',
+    auto_trim: '',
+
+    // UI State
+    showAdvanced: false,
+    advancedTab: 'config'
   };
 };
 
 /**
- * Add a new field to a section
+ * Add a new field
  */
-const addFieldToSection = (sectionIndex) => {
-  const newField = createNewField();
-  sections.value[sectionIndex].fields.push(newField);
-  emit('update', getAllFields());
-};
+const addField = (type = 'field') => {
+  let fieldtype = 'Data';
 
-/**
- * Duplicate a field
- */
-const duplicateField = (sectionIndex, fieldIndex) => {
-  const fieldToDuplicate = { ...sections.value[sectionIndex].fields[fieldIndex] };
+  if (type === 'section_break') fieldtype = 'Section Break';
+  else if (type === 'column_break') fieldtype = 'Column Break';
+  else if (type === 'html') fieldtype = 'HTML';
 
-  fieldToDuplicate.id = `field_${nextFieldId.value++}`;
-  fieldToDuplicate.fieldname = `${fieldToDuplicate.fieldname}_copy`;
-  fieldToDuplicate.label = `${fieldToDuplicate.label} (Copy)`;
-
-  sections.value[sectionIndex].fields.push(fieldToDuplicate);
-  emit('update', getAllFields());
+  const newField = createNewField(fieldtype);
+  fields.value.push(newField);
+  reindexFields();
+  emit('update', fields.value);
 };
 
 /**
  * Delete a field
  */
-const deleteField = (sectionIndex, fieldIndex) => {
-  const fieldName = sections.value[sectionIndex].fields[fieldIndex].label || 'this field';
+const deleteField = (index) => {
+  const fieldName = fields.value[index].label || fields.value[index].fieldtype;
 
   if (confirm(`Delete "${fieldName}"?`)) {
-    sections.value[sectionIndex].fields.splice(fieldIndex, 1);
-    emit('update', getAllFields());
+    fields.value.splice(index, 1);
+    reindexFields();
+    emit('update', fields.value);
   }
 };
 
 /**
- * Clear all sections and fields
+ * Duplicate a field
+ */
+const duplicateField = (index) => {
+  const fieldToDuplicate = { ...fields.value[index] };
+
+  fieldToDuplicate.id = `field_${nextFieldId.value++}`;
+  fieldToDuplicate.fieldname = `${fieldToDuplicate.fieldname}_copy`;
+  fieldToDuplicate.label = `${fieldToDuplicate.label} (Copy)`;
+
+  fields.value.splice(index + 1, 0, fieldToDuplicate);
+  reindexFields();
+  emit('update', fields.value);
+};
+
+/**
+ * Clear all fields
  */
 const clearAll = () => {
-  if (confirm('Clear all sections and fields?')) {
-    sections.value = [];
+  if (confirm('Clear all fields?')) {
+    fields.value = [];
     emit('update', []);
   }
 };
 
 /**
+ * Re-index all fields after drag/drop or add/remove
+ */
+const reindexFields = () => {
+  fields.value.forEach((field, index) => {
+    field.idx = index + 1;
+  });
+};
+
+/**
+ * Handle drag end - reindex all fields
+ */
+const onDragEnd = () => {
+  drag.value = false;
+  reindexFields();
+  emit('update', fields.value);
+};
+
+/**
  * Generate fieldname from label
  */
-const generateFieldnameFromLabel = (sectionIndex, fieldIndex) => {
-  const field = sections.value[sectionIndex].fields[fieldIndex];
-  if (!field.label) return;
+const generateFieldname = (index) => {
+  const field = fields.value[index];
+  if (!field.label || isLayoutField(field.fieldtype)) return;
 
-  // Always generate fieldname from label
   field.fieldname = field.label
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
 
-  emit('update', getAllFields());
+  emit('update', fields.value);
 };
 
 /**
  * Handle field type change
  */
-const onFieldTypeChange = (sectionIndex, fieldIndex) => {
-  const field = sections.value[sectionIndex].fields[fieldIndex];
+const onFieldTypeChange = (index) => {
+  const field = fields.value[index];
 
   if (!requiresOptions(field.fieldtype)) {
     field.options = '';
   }
-  emit('update', getAllFields());
+
+  if (isLayoutField(field.fieldtype)) {
+    field.fieldname = '';
+  }
+
+  emit('update', fields.value);
+};
+
+/**
+ * Toggle advanced options panel
+ */
+const toggleAdvanced = (index) => {
+  fields.value[index].showAdvanced = !fields.value[index].showAdvanced;
 };
 
 /**
  * Check if field type requires options
  */
 const requiresOptions = (fieldtype) => {
-  return ['Select', 'Link', 'Table', 'Table MultiSelect', 'Small Text'].includes(fieldtype);
+  return ['Select', 'Link', 'Table', 'Table MultiSelect', 'Small Text', 'Autocomplete'].includes(fieldtype);
+};
+
+/**
+ * Check if field is a layout field (Section Break, Column Break, HTML)
+ */
+const isLayoutField = (fieldtype) => {
+  return ['Section Break', 'Column Break', 'HTML'].includes(fieldtype);
+};
+
+/**
+ * Check if field is numeric
+ */
+const isNumericField = (fieldtype) => {
+  return ['Int', 'Float', 'Currency', 'Percent'].includes(fieldtype);
 };
 
 /**
  * Get options placeholder
  */
 const getOptionsPlaceholder = (fieldtype) => {
-  if (fieldtype === 'Select' || fieldtype === 'Small Text') {
+  if (fieldtype === 'Select' || fieldtype === 'Small Text' || fieldtype === 'Autocomplete') {
     return 'Option 1\nOption 2\nOption 3';
   } else if (fieldtype === 'Link') {
     return 'DocType Name (e.g., Customer)';
-  } else if (fieldtype === 'Table') {
+  } else if (fieldtype === 'Table' || fieldtype === 'Table MultiSelect') {
     return 'Child DocType Name';
   }
   return 'Enter options';
+};
+
+/**
+ * Get field placeholder based on type
+ */
+const getFieldPlaceholder = (fieldtype) => {
+  if (fieldtype === 'Section Break') return 'Section Label';
+  if (fieldtype === 'Column Break') return 'Column Label (optional)';
+  if (fieldtype === 'HTML') return 'HTML Field Label';
+  return 'Field Label';
+};
+
+/**
+ * Get field type icon
+ */
+const getFieldTypeIcon = (fieldtype) => {
+  const icons = {
+    'Data': 'bi bi-fonts',
+    'Small Text': 'bi bi-textarea-t',
+    'Text': 'bi bi-textarea',
+    'Long Text': 'bi bi-file-text',
+    'Text Editor': 'bi bi-file-richtext',
+    'Int': 'bi bi-hash',
+    'Float': 'bi bi-123',
+    'Currency': 'bi bi-currency-dollar',
+    'Percent': 'bi bi-percent',
+    'Date': 'bi bi-calendar-date',
+    'Datetime': 'bi bi-calendar-event',
+    'Time': 'bi bi-clock',
+    'Link': 'bi bi-link-45deg',
+    'Dynamic Link': 'bi bi-diagram-3',
+    'Table': 'bi bi-table',
+    'Select': 'bi bi-list-ul',
+    'Autocomplete': 'bi bi-search',
+    'Check': 'bi bi-check-square',
+    'Attach': 'bi bi-paperclip',
+    'Attach Image': 'bi bi-image',
+    'Section Break': 'bi bi-layout-split',
+    'Column Break': 'bi bi-layout-three-columns',
+    'HTML': 'bi bi-code-square',
+    'Button': 'bi bi-mouse',
+    'Rating': 'bi bi-star',
+    'Signature': 'bi bi-pen',
+    'Color': 'bi bi-palette',
+    'Barcode': 'bi bi-upc',
+  };
+  return icons[fieldtype] || 'bi bi-question-circle';
 };
 
 /**
@@ -421,58 +721,101 @@ const isValidFieldname = (fieldname) => {
 };
 
 /**
- * Get all fields from all sections
+ * Build sections structure from flat fields list
  */
-const getAllFields = () => {
-  const allFields = [];
-  sections.value.forEach(section => {
-    section.fields.forEach(field => {
-      allFields.push(field);
-    });
+const buildSectionsStructure = () => {
+  const sections = [];
+  let currentSection = null;
+  let currentRow = null;
+  let currentColumn = null;
+
+  fields.value.forEach((field, index) => {
+    if (field.fieldtype === 'Section Break') {
+      // Start new section
+      currentSection = {
+        label: field.label || '',
+        collapsible: field.collapsible,
+        collapsible_depends_on: field.collapsible_depends_on,
+        depends_on: field.depends_on,
+        rows: []
+      };
+      currentRow = { columns: [] };
+      currentColumn = { fields: [] };
+      currentRow.columns.push(currentColumn);
+      currentSection.rows.push(currentRow);
+      sections.push(currentSection);
+    } else if (field.fieldtype === 'Column Break') {
+      // Start new column in current row
+      if (currentRow) {
+        currentColumn = { fields: [] };
+        currentRow.columns.push(currentColumn);
+      }
+    } else if (field.fieldtype !== 'HTML') {
+      // Regular field - add to current column
+      if (!currentSection) {
+        // No section break yet, create default section
+        currentSection = {
+          label: '',
+          rows: []
+        };
+        currentRow = { columns: [] };
+        currentColumn = { fields: [] };
+        currentRow.columns.push(currentColumn);
+        currentSection.rows.push(currentRow);
+        sections.push(currentSection);
+      }
+
+      if (!currentColumn) {
+        currentColumn = { fields: [] };
+        currentRow.columns.push(currentColumn);
+      }
+
+      currentColumn.fields.push(field);
+    }
   });
-  return allFields;
+
+  return sections;
 };
 
 /**
  * Add fields to current block
  */
-const addFieldsToCurrentBlock = () => {
-  // Validate all sections and fields
-  for (const section of sections.value) {
-    for (const field of section.fields) {
-      if (!field.label || !field.fieldname || !field.fieldtype) {
-        showError('All fields must have a label, fieldname, and type');
-        return;
-      }
+const addFieldsToBlock = () => {
+  // Validate all fields
+  for (const field of fields.value) {
+    if (isLayoutField(field.fieldtype)) continue;
 
-      if (!isValidFieldname(field.fieldname)) {
-        showError(`Invalid fieldname: ${field.fieldname}`);
-        return;
-      }
+    if (!field.label || !field.fieldname || !field.fieldtype) {
+      showError('All fields must have a label, fieldname, and type');
+      return;
+    }
 
-      if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
-        showError(`Options required for ${field.fieldtype} field: ${field.label}`);
-        return;
-      }
+    if (!isValidFieldname(field.fieldname)) {
+      showError(`Invalid fieldname: ${field.fieldname}. Use lowercase letters, numbers, and underscores only.`);
+      return;
+    }
+
+    if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
+      showError(`Options required for ${field.fieldtype} field: ${field.label}`);
+      return;
     }
   }
 
-  // Emit sections with their layout information
-  emit('addFields', sections.value);
+  // Build sections structure from flat fields list
+  const sectionsStructure = buildSectionsStructure();
 
-  const totalFields = getAllFields().length;
-  showSuccess(`${sections.value.length} section(s) with ${totalFields} field(s) added to form!`);
+  emit('addFields', sectionsStructure);
+  showSuccess(`${fields.value.length} field(s) added to form!`);
 
-  // Clear sections after adding
-  sections.value = [];
+  // Clear fields after adding
+  fields.value = [];
 };
 
 // Expose methods
 defineExpose({
-  sections,
-  addFieldsToCurrentBlock,
-  addNewSection,
-  getAllFields: () => getAllFields()
+  fields,
+  addFieldsToBlock,
+  addField
 });
 </script>
 
@@ -487,11 +830,19 @@ defineExpose({
 .builder-toolbar {
   padding: 15px;
   background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 2px solid #dee2e6;
   flex-shrink: 0;
 }
 
-.sections-container {
+.vr {
+  display: inline-block;
+  width: 1px;
+  min-height: 1.5rem;
+  background-color: currentColor;
+  opacity: 0.25;
+}
+
+.fields-container {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
@@ -509,111 +860,105 @@ defineExpose({
   display: block;
 }
 
-.section-card {
+.field-item {
+  position: relative;
   background: #fff;
   border: 2px solid #dee2e6;
   border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 15px;
+  margin-bottom: 15px;
   transition: all 0.2s ease;
 }
 
-.section-card:hover {
+.field-item:hover {
   border-color: #007bff;
-  box-shadow: 0 2px 12px rgba(0,123,255,0.15);
+  box-shadow: 0 4px 12px rgba(0,123,255,0.15);
 }
 
-.section-card.dragging {
+.field-item.dragging {
   opacity: 0.5;
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  border-radius: 8px 8px 0 0;
+.field-item.field-section-break {
+  border-left: 4px solid #28a745;
+  background: #f8fff9;
 }
 
-.section-drag-handle {
+.field-item.field-column-break {
+  border-left: 4px solid #ffc107;
+  background: #fffef8;
+}
+
+.field-item.field-html {
+  border-left: 4px solid #6f42c1;
+  background: #f9f8ff;
+}
+
+.field-index-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #007bff;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 12px;
+  z-index: 10;
+}
+
+.field-type-indicator {
+  position: absolute;
+  top: 8px;
+  left: 8px;
   color: #6c757d;
-  cursor: move;
-  flex-shrink: 0;
+  font-size: 18px;
+  z-index: 10;
 }
 
-.section-drag-handle:hover {
-  color: #007bff;
-}
-
-.section-info {
-  flex: 1;
-}
-
-.section-body {
-  padding: 20px;
-}
-
-.fields-grid {
-  display: grid;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.fields-draggable-container {
-  display: contents;
-}
-
-.field-card {
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 12px;
-  transition: all 0.2s ease;
-}
-
-.field-card:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.1);
-}
-
-.field-header {
+.field-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-top: 25px;
 }
 
 .field-drag-handle {
   color: #6c757d;
   cursor: move;
-  font-size: 14px;
+  padding-top: 8px;
+  flex-shrink: 0;
+  font-size: 20px;
 }
 
 .field-drag-handle:hover {
   color: #007bff;
 }
 
-.field-actions {
-  display: flex;
-  gap: 8px;
+.field-editor {
+  flex: 1;
 }
 
-.field-body {
-  /* Field content */
-}
-
-.empty-fields-state {
-  text-align: center;
-  padding: 30px;
+.quick-options {
+  padding: 10px;
   background: #f8f9fa;
   border-radius: 6px;
-  border: 1px dashed #dee2e6;
 }
 
-.ghost-section {
-  opacity: 0.4;
-  background: #e7f3ff;
+.advanced-panel {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.nav-tabs-sm .nav-link {
+  padding: 0.4rem 0.8rem;
+  font-size: 13px;
+}
+
+.tab-content {
+  padding-top: 10px;
 }
 
 .ghost-field {
@@ -630,10 +975,15 @@ defineExpose({
   font-size: 12px;
 }
 
-code {
-  background: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 12px;
+.font-monospace {
+  font-family: 'Courier New', monospace;
+}
+
+.dropdown-menu {
+  font-size: 13px;
+}
+
+.dropdown-item {
+  padding: 0.4rem 1rem;
 }
 </style>
