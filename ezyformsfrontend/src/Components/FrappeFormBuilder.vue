@@ -1,27 +1,20 @@
 <template>
   <div class="frappe-form-builder">
-    <!-- Toolbar -->
-    <div class="builder-toolbar stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-      <div></div>
-      <h1 class="font-14 fw-bold m-0">Advanced Form Builder</h1>
-      <div>
-        <button @click="addNewField" class="btn btn-light font-13 mx-2">
-          <i class="bi bi-plus-circle"></i> Add Field
-        </button>
-        <button @click="loadExistingForm" class="btn btn-light font-13 mx-2">
-          <i class="bi bi-folder-open"></i> Load
-        </button>
-        <button @click="previewForm" class="btn btn-light font-13 mx-2" :disabled="formFields.length === 0">
-          <i class="bi bi-eye"></i> Preview
-        </button>
-        <button @click="saveFormSchema" class="btn btn-dark bg-dark text-white fw-bold font-13" :disabled="formFields.length === 0">
-          <i class="bi bi-save"></i> Save Schema
-        </button>
-      </div>
+    <!-- Simplified Toolbar -->
+    <div class="builder-toolbar-simple">
+      <button @click="addNewField" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Add Field
+      </button>
+      <button @click="addFieldsToCurrentBlock" class="btn btn-success btn-sm" :disabled="formFields.length === 0">
+        <i class="bi bi-check-circle"></i> Add to Form ({{ formFields.length }})
+      </button>
+      <button @click="clearAllFields" class="btn btn-outline-secondary btn-sm" :disabled="formFields.length === 0">
+        <i class="bi bi-trash"></i> Clear All
+      </button>
     </div>
 
     <!-- Field List with Drag & Drop -->
-    <div class="fields-container mt-3">
+    <div class="fields-container-simple">
       <draggable
         v-if="formFields.length > 0"
         v-model="formFields"
@@ -34,222 +27,115 @@
       >
         <template #item="{ element, index }">
           <div
-            class="field-item dynamicColumn px-3 py-2"
+            class="field-item-simple"
             :class="{ 'dragging': drag }"
             @mouseenter="hoveredField = index"
             @mouseleave="hoveredField = null"
           >
-            <div class="d-flex justify-content-between align-items-start">
-              <div class="flex-grow-1">
-                <!-- Field Header -->
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <div class="drag-handle" style="cursor: move;">
-                    <i class="bi bi-grip-vertical font-16"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <input
-                      v-if="element.editing"
-                      v-model="element.label"
-                      placeholder="Name the field"
-                      :class="[
-                        'border-less-input',
-                        'font-14',
-                        'p-0',
-                        'inputHeight',
-                        { 'italic-style': !element.label },
-                        { 'fw-medium': element.label }
-                      ]"
-                      @input="generateFieldnameFromLabel(index)"
-                    />
-                    <strong v-else class="font-14">{{ element.label || 'Untitled Field' }}</strong>
-                  </div>
-                  <span class="badge bg-primary font-11">{{ element.fieldtype }}</span>
-                </div>
+            <div class="field-content">
+              <!-- Drag Handle -->
+              <div class="drag-handle">
+                <i class="bi bi-grip-vertical"></i>
+              </div>
 
-                <!-- Field Preview -->
-                <div v-if="!element.editing" class="field-preview-info">
-                  <small class="text-muted font-12">{{ element.fieldname }}</small>
-                  <span v-if="element.reqd" class="text-danger ms-1">*</span>
-                  <span v-if="element.read_only" class="badge bg-secondary ms-1 font-10">Read Only</span>
-                  <span v-if="element.hidden" class="badge bg-dark ms-1 font-10">Hidden</span>
-                  <span v-if="element.unique" class="badge bg-info ms-1 font-10">Unique</span>
-                </div>
+              <!-- Field Editor (Always Visible) -->
+              <div class="field-editor-inline">
+                <!-- Label -->
+                <input
+                  v-model="element.label"
+                  placeholder="Field Label"
+                  class="form-control form-control-sm mb-1"
+                  @input="generateFieldnameFromLabel(index)"
+                />
 
-                <!-- Field Editor (inline) -->
-                <div v-if="element.editing" class="mt-2">
+                <div class="row g-2">
                   <!-- Field Type -->
-                  <select
-                    v-model="element.fieldtype"
-                    class="form-select mb-2 font-13 searchSelect"
-                    @change="onFieldTypeChange(index)"
-                  >
-                    <option value="">Select Type</option>
-                    <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
-                      {{ ft.label }}
-                    </option>
-                  </select>
+                  <div class="col-md-4">
+                    <select
+                      v-model="element.fieldtype"
+                      class="form-select form-select-sm"
+                      @change="onFieldTypeChange(index)"
+                    >
+                      <option value="">Select Type</option>
+                      <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
+                        {{ ft.label }}
+                      </option>
+                    </select>
+                  </div>
 
                   <!-- Fieldname -->
-                  <input
-                    v-model="element.fieldname"
-                    type="text"
-                    class="form-control mb-2 font-12"
-                    placeholder="fieldname (lowercase with underscores)"
-                  />
-                  <small v-if="!isValidFieldname(element.fieldname)" class="text-danger font-10 d-block mb-2">
-                    Invalid fieldname format
-                  </small>
-
-                  <!-- Description -->
-                  <textarea
-                    v-model="element.description"
-                    class="form-control mb-2 font-12"
-                    rows="2"
-                    placeholder="Field description"
-                  ></textarea>
-
-                  <!-- Options (for Select, Link, etc.) -->
-                  <div v-if="requiresOptions(element.fieldtype)" class="mb-2">
-                    <label class="font-12 fw-light">
-                      {{ getOptionsLabel(element.fieldtype) }}
-                    </label>
-                    <textarea
-                      v-if="element.fieldtype === 'Select' || element.fieldtype === 'Small Text'"
-                      v-model="element.options"
-                      class="form-control shadow-none font-12"
-                      rows="3"
-                      :placeholder="getOptionsPlaceholder(element.fieldtype)"
-                    ></textarea>
+                  <div class="col-md-4">
                     <input
-                      v-else
-                      v-model="element.options"
+                      v-model="element.fieldname"
                       type="text"
-                      class="form-control font-12"
-                      :placeholder="getOptionsPlaceholder(element.fieldtype)"
+                      class="form-control form-control-sm"
+                      placeholder="fieldname"
                     />
-                    <small v-if="!element.options || !element.options.trim()" class="text-danger font-10">
-                      Options are required for this field type
-                    </small>
                   </div>
-
-                  <!-- Default Value -->
-                  <input
-                    v-model="element.default"
-                    type="text"
-                    class="form-control mb-2 font-12"
-                    placeholder="Default value"
-                  />
 
                   <!-- Validation Checkboxes -->
-                  <div class="d-flex flex-wrap gap-3 mb-2">
-                    <div class="form-check">
-                      <input
-                        v-model="element.reqd"
-                        type="checkbox"
-                        class="form-check-input"
-                        :id="`reqd-${index}`"
-                        :true-value="1"
-                        :false-value="0"
-                      />
-                      <label class="form-check-label font-12" :for="`reqd-${index}`">
-                        Mandatory
-                      </label>
+                  <div class="col-md-4">
+                    <div class="d-flex gap-2 flex-wrap">
+                      <div class="form-check form-check-inline">
+                        <input
+                          v-model="element.reqd"
+                          type="checkbox"
+                          class="form-check-input"
+                          :id="`reqd-${index}`"
+                          :true-value="1"
+                          :false-value="0"
+                        />
+                        <label class="form-check-label small" :for="`reqd-${index}`">Required</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          v-model="element.unique"
+                          type="checkbox"
+                          class="form-check-input"
+                          :id="`unique-${index}`"
+                          :true-value="1"
+                          :false-value="0"
+                        />
+                        <label class="form-check-label small" :for="`unique-${index}`">Unique</label>
+                      </div>
                     </div>
-                    <div class="form-check">
-                      <input
-                        v-model="element.read_only"
-                        type="checkbox"
-                        class="form-check-input"
-                        :id="`readonly-${index}`"
-                        :true-value="1"
-                        :false-value="0"
-                      />
-                      <label class="form-check-label font-12" :for="`readonly-${index}`">
-                        Read Only
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input
-                        v-model="element.hidden"
-                        type="checkbox"
-                        class="form-check-input"
-                        :id="`hidden-${index}`"
-                        :true-value="1"
-                        :false-value="0"
-                      />
-                      <label class="form-check-label font-12" :for="`hidden-${index}`">
-                        Hidden
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input
-                        v-model="element.unique"
-                        type="checkbox"
-                        class="form-check-input"
-                        :id="`unique-${index}`"
-                        :true-value="1"
-                        :false-value="0"
-                      />
-                      <label class="form-check-label font-12" :for="`unique-${index}`">
-                        Unique
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input
-                        v-model="element.in_list_view"
-                        type="checkbox"
-                        class="form-check-input"
-                        :id="`listview-${index}`"
-                        :true-value="1"
-                        :false-value="0"
-                      />
-                      <label class="form-check-label font-12" :for="`listview-${index}`">
-                        In List View
-                      </label>
-                    </div>
-                  </div>
-
-                  <!-- Conditional Display -->
-                  <details class="mb-2">
-                    <summary class="font-12 fw-medium cursor-pointer">Advanced Options</summary>
-                    <div class="mt-2">
-                      <input
-                        v-model="element.depends_on"
-                        type="text"
-                        class="form-control mb-2 font-12"
-                        placeholder="Depends on (e.g., eval:doc.field=='value')"
-                      />
-                      <input
-                        v-model="element.fetch_from"
-                        type="text"
-                        class="form-control mb-2 font-12"
-                        placeholder="Fetch from (e.g., link_field.source_field)"
-                      />
-                    </div>
-                  </details>
-
-                  <!-- Action Buttons -->
-                  <div class="d-flex gap-2 mt-2">
-                    <button @click="saveFieldEdit(index)" class="btn btn-dark btn-sm font-12">
-                      <i class="bi bi-check"></i> Save
-                    </button>
-                    <button @click="cancelEdit(index)" class="btn btn-secondary btn-sm font-12">
-                      Cancel
-                    </button>
                   </div>
                 </div>
+
+                <!-- Options (for Select, Link, etc.) -->
+                <div v-if="requiresOptions(element.fieldtype)" class="mt-2">
+                  <textarea
+                    v-if="element.fieldtype === 'Select' || element.fieldtype === 'Small Text'"
+                    v-model="element.options"
+                    class="form-control form-control-sm"
+                    rows="2"
+                    :placeholder="getOptionsPlaceholder(element.fieldtype)"
+                  ></textarea>
+                  <input
+                    v-else
+                    v-model="element.options"
+                    type="text"
+                    class="form-control form-control-sm"
+                    :placeholder="getOptionsPlaceholder(element.fieldtype)"
+                  />
+                </div>
+
+                <!-- Description -->
+                <input
+                  v-model="element.description"
+                  type="text"
+                  class="form-control form-control-sm mt-1"
+                  placeholder="Description (optional)"
+                />
               </div>
 
               <!-- Action Icons -->
-              <div v-if="hoveredField === index && !element.editing" class="FieldcopyRemove">
-                <button class="btn btn-light btn-sm bg-transparent py-0" @click="editField(index)" title="Edit">
-                  <i class="bi bi-pencil font-13"></i>
+              <div class="field-actions">
+                <button class="btn btn-sm btn-link text-primary p-0" @click="duplicateField(index)" title="Duplicate">
+                  <i class="bi bi-files"></i>
                 </button>
-                <button class="btn btn-light btn-sm bg-transparent py-0" @click="duplicateField(index)" title="Duplicate">
-                  <i class="ri-file-copy-line font-13 copyIcon"></i>
-                </button>
-                <button class="btn btn-light btn-sm bg-transparent trash-btn py-0" @click="deleteField(index)" title="Delete">
-                  <i class="bi bi-x-lg font-13"></i>
+                <button class="btn btn-sm btn-link text-danger p-0" @click="deleteField(index)" title="Delete">
+                  <i class="bi bi-trash"></i>
                 </button>
               </div>
             </div>
@@ -258,24 +144,9 @@
       </draggable>
 
       <!-- Empty State -->
-      <div v-if="formFields.length === 0" class="empty-state text-center py-5">
-        <i class="bi bi-inbox" style="font-size: 48px; color: #6c757d;"></i>
-        <p class="text-muted mt-3">No fields added yet. Click "Add Field" to get started.</p>
-      </div>
-    </div>
-
-    <!-- Preview Modal -->
-    <div v-if="showPreview" class="modal-backdrop" @click="closePreview">
-      <div class="modal-content-custom" @click.stop>
-        <div class="modal-header-custom">
-          <h5 class="font-16 fw-bold m-0">Form Schema Preview</h5>
-          <button @click="closePreview" class="btn-close-custom">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="modal-body-custom">
-          <pre class="json-preview">{{ JSON.stringify(getCleanFields(), null, 2) }}</pre>
-        </div>
+      <div v-if="formFields.length === 0" class="empty-state-simple">
+        <i class="bi bi-inbox"></i>
+        <p>No fields yet. Click "Add Field" to start.</p>
       </div>
     </div>
   </div>
@@ -297,11 +168,15 @@ const props = defineProps({
   existingFields: {
     type: Array,
     default: () => []
+  },
+  currentBlockIndex: {
+    type: Number,
+    default: 0
   }
 });
 
 // Emits
-const emit = defineEmits(['save', 'preview', 'update']);
+const emit = defineEmits(['save', 'update', 'addFields']);
 
 // State
 const formFields = ref([]);
@@ -320,7 +195,6 @@ const fieldTypes = ref([
   { label: "Link", type: "Link" }
 ]);
 const drag = ref(false);
-const showPreview = ref(false);
 const loading = ref(false);
 const hoveredField = ref(null);
 
@@ -329,8 +203,7 @@ onMounted(async () => {
   if (props.existingFields && props.existingFields.length > 0) {
     formFields.value = props.existingFields.map((field, idx) => ({
       ...field,
-      idx: idx + 1,
-      editing: false
+      idx: idx + 1
     }));
   }
 });
@@ -343,7 +216,7 @@ const createNewField = (idx) => {
     idx: idx,
     fieldname: `field_${idx}`,
     fieldtype: 'Data',
-    label: `Field ${idx}`,
+    label: '',
     description: '',
     options: '',
     reqd: 0,
@@ -380,8 +253,7 @@ const createNewField = (idx) => {
     remember_last_selected_value: 0,
     is_virtual: 0,
     search_index: 0,
-    documentation_url: '',
-    editing: true
+    documentation_url: ''
   };
 };
 
@@ -391,77 +263,8 @@ const createNewField = (idx) => {
 const addNewField = () => {
   const newIdx = formFields.value.length + 1;
   const newField = createNewField(newIdx);
-
-  // Close any other editing fields
-  formFields.value.forEach(field => {
-    field.editing = false;
-  });
-
   formFields.value.push(newField);
-};
-
-/**
- * Edit an existing field
- */
-const editField = (index) => {
-  // Close any other editing fields
-  formFields.value.forEach((field, idx) => {
-    if (idx !== index) {
-      field.editing = false;
-    }
-  });
-  formFields.value[index].editing = true;
-};
-
-/**
- * Save field edit
- */
-const saveFieldEdit = (index) => {
-  const field = formFields.value[index];
-
-  // Validate
-  if (!field.label || !field.fieldname || !field.fieldtype) {
-    showError('Label, fieldname, and field type are required');
-    return;
-  }
-
-  if (!isValidFieldname(field.fieldname)) {
-    showError('Invalid fieldname format');
-    return;
-  }
-
-  if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
-    showError('Options are required for this field type');
-    return;
-  }
-
-  formFields.value[index].editing = false;
-
-  // Re-index fields
-  formFields.value.forEach((f, idx) => {
-    f.idx = idx + 1;
-  });
-
   emit('update', getCleanFields());
-  showSuccess('Field saved successfully');
-};
-
-/**
- * Cancel field edit
- */
-const cancelEdit = (index) => {
-  const field = formFields.value[index];
-
-  // Remove if it's a new unsaved field
-  if (field.fieldname.startsWith('field_') && field.label.startsWith('Field ')) {
-    formFields.value.splice(index, 1);
-    formFields.value.forEach((f, idx) => {
-      f.idx = idx + 1;
-    });
-    return;
-  }
-
-  formFields.value[index].editing = false;
 };
 
 /**
@@ -474,13 +277,9 @@ const duplicateField = (index) => {
   fieldToDuplicate.idx = newIdx;
   fieldToDuplicate.fieldname = `${fieldToDuplicate.fieldname}_copy`;
   fieldToDuplicate.label = `${fieldToDuplicate.label} (Copy)`;
-  fieldToDuplicate.editing = true;
-
-  formFields.value.forEach(field => {
-    field.editing = false;
-  });
 
   formFields.value.push(fieldToDuplicate);
+  emit('update', getCleanFields());
 };
 
 /**
@@ -489,14 +288,25 @@ const duplicateField = (index) => {
 const deleteField = (index) => {
   const fieldName = formFields.value[index].label || 'this field';
 
-  if (confirm(`Are you sure you want to delete "${fieldName}"?`)) {
+  if (confirm(`Delete "${fieldName}"?`)) {
     formFields.value.splice(index, 1);
 
+    // Re-index remaining fields
     formFields.value.forEach((field, idx) => {
       field.idx = idx + 1;
     });
 
     emit('update', getCleanFields());
+  }
+};
+
+/**
+ * Clear all fields
+ */
+const clearAllFields = () => {
+  if (confirm('Clear all fields?')) {
+    formFields.value = [];
+    emit('update', []);
   }
 };
 
@@ -513,6 +323,7 @@ const generateFieldnameFromLabel = (index) => {
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '');
   }
+  emit('update', getCleanFields());
 };
 
 /**
@@ -524,6 +335,7 @@ const onFieldTypeChange = (index) => {
   if (!requiresOptions(field.fieldtype)) {
     field.options = '';
   }
+  emit('update', getCleanFields());
 };
 
 /**
@@ -534,29 +346,15 @@ const requiresOptions = (fieldtype) => {
 };
 
 /**
- * Get options label
- */
-const getOptionsLabel = (fieldtype) => {
-  if (fieldtype === 'Select' || fieldtype === 'Small Text') {
-    return 'Enter Options:';
-  } else if (fieldtype === 'Link') {
-    return 'Search Doctype:';
-  } else if (fieldtype === 'Table') {
-    return 'Child DocType:';
-  }
-  return 'Options:';
-};
-
-/**
  * Get options placeholder
  */
 const getOptionsPlaceholder = (fieldtype) => {
   if (fieldtype === 'Select' || fieldtype === 'Small Text') {
-    return 'Enter your Options';
+    return 'Option 1\nOption 2\nOption 3';
   } else if (fieldtype === 'Link') {
-    return 'Type to search DocType...';
+    return 'DocType Name (e.g., Customer)';
   } else if (fieldtype === 'Table') {
-    return 'Enter Child DocType name';
+    return 'Child DocType Name';
   }
   return 'Enter options';
 };
@@ -574,211 +372,129 @@ const isValidFieldname = (fieldname) => {
 const getCleanFields = () => {
   return formFields.value.map((field, idx) => {
     const cleanField = { ...field };
-    delete cleanField.editing;
     cleanField.idx = idx + 1;
     return cleanField;
   });
 };
 
 /**
- * Save form schema
+ * Add fields to current block
  */
-const saveFormSchema = async () => {
-  try {
-    const hasUnsavedFields = formFields.value.some(field => field.editing);
-    if (hasUnsavedFields) {
-      showError('Please save all fields before saving the form schema');
+const addFieldsToCurrentBlock = () => {
+  // Validate all fields
+  for (const field of formFields.value) {
+    if (!field.label || !field.fieldname || !field.fieldtype) {
+      showError('All fields must have a label, fieldname, and type');
       return;
     }
 
-    const schema = getCleanFields();
-
-    const payload = {
-      form_name: props.formName || 'Untitled Form',
-      fields: JSON.stringify(schema)
-    };
-
-    if (apis.saveFormDefinition) {
-      loading.value = true;
-      const response = await axiosInstance.post(apis.saveFormDefinition, payload);
-      loading.value = false;
-
-      if (response && response.data && response.data.message && response.data.message.success) {
-        showSuccess('Form schema saved successfully!');
-        emit('save', schema);
-      } else {
-        throw new Error('Failed to save form schema');
-      }
-    } else {
-      emit('save', schema);
+    if (!isValidFieldname(field.fieldname)) {
+      showError(`Invalid fieldname: ${field.fieldname}`);
+      return;
     }
-  } catch (error) {
-    loading.value = false;
-    console.error('Error saving form schema:', error);
-    showError('Failed to save form schema. Please try again.');
-  }
-};
 
-/**
- * Preview the form
- */
-const previewForm = () => {
-  showPreview.value = true;
-  emit('preview', getCleanFields());
-};
-
-/**
- * Close preview modal
- */
-const closePreview = () => {
-  showPreview.value = false;
-};
-
-/**
- * Load an existing form
- */
-const loadExistingForm = async () => {
-  const formName = prompt('Enter form name to load:');
-  if (!formName) return;
-
-  try {
-    loading.value = true;
-
-    if (apis.getFormDefinition) {
-      const response = await axiosInstance.post(apis.getFormDefinition, { form_name: formName });
-      loading.value = false;
-
-      const data = response.data.message;
-      if (data && data.success && data.fields) {
-        const fields = typeof data.fields === 'string'
-          ? JSON.parse(data.fields)
-          : data.fields;
-
-        formFields.value = fields.map((field, idx) => ({
-          ...field,
-          idx: idx + 1,
-          editing: false
-        }));
-
-        showSuccess('Form loaded successfully!');
-      } else {
-        throw new Error('Form not found');
-      }
+    if (requiresOptions(field.fieldtype) && (!field.options || !field.options.trim())) {
+      showError(`Options required for ${field.fieldtype} field: ${field.label}`);
+      return;
     }
-  } catch (error) {
-    loading.value = false;
-    console.error('Error loading form:', error);
-    showError('Failed to load form. Please check the form name and try again.');
   }
+
+  const cleanFields = getCleanFields();
+  emit('addFields', cleanFields);
+  showSuccess(`${cleanFields.length} field(s) added to form!`);
+
+  // Clear fields after adding
+  formFields.value = [];
 };
 
 // Expose methods
 defineExpose({
   formFields,
-  saveFormSchema,
+  addFieldsToCurrentBlock,
   addNewField,
   getFields: () => getCleanFields()
 });
 </script>
 
 <style scoped>
-/* Match FormStepper Design */
 .frappe-form-builder {
   background: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.stepperbackground {
-  background-color: #f5f5f5;
-  padding: 15px 20px;
-  border-radius: 7px;
-  margin-bottom: 15px;
+.builder-toolbar-simple {
+  padding: 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.fields-container {
-  padding: 10px;
+.fields-container-simple {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
 }
 
-.dynamicColumn {
-  border: 1.5px dashed #cccccc;
-  border-radius: 10px;
-  margin: 5px;
-  background-color: #ffffff;
+.field-item-simple {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
   transition: all 0.2s ease;
 }
 
-.dynamicColumn:hover {
-  border: 1px solid rgb(119, 119, 119);
+.field-item-simple:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.1);
 }
 
-.field-item {
-  position: relative;
-}
-
-.field-item.dragging {
+.field-item-simple.dragging {
   opacity: 0.5;
+}
+
+.field-content {
+  display: flex;
+  gap: 12px;
+  align-items: start;
 }
 
 .drag-handle {
   color: #6c757d;
   cursor: move;
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 
 .drag-handle:hover {
   color: #007bff;
 }
 
-.FieldcopyRemove {
-  position: absolute;
-  top: 5px;
-  right: 5px;
+.field-editor-inline {
+  flex: 1;
+}
+
+.field-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 8px;
 }
 
-.border-less-input {
-  border: 0;
-  background: transparent;
-  padding-left: 10px;
-  width: 100%;
-}
-
-.border-less-input:focus {
-  border: 0;
-  background: transparent;
-  outline: 0;
-}
-
-.italic-style {
-  font-style: italic;
-}
-
-.inputHeight {
-  height: 36px;
-}
-
-.searchSelect {
-  background-color: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-}
-
-.field-preview-info {
-  padding: 8px 10px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.copyIcon {
+.empty-state-simple {
+  text-align: center;
+  padding: 60px 20px;
   color: #6c757d;
 }
 
-.trash-btn:hover {
-  color: #dc3545;
-}
-
-.empty-state {
-  padding: 60px 20px;
+.empty-state-simple i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
 }
 
 .ghost-field {
@@ -786,80 +502,12 @@ defineExpose({
   background: #e7f3ff;
 }
 
-/* Modal Styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+.form-control-sm,
+.form-select-sm {
+  font-size: 13px;
 }
 
-.modal-content-custom {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.modal-header-custom {
-  padding: 20px;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.btn-close-custom {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 5px 10px;
-}
-
-.btn-close-custom:hover {
-  color: #000;
-}
-
-.modal-body-custom {
-  padding: 20px;
-  overflow: auto;
-  flex: 1;
-}
-
-.json-preview {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  overflow: auto;
+.form-check-label {
   font-size: 12px;
-  font-family: 'Courier New', monospace;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .builder-toolbar {
-    flex-direction: column;
-    align-items: stretch !important;
-  }
-
-  .builder-toolbar > div {
-    margin-bottom: 10px;
-  }
 }
 </style>

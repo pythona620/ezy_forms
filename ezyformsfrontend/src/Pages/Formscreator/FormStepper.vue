@@ -391,8 +391,10 @@
                         <FrappeFormBuilder
                           ref="frappeBuilderRef"
                           :formName="formNameModel"
+                          :currentBlockIndex="currentBuilderTab"
                           @save="handleAdvancedBuilderSave"
                           @update="handleAdvancedBuilderUpdate"
+                          @addFields="handleAdvancedBuilderAddFields"
                         />
                       </div>
 
@@ -5457,6 +5459,85 @@ const handleAdvancedBuilderSave = (fields) => {
 const handleAdvancedBuilderUpdate = (fields) => {
   console.log('Advanced builder fields updated:', fields);
   // Real-time update, fields are managed by the component
+};
+
+// Handle adding fields from advanced builder to current block
+const handleAdvancedBuilderAddFields = (fields) => {
+  const currentBlockIndex = currentBuilderTab.value;
+  const currentBlock = blockArr[currentBlockIndex];
+
+  if (!currentBlock) {
+    showError('Please create a block first');
+    return;
+  }
+
+  // Initialize sections array if it doesn't exist
+  if (!currentBlock.sections || currentBlock.sections.length === 0) {
+    currentBlock.sections = [{
+      label: '',
+      parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
+      rows: []
+    }];
+  }
+
+  // Get the first section
+  const firstSection = currentBlock.sections[0];
+
+  // Initialize rows array if it doesn't exist
+  if (!firstSection.rows || firstSection.rows.length === 0) {
+    firstSection.rows = [{
+      label: `row_0_0_${currentBlockIndex}`,
+      columns: []
+    }];
+  }
+
+  // Get the first row
+  const firstRow = firstSection.rows[0];
+
+  // Initialize columns array if it doesn't exist
+  if (!firstRow.columns || firstRow.columns.length === 0) {
+    firstRow.columns = [{
+      label: '',
+      fields: []
+    }];
+  }
+
+  // Get the first column
+  const firstColumn = firstRow.columns[0];
+
+  // Initialize fields array if it doesn't exist
+  if (!firstColumn.fields) {
+    firstColumn.fields = [];
+  }
+
+  // Add all fields from advanced builder
+  fields.forEach(field => {
+    // Map Frappe field structure to FormStepper field structure
+    const formStepperField = {
+      label: field.label,
+      fieldname: field.fieldname,
+      fieldtype: field.fieldtype,
+      options: field.options || '',
+      reqd: field.reqd || 0,
+      unique: field.unique || 0,
+      description: field.description || '',
+      default: field.default || '',
+      read_only: field.read_only || 0,
+      hidden: field.hidden || 0,
+      depends_on: field.depends_on || '',
+      mandatory_depends_on: field.mandatory_depends_on || '',
+      read_only_depends_on: field.read_only_depends_on || '',
+      // Add any other properties that exist in the field
+      ...field
+    };
+
+    firstColumn.fields.push(formStepperField);
+  });
+
+  showSuccess(`Added ${fields.length} field(s) to ${currentBlockIndex === 0 ? 'Requestor' : `Approver ${currentBlockIndex}`} Block`);
+
+  // Switch back to simple mode to see the added fields
+  advancedBuilderMode.value = false;
 };
 
 // Create field object from Frappe fieldtype
