@@ -50,37 +50,60 @@
               <div class="px-2">
                 <div class="form-content stepsDiv">
                   <!-- Step 1: Form Info -->
-                  <div v-if="activeStep === 1">
-                    <div class="">
-                      <div class="stepperbackground ps-3 pe-3 py-2 m-0 d-flex justify-content-between align-items-center">
-                        <div>
-                          <h1 class="font-16 fw-bold m-0">Form Information</h1>
-                          <p class="font-12 text-muted m-0">Configure basic form settings and permissions</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                          <button v-if="!$route.query.id && !$route.query.preId" class="btn btn-outline-secondary font-13" type="button"
-                            @click="clearForm">
-                            <i class="bi bi-x-circle me-1"></i>Clear Form
-                          </button>
-                          <button class="btn btn-dark font-13 px-4" :disabled="isNextDisabled"
-                            v-if="activeStep < 5" @click="nextStep">
-                            Next <i class="bi bi-arrow-right ms-1"></i>
-                          </button>
-                        </div>
+                  <div v-if="activeStep === 1" class="form-info-builder">
+                    <!-- Top Toolbar -->
+                    <div class="zoho-toolbar">
+                      <div class="toolbar-left">
+                        <h1 class="font-14 fw-bold m-0">Form Information</h1>
+                      </div>
+
+                      <!-- Tab Navigation for Step 1 -->
+                      <div class="zoho-tabs">
+                        <button
+                          :class="['zoho-tab', { active: currentStep1Tab === 0 }]"
+                          @click="currentStep1Tab = 0">
+                          <i class="bi bi-file-earmark-text me-1"></i>
+                          Basic Details
+                        </button>
+                        <button
+                          :class="['zoho-tab', { active: currentStep1Tab === 1 }]"
+                          @click="currentStep1Tab = 1">
+                          <i class="bi bi-building me-1"></i>
+                          Permissions
+                        </button>
+                        <button
+                          :class="['zoho-tab', { active: currentStep1Tab === 2 }]"
+                          @click="currentStep1Tab = 2">
+                          <i class="bi bi-gear me-1"></i>
+                          Settings
+                        </button>
+                        <button
+                          v-if="filterObj.as_web_view===1 || route.query.preId"
+                          :class="['zoho-tab', { active: currentStep1Tab === 3 }]"
+                          @click="currentStep1Tab = 3">
+                          <i class="bi bi-sliders me-1"></i>
+                          Advanced
+                        </button>
+                      </div>
+
+                      <div class="toolbar-right">
+                        <button v-if="!$route.query.id && !$route.query.preId" class="btn btn-sm btn-outline-secondary me-2" type="button"
+                          @click="clearForm">
+                          <i class="bi bi-x-circle me-1"></i>Clear
+                        </button>
+                        <button class="btn btn-sm btn-dark" :disabled="isNextDisabled"
+                          v-if="activeStep < 5" @click="nextStep">
+                          Next <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
                       </div>
                     </div>
-                    <div class="container-fluid aboutFields p-0">
-                      <div class="row">
-                        <div class="col-12">
-                          <div class="p-4">
 
-  <!-- Form Details Card -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-light border-bottom">
-      <h6 class="m-0 fw-bold font-14"><i class="bi bi-file-earmark-text me-2"></i>Form Details</h6>
-    </div>
-    <div class="card-body p-4">
-      <div class="row g-4"> 
+                    <!-- Tab Content -->
+                    <div class="zoho-builder-container" style="padding: 2rem;">
+
+                      <!-- Tab 0: Basic Details -->
+                      <div v-show="currentStep1Tab === 0">
+                        <div class="row g-4"> 
       <!-- Form Name -->
       <div class="col-md-6">
         <div class="position-relative">
@@ -144,17 +167,12 @@
           Format examples: <code>YY-YY</code> → 24-25-0001, <code>YYYY</code> → 2025-0001, <code>ABC</code> → ABC-0001
         </small>
       </div>
-      </div>
-    </div>
-  </div>
+                        </div>
+                      </div>
 
-  <!-- Department & Permissions Card -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-light border-bottom">
-      <h6 class="m-0 fw-bold font-14"><i class="bi bi-building me-2"></i>Department & Permissions</h6>
-    </div>
-    <div class="card-body p-4">
-      <div class="row g-4">
+                      <!-- Tab 1: Permissions -->
+                      <div v-show="currentStep1Tab === 1">
+                        <div class="row g-4">
 
       <!-- Owner Of The Form -->
       <div class="col-md-6">
@@ -235,17 +253,12 @@
           <i class="bi bi-info-circle me-1"></i>Users from these departments can raise requests using this form
         </small>
       </div>
-      </div>
-    </div>
-  </div>
+                        </div>
+                      </div>
 
-  <!-- Form Settings Card -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-light border-bottom">
-      <h6 class="m-0 fw-bold font-14"><i class="bi bi-gear me-2"></i>Form Settings</h6>
-    </div>
-    <div class="card-body p-4">
-      <div class="row g-4">
+                      <!-- Tab 2: Settings -->
+                      <div v-show="currentStep1Tab === 2">
+                        <div class="row g-4">
 
       <!-- Form Type -->
       <div class="col-md-6">
@@ -312,17 +325,17 @@
           Auto-populates requestor and approver configurations from existing workflow
         </small>
       </div>
-      </div>
-    </div>
-  </div>
+                        </div>
+                      </div>
 
-  <!-- Public Form Settings (only if public) -->
-  <div class="card border-0 shadow-sm mb-4" v-if="filterObj.as_web_view===1">
-    <div class="card-header bg-light border-bottom">
-      <h6 class="m-0 fw-bold font-14"><i class="bi bi-qr-code me-2"></i>Public Form Settings</h6>
-    </div>
-    <div class="card-body p-4">
-      <div class="row g-4">
+                      <!-- Tab 3: Advanced Settings -->
+                      <div v-show="currentStep1Tab === 3">
+                        <div class="row g-4">
+
+                        <!-- Public Form Settings (only if public) -->
+                        <div class="col-12" v-if="filterObj.as_web_view===1">
+                          <h6 class="fw-bold font-14 mb-3"><i class="bi bi-qr-code me-2"></i>Public Form Settings</h6>
+                        </div>
 
       <!-- Form Submit Response -->
       <div class="col-md-6">
@@ -363,17 +376,11 @@
           <i class="bi bi-info-circle me-1"></i>Email addresses to notify on form submission (comma-separated)
         </small>
       </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Advanced Options (Link Feature) -->
-  <div class="card border-0 shadow-sm mb-4" v-if="route.query.preId">
-    <div class="card-header bg-light border-bottom">
-      <h6 class="m-0 fw-bold font-14"><i class="bi bi-link-45deg me-2"></i>Advanced Options</h6>
-    </div>
-    <div class="card-body p-4">
-      <div class="row g-4">
+      <!-- Linking Options (for predefined forms) -->
+      <div class="col-12" v-if="route.query.preId">
+        <h6 class="fw-bold font-14 mb-3 mt-4"><i class="bi bi-link-45deg me-2"></i>Form Linking</h6>
+      </div>
 
       <!-- Link to Form -->
       <div class="col-md-12">
@@ -427,13 +434,9 @@
           </ul>
         </div>
       </div>
-      </div>
-    </div>
-  </div>
-
-</div>
                         </div>
                       </div>
+
                     </div>
                   </div>
 
@@ -461,13 +464,6 @@
                       </div>
 
                       <div class="toolbar-right">
-                        <button
-                          :class="['btn btn-sm me-2', advancedBuilderMode ? 'btn-dark' : 'btn-outline-dark']"
-                          @click="advancedBuilderMode = !advancedBuilderMode"
-                          title="Toggle Advanced Field Builder">
-                          <i :class="advancedBuilderMode ? 'bi bi-tools' : 'bi bi-grid-3x3-gap'"></i>
-                          {{ advancedBuilderMode ? 'Advanced' : 'Simple' }}
-                        </button>
                         <button class="btn btn-sm btn-primary me-2" @click="addBlock">
                           <i class="bi bi-plus-lg me-1"></i>Add Block
                         </button>
@@ -482,25 +478,6 @@
 
                     <!-- Main Builder Area -->
                     <div class="zoho-builder-container">
-                      <!-- Advanced Mode: Frappe Form Builder -->
-                      <div v-if="advancedBuilderMode" class="advanced-builder-wrapper">
-                        <div class="alert alert-info mb-3">
-                          <i class="bi bi-info-circle me-2"></i>
-                          <strong>Advanced Mode:</strong> Use this mode to access all Frappe field types and advanced field properties.
-                          Fields created here will be added to the current block.
-                        </div>
-                        <FrappeFormBuilder
-                          ref="frappeBuilderRef"
-                          :formName="formNameModel"
-                          :currentBlockIndex="currentBuilderTab"
-                          @save="handleAdvancedBuilderSave"
-                          @update="handleAdvancedBuilderUpdate"
-                          @addFields="handleAdvancedBuilderAddFields"
-                        />
-                      </div>
-
-                      <!-- Simple Mode: Original Builder -->
-                      <template v-else>
                         <!-- Left: Field Library -->
                         <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
                           <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
@@ -1560,10 +1537,8 @@
                           <p class="text-muted small">Select a field to edit its properties</p>
                         </div>
                       </aside>
-                      </template>
-                      <!-- End Simple Mode -->
                     </div>
-                    <!-- End Zoho Builder Container -->
+                    <!-- End Builder Container -->
                   </div>
                   <!-- End Zoho Form Builder -->
 
@@ -2152,9 +2127,9 @@ const draggedFieldType = ref(null);
 const selectedFieldForEdit = ref(null);
 const frappeBuilderRef = ref(null); // Reference to FrappeFormBuilder component
 
-// Zoho-style Tab State
-const currentBuilderTab = ref(0);
-const advancedBuilderMode = ref(false); // Toggle between simple and advanced field builder
+// Tab State
+const currentStep1Tab = ref(0); // Tab index for Step 1
+const currentBuilderTab = ref(0); // Tab index for Step 2 block navigation
 const showFieldLibrary = ref(true); // Toggle field library visibility
 
 // Loading States
