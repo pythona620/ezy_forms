@@ -50,60 +50,37 @@
               <div class="px-2">
                 <div class="form-content stepsDiv">
                   <!-- Step 1: Form Info -->
-                  <div v-if="activeStep === 1" class="form-info-builder">
-                    <!-- Top Toolbar -->
-                    <div class="zoho-toolbar">
-                      <div class="toolbar-left">
-                        <h1 class="font-14 fw-bold m-0">Form Information</h1>
-                      </div>
-
-                      <!-- Tab Navigation for Step 1 -->
-                      <div class="zoho-tabs">
-                        <button
-                          :class="['zoho-tab', { active: currentStep1Tab === 0 }]"
-                          @click="currentStep1Tab = 0">
-                          <i class="bi bi-file-earmark-text me-1"></i>
-                          Basic Details
-                        </button>
-                        <button
-                          :class="['zoho-tab', { active: currentStep1Tab === 1 }]"
-                          @click="currentStep1Tab = 1">
-                          <i class="bi bi-building me-1"></i>
-                          Permissions
-                        </button>
-                        <button
-                          :class="['zoho-tab', { active: currentStep1Tab === 2 }]"
-                          @click="currentStep1Tab = 2">
-                          <i class="bi bi-gear me-1"></i>
-                          Settings
-                        </button>
-                        <button
-                          v-if="filterObj.as_web_view===1 || route.query.preId"
-                          :class="['zoho-tab', { active: currentStep1Tab === 3 }]"
-                          @click="currentStep1Tab = 3">
-                          <i class="bi bi-sliders me-1"></i>
-                          Advanced
-                        </button>
-                      </div>
-
-                      <div class="toolbar-right">
-                        <button v-if="!$route.query.id && !$route.query.preId" class="btn btn-sm btn-outline-secondary me-2" type="button"
-                          @click="clearForm">
-                          <i class="bi bi-x-circle me-1"></i>Clear
-                        </button>
-                        <button class="btn btn-sm btn-dark" :disabled="isNextDisabled"
-                          v-if="activeStep < 5" @click="nextStep">
-                          Next <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
+                  <div v-if="activeStep === 1">
+                    <div class="">
+                      <div class="stepperbackground ps-3 pe-3 py-2 m-0 d-flex justify-content-between align-items-center">
+                        <div>
+                          <h1 class="font-16 fw-bold m-0">Form Information</h1>
+                          <p class="font-12 text-muted m-0">Configure basic form settings and permissions</p>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                          <button v-if="!$route.query.id && !$route.query.preId" class="btn btn-outline-secondary font-13" type="button"
+                            @click="clearForm">
+                            <i class="bi bi-x-circle me-1"></i>Clear Form
+                          </button>
+                          <button class="btn btn-dark font-13 px-4" :disabled="isNextDisabled"
+                            v-if="activeStep < 5" @click="nextStep">
+                            Next <i class="bi bi-arrow-right ms-1"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
+                    <div class="container-fluid aboutFields p-0">
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="p-4">
 
-                    <!-- Tab Content -->
-                    <div class="zoho-builder-container" style="padding: 2rem;">
-
-                      <!-- Tab 0: Basic Details -->
-                      <div v-show="currentStep1Tab === 0">
-                        <div class="row g-4"> 
+  <!-- Form Details Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-file-earmark-text me-2"></i>Form Details</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4"> 
       <!-- Form Name -->
       <div class="col-md-6">
         <div class="position-relative">
@@ -167,12 +144,17 @@
           Format examples: <code>YY-YY</code> → 24-25-0001, <code>YYYY</code> → 2025-0001, <code>ABC</code> → ABC-0001
         </small>
       </div>
-                        </div>
-                      </div>
+      </div>
+    </div>
+  </div>
 
-                      <!-- Tab 1: Permissions -->
-                      <div v-show="currentStep1Tab === 1">
-                        <div class="row g-4">
+  <!-- Department & Permissions Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-building me-2"></i>Department & Permissions</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
 
       <!-- Owner Of The Form -->
       <div class="col-md-6">
@@ -253,12 +235,17 @@
           <i class="bi bi-info-circle me-1"></i>Users from these departments can raise requests using this form
         </small>
       </div>
-                        </div>
-                      </div>
+      </div>
+    </div>
+  </div>
 
-                      <!-- Tab 2: Settings -->
-                      <div v-show="currentStep1Tab === 2">
-                        <div class="row g-4">
+  <!-- Form Settings Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-gear me-2"></i>Form Settings</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
 
       <!-- Form Type -->
       <div class="col-md-6">
@@ -325,17 +312,17 @@
           Auto-populates requestor and approver configurations from existing workflow
         </small>
       </div>
-                        </div>
-                      </div>
+      </div>
+    </div>
+  </div>
 
-                      <!-- Tab 3: Advanced Settings -->
-                      <div v-show="currentStep1Tab === 3">
-                        <div class="row g-4">
-
-                        <!-- Public Form Settings (only if public) -->
-                        <div class="col-12" v-if="filterObj.as_web_view===1">
-                          <h6 class="fw-bold font-14 mb-3"><i class="bi bi-qr-code me-2"></i>Public Form Settings</h6>
-                        </div>
+  <!-- Public Form Settings (only if public) -->
+  <div class="card border-0 shadow-sm mb-4" v-if="filterObj.as_web_view===1">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-qr-code me-2"></i>Public Form Settings</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
 
       <!-- Form Submit Response -->
       <div class="col-md-6">
@@ -376,11 +363,17 @@
           <i class="bi bi-info-circle me-1"></i>Email addresses to notify on form submission (comma-separated)
         </small>
       </div>
-
-      <!-- Linking Options (for predefined forms) -->
-      <div class="col-12" v-if="route.query.preId">
-        <h6 class="fw-bold font-14 mb-3 mt-4"><i class="bi bi-link-45deg me-2"></i>Form Linking</h6>
       </div>
+    </div>
+  </div>
+
+  <!-- Advanced Options (Link Feature) -->
+  <div class="card border-0 shadow-sm mb-4" v-if="route.query.preId">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-link-45deg me-2"></i>Advanced Options</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
 
       <!-- Link to Form -->
       <div class="col-md-12">
@@ -434,9 +427,13 @@
           </ul>
         </div>
       </div>
+      </div>
+    </div>
+  </div>
+
+</div>
                         </div>
                       </div>
-
                     </div>
                   </div>
 
@@ -3711,54 +3708,258 @@ const childfield = [
   // }
 ];
 const fieldTypes = [
+  // === Data Entry Fields ===
   {
-    label: "Text",
+    label: "Data",
     type: "Data",
+    icon: "bi-input-cursor-text",
+    category: "Basic",
+    description: "Single line text input"
   },
   {
-    label: "Time",
-    type: "Time",
+    label: "Small Text",
+    type: "Small Text",
+    icon: "bi-textarea-t",
+    category: "Basic",
+    description: "Multi-line text, comma-separated values"
   },
   {
-    label: "Text Area",
+    label: "Text Editor",
     type: "Text",
+    icon: "bi-file-earmark-richtext",
+    category: "Basic",
+    description: "Rich text editor"
   },
+  {
+    label: "Code",
+    type: "Code",
+    icon: "bi-code-slash",
+    category: "Basic",
+    description: "Code editor with syntax highlighting"
+  },
+
+  // === Number Fields ===
+  {
+    label: "Int",
+    type: "Int",
+    icon: "bi-123",
+    category: "Number",
+    description: "Integer number"
+  },
+  {
+    label: "Float",
+    type: "Float",
+    icon: "bi-hash",
+    category: "Number",
+    description: "Decimal number"
+  },
+  {
+    label: "Currency",
+    type: "Currency",
+    icon: "bi-currency-dollar",
+    category: "Number",
+    description: "Money amount with currency"
+  },
+  {
+    label: "Percent",
+    type: "Percent",
+    icon: "bi-percent",
+    category: "Number",
+    description: "Percentage value"
+  },
+
+  // === Selection Fields ===
+  {
+    label: "Check",
+    type: "Check",
+    icon: "bi-check-square",
+    category: "Selection",
+    description: "Checkbox (Yes/No)"
+  },
+  {
+    label: "Select",
+    type: "Select",
+    icon: "bi-menu-button-wide",
+    category: "Selection",
+    description: "Dropdown selection"
+  },
+  {
+    label: "Table MultiSelect",
+    type: "Table MultiSelect",
+    icon: "bi-ui-checks-grid",
+    category: "Selection",
+    description: "Select multiple items"
+  },
+  {
+    label: "Link",
+    type: "Link",
+    icon: "bi-link-45deg",
+    category: "Selection",
+    description: "Link to another DocType"
+  },
+  {
+    label: "Dynamic Link",
+    type: "Dynamic Link",
+    icon: "bi-diagram-3",
+    category: "Selection",
+    description: "Dynamic link based on another field"
+  },
+  {
+    label: "Rating",
+    type: "Rating",
+    icon: "bi-star",
+    category: "Selection",
+    description: "Star rating field"
+  },
+
+  // === Date & Time Fields ===
   {
     label: "Date",
     type: "Date",
+    icon: "bi-calendar",
+    category: "DateTime",
+    description: "Date picker"
   },
   {
     label: "Datetime",
     type: "Datetime",
+    icon: "bi-calendar-event",
+    category: "DateTime",
+    description: "Date and time picker"
   },
+  {
+    label: "Time",
+    type: "Time",
+    icon: "bi-clock",
+    category: "DateTime",
+    description: "Time picker"
+  },
+  {
+    label: "Duration",
+    type: "Duration",
+    icon: "bi-hourglass-split",
+    category: "DateTime",
+    description: "Time duration (HH:MM:SS)"
+  },
+
+  // === File & Media Fields ===
   {
     label: "Attach",
     type: "Attach",
+    icon: "bi-paperclip",
+    category: "Media",
+    description: "File attachment"
   },
   {
-    label: "Phone",
-    type: "Data",
+    label: "Attach Image",
+    type: "Attach Image",
+    icon: "bi-image",
+    category: "Media",
+    description: "Image upload with preview"
   },
   {
-    label: "Check",
-    type: "Check",
-  },
-   {
-    label: "Number",
-    type: "Int",
-  },
- 
-  {
-    label: "Select",
-    type: "Select",
+    label: "Image",
+    type: "Image",
+    icon: "bi-file-image",
+    category: "Media",
+    description: "Display image from URL"
   },
   {
-    label: "Multi Select",
-    type: "Small Text",
+    label: "Signature",
+    type: "Signature",
+    icon: "bi-pen",
+    category: "Media",
+    description: "Digital signature pad"
+  },
+
+  // === Special Fields ===
+  {
+    label: "Password",
+    type: "Password",
+    icon: "bi-key",
+    category: "Special",
+    description: "Masked password input"
   },
   {
-    label: "Link",
-    type: "Link"
+    label: "Color",
+    type: "Color",
+    icon: "bi-palette",
+    category: "Special",
+    description: "Color picker"
+  },
+  {
+    label: "Barcode",
+    type: "Barcode",
+    icon: "bi-upc-scan",
+    category: "Special",
+    description: "Barcode/QR code display"
+  },
+  {
+    label: "Geolocation",
+    type: "Geolocation",
+    icon: "bi-geo-alt",
+    category: "Special",
+    description: "Map location picker"
+  },
+  {
+    label: "HTML",
+    type: "HTML",
+    icon: "bi-filetype-html",
+    category: "Special",
+    description: "Custom HTML content"
+  },
+  {
+    label: "JSON",
+    type: "JSON",
+    icon: "bi-braces",
+    category: "Special",
+    description: "JSON data editor"
+  },
+  {
+    label: "Read Only",
+    type: "Read Only",
+    icon: "bi-eye",
+    category: "Special",
+    description: "Display-only text"
+  },
+
+  // === Table Field ===
+  {
+    label: "Table",
+    type: "Table",
+    icon: "bi-table",
+    category: "Table",
+    description: "Child table with rows"
+  },
+
+  // === Layout Fields ===
+  {
+    label: "Column Break",
+    type: "Column Break",
+    icon: "bi-layout-three-columns",
+    category: "Layout",
+    description: "Start new column"
+  },
+  {
+    label: "Section Break",
+    type: "Section Break",
+    icon: "bi-layout-sidebar",
+    category: "Layout",
+    description: "Start new section"
+  },
+  {
+    label: "Heading",
+    type: "Heading",
+    icon: "bi-type-h1",
+    category: "Layout",
+    description: "Section heading text"
+  },
+  {
+    label: "Button",
+    type: "Button",
+    icon: "bi-square",
+    category: "Layout",
+    description: "Custom action button"
   }
   // {
   //     label: "Signature",
