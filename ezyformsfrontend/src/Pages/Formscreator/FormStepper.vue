@@ -437,44 +437,45 @@
                     </div>
                   </div>
 
-                  <!-- Step 2: Form Fields (Form Builder) -->
-                  <div v-if="activeStep === 2" class="zoho-form-builder">
-                    <!-- Top Toolbar -->
-                    <div class="zoho-toolbar">
-                      <div class="toolbar-left">
-                        <button @click="prevStep(1)" class="btn btn-sm btn-light">
-                          <i class="bi bi-chevron-left"></i> Back
+                  <!-- Step 2: Form Fields (Frappe-Style Builder) -->
+                  <div v-if="activeStep === 2" class="frappe-form-builder">
+                    <!-- Top Navigation Bar -->
+                    <div class="frappe-nav-bar">
+                      <div class="nav-left">
+                        <button @click="prevStep(1)" class="btn btn-sm btn-link text-dark">
+                          <i class="bi bi-chevron-left me-1"></i>Back
                         </button>
                       </div>
 
-                      <!-- Tab Navigation -->
-                      <div class="zoho-tabs">
-                        <button
-                          v-for="(block, index) in blockArr"
-                          :key="index"
-                          :class="['zoho-tab', { active: currentBuilderTab === index }]"
-                          @click="currentBuilderTab = index">
-                          <i class="bi bi-file-earmark-text me-1"></i>
-                          {{ index === 0 ? 'Requestor Block' : `Approver Block ${index}` }}
-                          <i v-if="blockArr.length > 1" class="bi bi-x-lg ms-2" @click.stop="removeBlock(index)"></i>
-                        </button>
+                      <div class="nav-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button
+                            v-for="(block, index) in blockArr"
+                            :key="index"
+                            type="button"
+                            :class="['btn', currentBuilderTab === index ? 'btn-primary' : 'btn-outline-secondary']"
+                            @click="currentBuilderTab = index">
+                            {{ index === 0 ? 'Requestor' : `Approver ${index}` }}
+                            <i v-if="blockArr.length > 1" class="bi bi-x ms-2" @click.stop="removeBlock(index)"></i>
+                          </button>
+                        </div>
                       </div>
 
-                      <div class="toolbar-right">
-                        <button class="btn btn-sm btn-primary me-2" @click="addBlock">
+                      <div class="nav-right">
+                        <button class="btn btn-sm btn-outline-primary me-2" @click="addBlock">
                           <i class="bi bi-plus-lg me-1"></i>Add Block
                         </button>
-                        <button v-if="isPreviewVisible" class="btn btn-sm btn-light me-2" @click="previewForm">
+                        <button v-if="isPreviewVisible" class="btn btn-sm btn-outline-secondary me-2" @click="previewForm">
                           <i class="bi bi-eye me-1"></i>Preview
                         </button>
-                        <button v-if="blockArr.length" class="btn btn-sm btn-dark" @click="saveFormData('save')">
-                          {{ paramId !== "new" ? "Update Form" : "Create Form" }}
+                        <button v-if="blockArr.length" class="btn btn-sm btn-primary" @click="saveFormData('save')">
+                          <i class="bi bi-save me-1"></i>{{ paramId !== "new" ? "Update" : "Save" }}
                         </button>
                       </div>
                     </div>
 
-                    <!-- Main Builder Area -->
-                    <div class="zoho-builder-container">
+                    <!-- Three-Panel Layout (Frappe Style) -->
+                    <div class="frappe-builder-container">
                         <!-- Left: Field Library -->
                         <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
                           <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
