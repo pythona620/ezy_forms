@@ -52,40 +52,58 @@
                   <!-- Step 1: Form Info -->
                   <div v-if="activeStep === 1">
                     <div class="">
-                      <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                        <div></div>
-                        <h1 class="font-14 fw-bold m-0">Form Info</h1>
+                      <div class="stepperbackground ps-3 pe-3 py-2 m-0 d-flex justify-content-between align-items-center">
                         <div>
-                          <button v-if="!$route.query.id && !$route.query.preId" class=" btn btn-light font-12 mx-2" type="button"
-                            @click="clearForm">Clear
-                            Form</button>
-
-                          <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                            v-if="activeStep < 5" @click="nextStep" />
+                          <h1 class="font-16 fw-bold m-0">Form Information</h1>
+                          <p class="font-12 text-muted m-0">Configure basic form settings and permissions</p>
                         </div>
-                        <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
-                        <!-- :disabled="isNextDisabled" -->
+                        <div class="d-flex gap-2 align-items-center">
+                          <button v-if="!$route.query.id && !$route.query.preId" class="btn btn-outline-secondary font-13" type="button"
+                            @click="clearForm">
+                            <i class="bi bi-x-circle me-1"></i>Clear Form
+                          </button>
+                          <button class="btn btn-dark font-13 px-4" :disabled="isNextDisabled"
+                            v-if="activeStep < 5" @click="nextStep">
+                            Next <i class="bi bi-arrow-right ms-1"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div class="container-fluid aboutFields p-0">
                       <div class="row">
-                        <div class="col-sm-none col-md-4"></div>
-                        <div class="col-sm-12 col-md-12 mt-lg-3 p-lg-4">
-  <div class="container-fluid">
-    <div class="row g-3"> 
+                        <div class="col-12">
+                          <div class="p-4">
+
+  <!-- Form Details Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-file-earmark-text me-2"></i>Form Details</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4"> 
       <!-- Form Name -->
       <div class="col-md-6">
-        <div class=" position-relative">
-            <span v-if="route.query.preId" class=" font-12 position-absolute PredefinedLabel">Predefined
-              <i class="bi bi-check2-circle"></i></span>
-                <FormFields
-                  :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
-                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                  id="formName" validationStar="true" placeholder="Untitled Form"
-                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
-                  <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
-                  {{ formNameError }}</span>
-                  </div>
+        <div class="position-relative">
+          <span v-if="route.query.preId" class="badge bg-success position-absolute" style="top: -8px; right: 10px; z-index: 10;">
+            <i class="bi bi-check2-circle me-1"></i>Predefined
+          </span>
+          <FormFields
+            :disabled="(selectedData.formId && selectedData.formId.length > 0 || route.query.form_name) && isDuplicate!=='1'"
+            labeltext="Form Name"
+            class="formHeight"
+            type="text"
+            tag="input"
+            name="Value"
+            id="formName"
+            validationStar="true"
+            placeholder="Enter form name (e.g., Leave Request)"
+            @change="(event) => handleInputChange(event, 'form_name')"
+            v-model="formNameModel"
+          />
+          <span v-if="formNameError" class="text-danger font-12 ms-1">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ formNameError }}
+          </span>
+        </div>
       </div>
 
       <!-- Form Short Code -->
@@ -99,32 +117,49 @@
           name="Value"
           id="formShortCode"
           validationStar="true"
-          placeholder="Untitled Form"
+          placeholder="Enter short code (e.g., LR, PR)"
           @change="(event) => handleInputChange(event, 'form_short_name')"
           v-model="filterObj.form_short_name"
         />
-        <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">{{ formShortNameError }}</span>
+        <span v-if="formShortNameError" class="text-danger font-12 ms-1">
+          <i class="bi bi-exclamation-circle me-1"></i>{{ formShortNameError }}
+        </span>
       </div>
 
       <!-- Form Naming Series -->
       <div class="col-md-6">
         <FormFields
           :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
-          labeltext="Form Naming series"
+          labeltext="Form Naming Series"
           class="formHeight"
           type="text"
           tag="input"
           name="Value"
           id="formNameSeries"
-          placeholder="Form Naming series"
+          placeholder="e.g., YY-YY, YYYY, or ABC"
           v-model="filterObj.series"
         />
-        <small class="text-muted" style="font-size:12px"> Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or <code> ABC-0001</code> respectively. </small>
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>
+          Format examples: <code>YY-YY</code> → 24-25-0001, <code>YYYY</code> → 2025-0001, <code>ABC</code> → ABC-0001
+        </small>
       </div>
-      
+      </div>
+    </div>
+  </div>
+
+  <!-- Department & Permissions Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-building me-2"></i>Department & Permissions</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+
       <!-- Owner Of The Form -->
       <div class="col-md-6">
-        <label>Owner Of The Form
+        <label class="form-label font-13 fw-medium">
+          Owner Department
           <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span>
         </label>
         <Multiselect
@@ -133,33 +168,41 @@
           :options="OwnerOfTheFormData"
           @change="OwnerOftheForm"
           v-model="filterObj.owner_of_the_form"
-          placeholder="Select Department"
+          placeholder="Select owning department"
           :multiple="false"
-          class="font-11 multiselect"
+          class="font-12 multiselect"
           :searchable="true"
           openDirection="bottom"
         />
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Department that owns and manages this form
+        </small>
       </div>
 
       <!-- Form Category -->
       <div class="col-md-6">
-        <label>Form Category
+        <label class="form-label font-13 fw-medium">
+          Form Category
           <span v-if="!filterObj.form_category" class="text-danger">*</span>
         </label>
         <Multiselect
           :disabled="(selectedData.formId && selectedData.formId.length > 0) && isDuplicate!=='1'"
           :options="departments"
           v-model="filterObj.form_category"
-          placeholder="Select Category"
+          placeholder="Select a category"
           :multiple="false"
           :searchable="true"
-          class="font-11 multiselect"
+          class="font-12 multiselect"
         />
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Categorize this form for better organization
+        </small>
       </div>
 
       <!-- Accessible to department -->
-      <div class="col-md-6">
-        <label>Accessible to Department
+      <div class="col-md-12">
+        <label class="form-label font-13 fw-medium">
+          Accessible to Departments
           <span v-if="!filterObj.accessible_departments.length" class="text-danger">*</span>
         </label>
         <VueMultiselect
@@ -169,8 +212,8 @@
           :close-on-select="false"
           :clear-on-select="false"
           :preserve-search="true"
-          placeholder="Select Department"
-          class="font-11"
+          placeholder="Select departments that can access this form"
+          class="font-12"
           @select="handleSelect"
           @remove="handleRemove"
           openDirection="bottom"
@@ -183,110 +226,160 @@
             </div>
           </template>
           <template #selection="{ values, isOpen }">
-            <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+            <span class="multiselect__single font-11" v-if="values.length" v-show="!isOpen">
               {{ formattedSelection }}
             </span>
           </template>
         </VueMultiselect>
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Users from these departments can raise requests using this form
+        </small>
       </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Settings Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-gear me-2"></i>Form Settings</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
 
       <!-- Form Type -->
       <div class="col-md-6">
-        <label>Form Type</label>
+        <label class="form-label font-13 fw-medium">Form Type</label>
         <Multiselect
           :options="formTypeOptions"
           v-model="selectedFormType"
-          placeholder="Select Form Type"
+          placeholder="Select form visibility"
           :multiple="false"
           :searchable="true"
           label="label"
           track-by="value"
           :reduce="option => option.value"
-          class="font-11 multiselect"
-          openDirection="top"
+          class="font-12 multiselect"
+          openDirection="bottom"
         />
-        <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>
+          <span v-if="selectedFormType === 1" class="text-success">Public forms are accessible via QR code without login</span>
+          <span v-else>Private forms require authentication to access</span>
+        </small>
       </div>
 
       <!-- Has Workflow -->
       <div class="col-md-6">
-        <label>Has Workflow <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <label class="form-label font-13 fw-medium">
+          Enable Workflow
+          <span class="fw-normal font-11 text-secondary">(optional)</span>
+        </label>
         <Multiselect
           :options="['Yes', 'No']"
           v-model="filterObj.has_workflow"
-          placeholder="Select"
+          placeholder="Enable approval workflow?"
           :multiple="false"
-          class="font-11 multiselect"
+          class="font-12 multiselect"
           :searchable="true"
         />
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Enable if this form requires multi-level approvals
+        </small>
       </div>
 
       <!-- WF Road Map Selection -->
       <div class="col-md-6" v-if="filterObj.has_workflow === 'Yes'">
-        <label>Use Existing Workflow <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <label class="form-label font-13 fw-medium">
+          Use Existing Workflow
+          <span class="fw-normal font-11 text-secondary">(optional)</span>
+        </label>
         <Multiselect
           @open="fetchWFRoadMaps"
           :options="wfRoadMapOptions"
           v-model="selectedWFRoadMap"
-          placeholder="Select WF Road Map"
+          placeholder="Select a workflow roadmap"
           :multiple="false"
-          class="font-11 multiselect"
+          class="font-12 multiselect"
           :searchable="true"
           label="display_name"
           track-by="roadmap_title"
           @select="handleWFRoadMapSelect"
           openDirection="bottom"
         />
-        <small class="text-muted font-12 ms-2">
+        <small class="text-muted font-11 ms-1">
           <i class="bi bi-info-circle me-1"></i>
-          Select to auto-populate requestor and approver configurations
+          Auto-populates requestor and approver configurations from existing workflow
+        </small>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Public Form Settings (only if public) -->
+  <div class="card border-0 shadow-sm mb-4" v-if="filterObj.as_web_view===1">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-qr-code me-2"></i>Public Form Settings</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+
+      <!-- Form Submit Response -->
+      <div class="col-md-6">
+        <label class="form-label font-13 fw-medium">
+          Submit Response Message
+          <span class="fw-normal font-11 text-secondary">(optional)</span>
+        </label>
+        <FormFields
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formSubmitResponse"
+          placeholder="e.g., Thank you! Your request has been submitted."
+          v-model="filterObj.public_form_response"
+        />
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Message shown to users after successful form submission
         </small>
       </div>
 
-      <!-- Form Submit Response -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-      <label>Form Submit Response <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-      <FormFields
-        class="formHeight mt-2"
-        type="text"
-        tag="input"
-        name="Value"
-        id="formNameSeries"
-        placeholder="Form Submit Response"
-        v-model="filterObj.public_form_response"
-        />
-      </div>
- 
       <!-- Form Submit Send Mail -->
-      <div class="col-md-6" v-if="filterObj.as_web_view===1">
-        <label>Submit Notification Email <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-            <FormFields
-              class="formHeight mt-2"
-              type="text"
-              tag="input"
-              name="Value"
-              id="formNameSeries"
-              placeholder="Form Submit mail"
-              v-model="filterObj.mail_id"
-            />
-        <small class="text-muted font-12 ms-2">Note : If multiple Emails, separate with commas (,).</small>
-        <!-- <Multiselect
-          @open="EmployeeData"
-          :options="EmpMailsList"
+      <div class="col-md-6">
+        <label class="form-label font-13 fw-medium">
+          Notification Email(s)
+          <span class="fw-normal font-11 text-secondary">(optional)</span>
+        </label>
+        <FormFields
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formSubmitEmail"
+          placeholder="email1@example.com, email2@example.com"
           v-model="filterObj.mail_id"
-          placeholder="Select Mail Id"
-          :multiple="false"
-          class="font-11 multiselect"
-          :searchable="true"
-          openDirection="top"
-          /> -->
+        />
+        <small class="text-muted font-11 ms-1">
+          <i class="bi bi-info-circle me-1"></i>Email addresses to notify on form submission (comma-separated)
+        </small>
       </div>
+      </div>
+    </div>
+  </div>
 
-      <!-- Linked Checkbox and Linked Form -->
-      <div class="col-md-6" v-if="route.query.preId">
-        <div class="form-check d-flex align-items-center p-0 pe-3">
+  <!-- Advanced Options (Link Feature) -->
+  <div class="card border-0 shadow-sm mb-4" v-if="route.query.preId">
+    <div class="card-header bg-light border-bottom">
+      <h6 class="m-0 fw-bold font-14"><i class="bi bi-link-45deg me-2"></i>Advanced Options</h6>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+
+      <!-- Link to Form -->
+      <div class="col-md-12">
+        <div class="form-check">
           <input
-            class="form-check-input linketoCheck p-1"
+            class="form-check-input"
             :disabled="filterObj.is_predefined_doctype == 1"
             type="checkbox"
             id="is_linked"
@@ -294,44 +387,52 @@
             :true-value="1"
             :false-value="0"
           />
-          <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
-            Link
+          <label class="form-check-label font-13" for="is_linked">
+            Link this form to another form
           </label>
         </div>
+        <small class="text-muted font-11 ms-4">
+          <i class="bi bi-info-circle me-1"></i>Create a relationship between this form and an existing form
+        </small>
       </div>
 
-      <div class="col-md-6" v-if="filterObj.is_linked">
-        <label for="standardFormInput">Form</label>
-        <input
-          type="text"
-          class="form-control standardFormInput"
-          id="standardFormInput"
-          :disabled="filterObj.is_predefined_doctype == 1"
-          v-model="filterObj.is_linked_form"
-          placeholder="Type to search Form Name..."
-          @input="searchForm"
-          @focus="showSuggestions = true"
-          @blur="hideSuggestions"
-        />
-        <ul
-          v-if="showSuggestions && filteredForms.length"
-          class="list-group position-absolute w-100 z-3 formslist"
-        >
-          <li
-            class="list-group-item formlistitem"
-            v-for="(item, index) in filteredForms"
-            :key="index"
-            @mousedown.prevent="selectForm(item.name)"
+      <div class="col-md-12" v-if="filterObj.is_linked">
+        <label class="form-label font-13 fw-medium">Linked Form</label>
+        <div class="position-relative">
+          <input
+            type="text"
+            class="form-control font-13"
+            id="standardFormInput"
+            :disabled="filterObj.is_predefined_doctype == 1"
+            v-model="filterObj.is_linked_form"
+            placeholder="Type to search and select a form..."
+            @input="searchForm"
+            @focus="showSuggestions = true"
+            @blur="hideSuggestions"
+          />
+          <ul
+            v-if="showSuggestions && filteredForms.length"
+            class="list-group position-absolute w-100 z-3"
+            style="max-height: 200px; overflow-y: auto;"
           >
-            {{ item.name }}
-          </li>
-        </ul>
+            <li
+              class="list-group-item list-group-item-action font-12"
+              v-for="(item, index) in filteredForms"
+              :key="index"
+              @mousedown.prevent="selectForm(item.name)"
+              style="cursor: pointer;"
+            >
+              {{ item.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
       </div>
     </div>
   </div>
-</div>
 
-                        <div class="col-sm-none col-md-4"></div>
+</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2056,6 +2157,12 @@ const currentBuilderTab = ref(0);
 const advancedBuilderMode = ref(false); // Toggle between simple and advanced field builder
 const showFieldLibrary = ref(true); // Toggle field library visibility
 
+// Loading States
+const isLoadingDepartments = ref(false);
+const isLoadingCategories = ref(false);
+const isLoadingFormData = ref(false);
+const isLoadingWorkflows = ref(false);
+
 // WF Road Map State
 const wfRoadMapOptions = ref([]);
 const selectedWFRoadMap = ref(null);
@@ -2839,7 +2946,6 @@ onMounted(() => {
 
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
-    OwnerOftheForm();
   }
   sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
@@ -4204,15 +4310,26 @@ function cancelForm() {
 }
 
 function clearForm() {
+  // Clear all Step 1 form fields
   filterObj.value.form_name = ''
   filterObj.value.form_short_name = ''
   filterObj.value.owner_of_the_form = ''
-  filterObj.value.business_unit = ''
   filterObj.value.form_category = ''
   filterObj.value.accessible_departments = []
+  filterObj.value.series = ''
+  filterObj.value.has_workflow = ''
+  filterObj.value.is_linked = 0
+  filterObj.value.is_linked_form = ''
+  filterObj.value.mail_id = ''
+  filterObj.value.public_form_response = ''
 
+  // Clear validation errors
+  formNameError.value = ''
+  formShortNameError.value = ''
 
-
+  // Clear dependent dropdowns
+  departments.value = []
+  selectedWFRoadMap.value = null
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
@@ -4250,12 +4367,13 @@ const prevStep = () => {
 const returTables = ref([])
 // Get form by ID
 function getFormData() {
-   const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: "none",
-        doctype:doctypes.EzyFormDefinitions,
-        doc_id:paramId.value,
-    };
+  isLoadingFormData.value = true;
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "none",
+    doctype: doctypes.EzyFormDefinitions,
+    doc_id: paramId.value,
+  };
   axiosInstance
     .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
@@ -4266,8 +4384,10 @@ function getFormData() {
         //     id: res_data.name,
         //   }
         // })
-        if (res_data.accessible_departments) {
-          res_data.accessible_departments = res_data.accessible_departments.split(",");
+        if (res_data.accessible_departments && typeof res_data.accessible_departments === 'string') {
+          res_data.accessible_departments = res_data.accessible_departments.split(",").filter(dept => dept.trim() !== '');
+        } else {
+          res_data.accessible_departments = [];
         }
         filterObj.value = {
           ...filterObj.value,
@@ -4275,6 +4395,11 @@ function getFormData() {
           owner_of_the_form:
             res_data.owner_of_the_form || filterObj.value.owner_of_the_form || "",
         };
+
+        // Load categories after owner is set
+        if (filterObj.value.owner_of_the_form) {
+          OwnerOftheForm(filterObj.value.owner_of_the_form);
+        }
 
         const parsedFormJson = JSON.parse(res.message.data?.form_json);
         wrkAfterGetData.value = parsedFormJson.workflow;
@@ -4308,7 +4433,11 @@ function getFormData() {
       }
     })
     .catch((error) => {
-      console.error("Error fetching  data:", error);
+      console.error("Error fetching data:", error);
+      showError("Failed to load form data. Please try again.");
+    })
+    .finally(() => {
+      isLoadingFormData.value = false;
     });
 }
 
@@ -4348,6 +4477,7 @@ function deptData() {
     doctype:doctypes.departments,
   };
 
+  isLoadingDepartments.value = true;
   axiosInstance
     .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
@@ -4359,6 +4489,10 @@ function deptData() {
     })
     .catch((error) => {
       console.error("Error fetching department data:", error);
+      showError("Failed to load departments. Please refresh the page.");
+    })
+    .finally(() => {
+      isLoadingDepartments.value = false;
     });
 }
 
@@ -4401,6 +4535,7 @@ function OwnerOftheForm(newVal) {
 }
 
 function categoriesData(newVal) {
+  isLoadingCategories.value = true;
   const queryParams = {
     fields: JSON.stringify(["ezy_departments_items"]),
     doctype:doctypes.departments,
@@ -4415,6 +4550,10 @@ function categoriesData(newVal) {
     })
     .catch((error) => {
       console.error("Error fetching categories data:", error);
+      showError("Failed to load form categories. Please try again.");
+    })
+    .finally(() => {
+      isLoadingCategories.value = false;
     });
 }
 
