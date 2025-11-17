@@ -129,7 +129,15 @@ export const apis = {
   getDocfieldMeta: domain + `/method/ezy_forms.api.v1.form_builder.get_docfield_meta`,
   validateFieldname: domain + `/method/ezy_forms.api.v1.form_builder.validate_fieldname`,
   getLinkOptions: domain + `/method/ezy_forms.api.v1.form_builder.get_link_options`,
-  getChildTableOptions: domain + `/method/ezy_forms.api.v1.form_builder.get_child_table_options`
+  getChildTableOptions: domain + `/method/ezy_forms.api.v1.form_builder.get_child_table_options`,
+
+  // New Dashboard APIs
+  getFormStatusOverview: domain + `/method/ezy_forms.api.v1.new_dashboard.get_form_status_overview`,
+  getDepartmentWiseAnalysis: domain + `/method/ezy_forms.api.v1.new_dashboard.get_department_wise_analysis`,
+  getFormValueTracking: domain + `/method/ezy_forms.api.v1.new_dashboard.get_form_value_tracking`,
+  getRecurringFormTrends: domain + `/method/ezy_forms.api.v1.new_dashboard.get_recurring_form_trends`,
+  getDashboardFilters: domain + `/method/ezy_forms.api.v1.new_dashboard.get_dashboard_filters`,
+  getConsolidatedDashboard: domain + `/method/ezy_forms.api.v1.new_dashboard.get_consolidated_dashboard`
 };
 
 // export const tokens = {
