@@ -476,1069 +476,250 @@
 
                     <!-- Three-Panel Layout (Frappe Style) -->
                     <div class="frappe-builder-container">
-                        <!-- Left: Field Library -->
-                        <aside :class="['zoho-field-library', { 'collapsed': !showFieldLibrary }]">
-                          <div class="library-header" @click="showFieldLibrary = !showFieldLibrary">
-                            <div class="d-flex align-items-center justify-content-between w-100">
-                              <h6 class="mb-0 font-14 fw-bold">
-                                <i class="bi bi-grid-3x3-gap me-2"></i>
-                                {{ showFieldLibrary ? 'Field Types' : 'Fields' }}
-                              </h6>
-                              <button class="btn btn-sm btn-link p-0 text-dark">
-                                <i :class="showFieldLibrary ? 'bi bi-chevron-left' : 'bi bi-chevron-right'"></i>
-                              </button>
-                            </div>
-                          </div>
 
-                          <div v-if="showFieldLibrary" class="library-content">
-                            <SimpleFieldLibrary
-                              :fields="fieldTypes"
-                              @field-add="handleFieldAddFromLibrary"
-                              @field-dragstart="handleFieldDragStart"
-                              @field-dragend="handleFieldDragEnd"
-                            />
-                          </div>
-                        </aside>
-
-                        <!-- Center: Form Canvas -->
-                      <div class="zoho-form-canvas">
-                        <div class="canvas-inner" ref="mainBlockRef">
-                          <!-- Current Block Content -->
-                        <!-- Here is block level starts -->
-                        <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex" v-show="blockIndex === currentBuilderTab">
-                          <div class="requestandAppHeader">
-                            <div class="d-flex justify-content-between align-items-center">
-                              <div class=" ">
-                                <h6 class="ps-2 mb-0 fw-bolder font-14 blockTitle">
-                                  {{
-                                    blockIndex === 0
-                                      ? "Requestor Block"
-                                      : `Approver
-                                  Block ${blockIndex}
-                                  `
-                                  }}
-                                  <!-- ${blockIndex++} -->
-                                </h6>
-                                  <div class="text-center ms-2 mt-1">
-                                    <div v-if="blockIndex !== 0 && getWorkflowSetup(blockIndex).view_only_reportee || getWorkflowSetup(blockIndex).all_approvals_required || getWorkflowSetup(blockIndex).requester_as_a_approver" class="font-12 d-flex align-items-center">
-                                      <!-- <span class="">
-                                        <i class="bi bi-circle"></i>
-                                      </span> -->
-                                      <span class="font-12  approver_type_div">
-
-
-                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'Reporting Manager only' : ''}}
-                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All of the selected approvers' : ''}}
-                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Approval by Requestor' : ''}}
-                                      </span>
-                                      
-                                      
-                                      <span>
-                                        <span class="ms-1">
-                                          
-                                          on rejection escalating to 
-                                        </span>
-                                          <span class="font-12 fw-bold">
-                                        {{ getWorkflowSetup(blockIndex).on_rejection ? `Level ${getWorkflowSetup(blockIndex).on_rejection}` : 'Requestor' }}
-                                          </span>
-
-                                      </span>
-                                      <span class="font-12 text-danger ms-1">
-                                        {{ getWorkflowSetup(blockIndex).all_approvals_required === 1 ? '' : '(Skipping multi approval)' }}
-                                        
-                                      </span>
-
-
-                                      
-                                    </div>
-
-                                  </div>
-                              </div>
-                              <div class="d-flex align-items-center">
-                                <div v-if="paramId && workflowSetup.length" class="role-container">
-                                  <label class="role-text d-flex align-items-center"
-                                    v-if="getWorkflowSetup(blockIndex)">
-                                    <span class="role-label fw-bold">
-                                      {{
-                                        getWorkflowSetup(blockIndex).roles.length > 0
-                                          ? blockIndex === 0
-                                            ? "Requestor Roles: "
-                                            : "Approver Roles: "
-                                          : ""
-                                      }}
-                                    </span>
-                                    <span class="role-names text-primary">
-                                      {{
-                                        getWorkflowSetup(blockIndex)
-                                          .roles.slice(0, 2)
-                                          .join(", ")
-                                      }}
-                                    </span>
-                                    <span data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
-                                      aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)"
-                                      v-if="getWorkflowSetup(blockIndex).roles.length > 2" class="more-count badge bg-primary ms-2" style="cursor: pointer;">
-                                      +{{ getWorkflowSetup(blockIndex).roles.length - 2 }}
-                                      more
-                                    </span>
-                                  </label>
-                                </div>
-
-                                <button v-if="
-                                  canShowDesignationButton(blockIndex) &&
-                                  paramId != undefined &&
-                                  paramId != null &&
-                                  paramId != 'new' &&
-                                  getWorkflowSetup(blockIndex).roles.length === 0
-                                " class="btn btn-light designationBtn d-flex align-items-center" type="button"
-                                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
-                                  aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)">
-                                  <img src="../../assets/oui_app-users-roles.svg" alt="Add" class="me-1" />
-                                  {{ blockIndex === 0 ? 'Add Requestors' :'Add Approvers' }}
-                                  
-                                </button>
-
-                                <!-- Edit Designation Button (only when roles are present for that block) -->
-                                <button v-if="
-                                  paramId != undefined &&
-                                  paramId != null &&
-                                  paramId != 'new' &&
-                                  getWorkflowSetup(blockIndex).roles.length > 0
-                                " class="btn btn-light designationBtn d-flex align-items-center" type="button"
-                                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
-                                  aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)">
-                                  <i class="bi bi-pencil font-14"></i>
-                                </button>
-                                <button class="btn btn-light bg-transparent border-0 font-13 deleteBlock"
-                                  @click="removeBlock(blockIndex)">
-                                  <i class="bi bi-trash me-1"></i> Delete Block
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
-                                                            @dragover="handleDragOver($event)"
-                                                            @drop="handleDrop($event, sectionIndex, 'section', blockIndex)" -->
-                          <div class=" pt-0 section_block">
-                            <div v-for="(section, sectionIndex) in block.sections" :key="'section-' + sectionIndex"
-                              class="dynamicSection mt-0 section">
-                              <section class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex flex-column">
-                                  <input v-model="section.label" type="text" :class="[
-                                    'border-less-input',
-                                    'font-14',
-                                    { 'italic-style': !section.label },
-                                    { 'fw-medium': section.label },
-                                  ]" @change="handleFieldChange(blockIndex, sectionIndex)" @input="handleFieldChange(blockIndex, sectionIndex)"
-                                    placeholder="Untitled section" />
-                                  <small v-if="section.errorMsg" class="text-danger ps-3 font-10">
-                                    {{ section.errorMsg }}
-                                  </small>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                  <!-- Button trigger modal -->
-                                  <!-- <button type="button" class="btn btn-white font-12" data-bs-toggle="modal"
-                                    data-bs-target="#childtable">
-                                    Add Table
-                                  </button> -->
-
-                                  <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                    @click="removeSection(blockIndex, sectionIndex)">
-                                    <i class="bi bi-trash me-1"></i> Delete Section
-                                  </button>
-                                </div>
-                              </section>
-                              <!-- draggable="true" @dragstart="handleDragStart($event, rowIndex, 'row', blockIndex, sectionIndex)"
-                                                                    @dragover="handleDragOver"
-                                                                    @drop="handleDrop($event, rowIndex, 'row', blockIndex, sectionIndex)" -->
-                              <div class="container-fluid">
-                                <section class="row dynamicRow row-container" v-for="(row, rowIndex) in section.rows"
-                                  :key="'row-' + rowIndex">
-                                  <div class="d-flex justify-content-between align-items-center">
-                                    <label class="rownames m-0">{{
-                                      getRowSuffix(rowIndex)
-                                    }}</label>
-                                    <div>
-                                      <button v-if="row.columns.length < 3"
-                                        class="btn btn-light bg-transparent border-0 p-1 font-12" @click="
-                                          addColumn(blockIndex, sectionIndex, rowIndex)
-                                          ">
-                                        <i class="bi bi-plus font-14"></i> Add Column
-                                      </button>
-                                      <!-- <button class="btn btn-light bg-transparent border-0 font-12 deleteRow" @click="
-                                        removeRow(blockIndex, sectionIndex, rowIndex)
-                                        ">
-                                        <i class="ri-subtract-line"></i> Delete row
-                                      </button> -->
-                                    </div>
-                                  </div>
-                                  <!-- draggable="true"
-                                                                                @dragstart="handleDragStart($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)"
-                                                                                @dragover="handleDragOver"
-                                                                                @drop="handleDrop($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)" -->
-                                  <div class="col">
-                                    <div class="row">
-                                      <div v-for="(column, columnIndex) in row.columns" :key="'column-' + columnIndex"
-                                        @mouseenter="
-                                          setHoveredColumn(
-                                            blockIndex,
-                                            sectionIndex,
-                                            rowIndex,
-                                            columnIndex
-                                          )
-                                          " @mouseleave="resetHoveredColumn"
-                                        class="col p-0 dynamicColumn position-relative column-container">
-                                        <div class="column_name d-flex align-items-center justify-content-between">
-                                          <div class="d-flex flex-column ps-2">
-                                            <input v-model="column.label" type="text" :class="[
-                                              'border-less-input',
-                                              'ps-1',
-                                              'font-14',
-                                              'inputHeight',
-                                              {
-                                                'italic-style': !column.label,
-                                              },
-                                              { 'fw-medium': column.label },
-                                            ]" @change="
-                                              handleFieldChange(
-                                                blockIndex,
-                                                sectionIndex,
-                                                rowIndex,
-                                                columnIndex
-                                              )
-                                              " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex)" placeholder="Column Name" />
-                                            <small v-if="column.errorMsg" class="text-danger ps-2 font-10">
-                                              {{ column.errorMsg }}
-                                            </small>
-                                          </div>
-                                          <div class="position-absolute top-0 end-0" v-show="isHoveredColumn(
-                                            blockIndex,
-                                            sectionIndex,
-                                            rowIndex,
-                                            columnIndex
-                                          )
-                                            ">
-                                            <button class="btn btn-light bg-transparent me-1 btn-sm" @click="
-                                              removeColumn(
-                                                blockIndex,
-                                                sectionIndex,
-                                                rowIndex,
-                                                columnIndex
-                                              )
-                                              ">
-                                              <i class="bi bi-x-lg"></i>
-                                            </button>
-                                          </div>
-                                        </div>
-                                        <!-- draggable="true"
-                                                                                    @dragstart="handleDragStart($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
-                                                                                    @dragover="handleDragOver"
-                                                                                    @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
-                                        <div v-if="column.fields.length === 0" class="empty-drop-zone" @dragover.prevent
-                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                        </div>
-                                        <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
-                                          @mouseenter="
-                                            setHoveredField(
-                                              blockIndex,
-                                              sectionIndex,
-                                              rowIndex,
-                                              columnIndex,
-                                              fieldIndex
-                                            )
-                                            " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
-                                          draggable="true"
-                                          @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                          @dragover.prevent
-                                          @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-
-                                          <div class="drop-zone" @dragover.prevent
-                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                          </div>
-
-                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
-                                            draggable="true"
-                                            @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                            @dragover.prevent
-                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                            <div class="d-flex justify-content-between">
-                                              <div class="flex-column d-flex">
-                                                <input v-model="field.label" placeholder="Name the field" :class="[
-                                                  'border-less-input',
-                                                  'font-14',
-                                                  'p-0',
-                                                  'inputHeight',
-                                                  {
-                                                    'italic-style': !field.label,
-                                                  },
-                                                  {
-                                                    'fw-medium': field.label,
-                                                  },
-                                                ]" @change="
-                                                  handleFieldChange(
-                                                    blockIndex,
-                                                    sectionIndex,
-                                                    rowIndex,
-                                                    columnIndex,
-                                                    fieldIndex
-                                                  )
-                                                  " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex,fieldIndex)" />
-                                                <small v-if="field.errorMsg" class="text-danger font-10">
-                                                  {{ field.errorMsg }}
-                                                </small>
-                                              </div>
-                                              <div class="FieldcopyRemove" v-show="isHoveredField(
-                                                blockIndex,
-                                                sectionIndex,
-                                                rowIndex,
-                                                columnIndex,
-                                                fieldIndex
-                                              )
-                                                ">
-                                                <button class="btn btn-light btn-sm bg-transparent py-0" @click="
-                                                  copyField(
-                                                    blockIndex,
-                                                    sectionIndex,
-                                                    rowIndex,
-                                                    columnIndex,
-                                                    fieldIndex
-                                                  )
-                                                  ">
-                                                  <i class="ri-file-copy-line font-13 copyIcon"></i>
-                                                </button>
-                                                <button class="btn btn-light btn-sm bg-transparent trash-btn py-0"
-                                                  @click="
-                                                    removeField(
-                                                      blockIndex,
-                                                      sectionIndex,
-                                                      rowIndex,
-                                                      columnIndex,
-                                                      fieldIndex
-                                                    );
-              handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex);
-                                                    ">
-                                                  <i class="bi bi-x-lg font-13"></i>
-                                                </button>
-                                              </div>
-                                            </div>
-
-                                            <select v-model="field.fieldtype"
-                                              class="form-select mb-2 mt-1 font-13 searchSelect" @change="
-                                                onFieldTypeChange(
-                                                  blockIndex,
-                                                  sectionIndex,
-                                                  rowIndex,
-                                                  columnIndex,
-                                                  fieldIndex
-                                                )
-                                                ">
-                                              <option value="">Select Type</option>
-                                              <option v-for="section in fieldTypes" :key="section"
-                                                :value="section.type">
-                                                {{ section.label }}
-                                              </option>
-                                            </select>
-
-                                            <div v-if="
-                                              [
-                                                'Select',
-                                                'Table MultiSelect',
-                                                'Small Text'
-                                              ].includes(field.fieldtype)
-                                            ">
-                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                              <textarea id="options" placeholder="Enter your Options"
-                                                v-model="field.options"
-                                                class="form-control shadow-none mb-1 font-12"></textarea>
-                                              <small v-if="
-                                                !field.options ||
-                                                field.options.trim() === ''
-                                              " class="text-danger font-10">
-                                                Options are required for this field type.
-                                              </small>
-                                            </div>
-                                            <div v-if="field.fieldtype === 'Link'">
-                                             
-  <label class="font-11 fw-light" :for="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-    Search Doctype:
-  </label>
-
-  <!-- Single Search + Select Input -->
-  <input
-    :id="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    type="text"
-    v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
-    @input="fetchDoctypeList(blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    @focus="showDropdown(getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex))"
-    class="form-control font-12 mb-1"
-    placeholder="Type to search..."
-  />
-
-  <!-- Search Results Dropdown -->
-  <ul
-    v-if="linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]?.length && dropdownVisible[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
-    class="list-group mt-1"
-    style="max-height: 200px; overflow-y: auto;"
-  >
-    <li
-      v-for="(result, index) in linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
-      :key="index"
-      @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
-      class="list-group-item list-group-item-action"
-    >
-      {{ result.name }}
-    </li>
-  </ul>
-</div>
-
-  <!-- <label class="font-12 fw-light" :for="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-    Search Doctype:
-  </label>
-
-  
-  <input
-    :id="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    type="text"
-    v-model="linkSearchQueries[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
-    @input="fetchDoctypeList(linkSearchQueries[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)], blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    @focus="showDropdown(getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex))"
-    class="form-control font-12 mb-1"
-    placeholder="Type to search..."
-  />
-
-  
-  <ul
-    v-if="linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]?.length && dropdownVisible[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
-    class="list-group mt-1"
-    style="max-height: 200px; overflow-y: auto;"
-  >
-    <li
-      v-for="(result, index) in linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
-      :key="index"
-      @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
-      class="list-group-item list-group-item-action"
-    >
-      {{ result.name }}
-    </li>
-  </ul>
-
-  
-  <input
-    type="text"
-    v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
-    class="form-control font-12 mb-1"
-    placeholder="Selected doctype will appear here"
-    readonly
-  />
-</div> -->
-
-                                              <!-- <input id="link-search" type="text" v-model="linkSearchQuery"
-                                                @input="fetchDoctypeList(linkSearchQuery)"
-                                                @focus="dropdownVisible = true" class="form-control font-12 mb-1"
-                                                placeholder="Type to search..." />
-
-                                              <ul v-if="linkSearchResults.length && dropdownVisible"
-                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
-                                                  class="list-group-item list-group-item-action">
-                                                  {{ result.name }}
-                                                </li>
-                                              </ul> -->
-
-
-                                              <!-- <input type="text"
-                                                v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
-                                                class="form-control font-12 mb-1"
-                                                :placeholder="linkSearchQuery ? 'Select from list' : 'Selected doctype will appear here'"
-                                                readonly />
-                                            </div>
-                                            <div v-if="field.fieldtype === 'Table'">
-                                              <label class="font-12 fw-light" for="link-search">Search Doctype:</label>
-                                              <input id="link-search" type="text" v-model="linkSearchQuery"
-                                                @input="fetchChildDoctypeList(linkSearchQuery)"
-                                                @focus="dropdownVisible = true" class="form-control font-12 mb-1"
-                                                placeholder="Type to search..." />
-
-                                              <ul v-if="linkSearchResults.length && dropdownVisible"
-                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
-                                                  class="list-group-item list-group-item-action">
-                                                  {{ result.name }}
-                                                </li>
-                                              </ul> -->
-
-
-                                            <div class="d-flex  align-items-center justify-content-between">
-                                              <div class=" d-flex align-items-center gap-2">
-                                                <div class="d-flex align-items-center">
-
-                                                  <input  class="font-12" v-model="field.reqd" :true-value="1" :id="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                    :false-value="0" placeholder="Field Name" type="checkbox" />
-                                                  <!-- :id="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex" -->
-                                                </div>
-                                                <div>
-                                                  <label  class="font-12 m-0 fw-light" :for="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                   >Mandatory</label>
-                                                   <!-- :for="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex" -->
-                                                </div>
-                                              </div>
-                                              <div>
-
-                                                <button class="btn btn-sm  font-12"
-                                                  @click="field.showDescription = !field.showDescription">
-                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
-                                                    'Edit Description'
-                                                    : 'Add Description') }}
-                                                </button>
-                                              </div>
-                                            </div>
-
-                                            <!-- Description Textarea -->
-                                            <textarea v-if="field.showDescription" v-model="field.description"
-                                              class="form-control font-12 mt-2"
-                                              placeholder="Enter field description"></textarea>
-
-                                            <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
-                                          </div>
-                                          <div class="drop-zone" @dragover.prevent
-                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                          </div>
-                                          <div class="childtableShow">
-                                            <div>
-                                              <div>
-                                                <div class="mt-2">
-
-                                                  <div v-if="field.fieldtype === 'Table'" class="childTableContainer">
-
-                                                    <div v-for="(table, tableName) in childtableHeaders"
-                                                      :key="tableName" class="childTable">
-                                                      <h5 class=" font-13"
-                                                        v-if="tableName === field.fieldname || tableName === field.options">
-                                                        {{
-                                                          tableName.replace(/_/g,
-                                                            ' ') }}</h5>
-                                                      <div
-                                                        v-if="editMode[tableName] && tableName === currentEditingTable"
-                                                        class=" d-flex align-items-center gap-2">
-                                                        <!-- <div class="d-flex align-items-center">
-
-                                                          <input class="font-12" v-model="field.description"
-                                                            true-value="true" false-value="fasle" id="field-description"
-                                                            placeholder="Field Name" type="text" />
-                                                        </div>
-                                                        <div>
-                                                          <label  class="font-12 m-0 fw-light">Show as
-                                                            Blocks</label>
-                                                        </div> -->
-                                                        <div class="d-flex align-items-center">
-                                                <input v-if="field.showDescription" v-model="field.description"
-                                                  class="form-control font-12 " placeholder="Enter field description" />
-                                                <button class="btn btn-sm text-nowrap font-12"
-                                                  @click="field.showDescription = !field.showDescription">
-                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
-                                                    'Edit Description'
-                                                    : 'Add Description') }}
-                                                </button>
-                                            </div>
-                                                      </div>
-                                                      <table
-                                                        v-if="tableName === field.options || tableName === field.fieldname"
-                                                        class="table table-bordered rounded-table">
-                                                        <thead>
-                                                          <tr>
-                                                            <th>#</th>
-                                                            <th>Label</th>
-                                                            <th>Field Type</th>
-                                                            <!-- <th>Action</th> -->
-                                                          </tr>
-                                                        </thead>
-                                                        <!-- :draggable="editMode[tableName]" -->
-                                                        <tbody @dragover.prevent="onDragOver"
-                                                          @drop="onDrop($event, table)">
-                                                          <tr v-for="(field, index) in table" :key="index"
-                                                            :draggable="editMode[tableName]"
-                                                            @dragstart="onDragStart(index)" @dragend="onDragEnd"
-                                                            :class="{ dragging: draggingIndex === index }">
-                                                            <td>{{ index + 1 }}</td>
-
-                                                            <!-- Label Input -->
-                                                            <td v-if="editMode[tableName]">
-                                                              <input
-                                                                  v-model="field.label"
-                                                                  @input="validateField(field, tableName, index)"
-                                                                  placeholder="Field Label"
-                                                                  class="form-control"
-                                                                  :class="{ 'border-1 border-danger': fieldErrors[tableName]?.[index]?.length }"
-                                                                />
-                                                                <div v-if="fieldErrors[tableName]?.[index]?.length" class="text-danger font-11">
-                                                                  <div v-for="(err, i) in fieldErrors[tableName][index]" :key="i">{{ err }}</div>
-                                                                </div>
-
-                                                            </td>
-                                                            <td v-else>{{ field.label }}</td>
-
-                                                            <!-- Field Type Select -->
-                                                            <td v-if="editMode[tableName]">
-                                                              <div class="d-flex gap-1">
-                                                                <select v-model="field.fieldtype"
-                                                                    @change="validateField(field, tableName, index)"
-                                                                    class="form-select form-select-sm"
-                                                                    :class="{ 'border-1 border-danger': fieldErrors[tableName]?.[index]?.length }">
-                                                                  <option value="">Select Type</option>
-                                                                  <option v-for="option in childfield" :key="option.type" :value="option.type">
-                                                                    {{ option.label }}
-                                                                  </option>
-                                                                </select>
-
-                                                                <div class=" d-flex">
-                                                                  <div class=" d-flex align-items-center gap-2">
-
-                                                                    <div class="d-flex align-items-center">
-                                                                      <input class="font-12 form-control-sm"
-                                                                        v-model="field.description"
-                                                                        placeholder="description" type="text" />
-                                                                    </div>
-                                                                    <!-- <div>
-                                                                      <label for="mandatory"
-                                                                        class="font-12 m-0 fw-light">Calculate</label>
-                                                                    </div> -->
-                                                                  </div>
-                                                                  <button class="btn btn-light btn-sm"
-                                                                    @click="deleteRow(tableName, index)">
-                                                                    <i class="bi bi-x-lg"></i>
-                                                                  </button>
-                                                                </div>
-                                                              </div>
-                                                              <div v-if="
-                                                                [
-                                                                  'Select'
-                                                                ].includes(field.fieldtype)
-                                                              ">
-                                                                <label class="font-12 fw-light" for="options">Enter
-                                                                  Options:</label>
-                                                                <textarea id="options" placeholder="Enter your Options"
-                                                              v-model="field.options"
-                                                              @input="validateField(field, tableName, index)"
-                                                              class="form-control shadow-none mb-1 font-12"></textarea>
-
-                                                                <small v-if="
-                                                                  !field.options ||
-                                                                  field.options.trim() === ''
-                                                                " class="text-danger font-10">
-                                                                  Options are required for this field type.
-                                                                </small>
-                                                              </div>
-                                                              <span v-if="invalidFields[tableName]?.includes(index)"
-                                                                class="font-11 text-danger">Type required**</span>
-                                                            </td>
-                                                            <td v-else>{{ field.fieldtype }}</td>
-                                                          </tr>
-                                                        </tbody>
-                                                      </table>
-
-                                                      <!-- Show error message below the table if any fields are invalid -->
-                                                      <!-- <div v-if="invalidFields[tableName]?.length" class="text-danger font-12 mt-2">
-                                                    Please fill in the required fields in the highlighted rows.
-                                                  </div> -->
-                                                      <div
-                                                        v-if="field.fieldtype === 'Table' && (field.label === tableName || field.fieldname === tableName)"
-                                                        class="mb-2 mt-3">
-                                                        <button class="btn btn-light btn-sm mx-2 "
-                                                          @click="toggleEdit(tableName, field.description)">
-                                                          {{ editMode[tableName] ? 'Save' : 'Edit' }}
-                                                        </button>
-                                                        <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
-                                                          @click="addNewFieldedit(tableName)">
-                                                          Add More Field
-                                                        </button>
-                                                      </div>
-
-                                                    </div>
-
-                                                    <!-- <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
-                                            class="newField dynamicField">
-                                            <div class=" d-flex justify-content-between">
-
-                                              <input v-model="field.label" placeholder="Field Label" :class="[
-                                                'border-less-input',
-                                                'font-14',
-                                                'p-0 my-1',
-                                                'inputHeight',
-                                                { 'italic-style': !field.label },
-                                                { 'fw-medium': field.label },
-                                              ]" />
-                                              
-                                            </div>
-                                            <select v-model="field.fieldtype" class="form-select font-13 mb-3">
-                                              <option value="">Select Type</option>
-                                              <option v-for="section in childfield" :key="section.type"
-                                                :value="section.type">
-                                                {{ section.label }}
-                                              </option>
-                                            </select>
-
-                                          </div>
-
-                                          <button class="btn btn-light btn-sm font-12 my-2" @click="toggleEdit(tableName)">
-                                              {{ editMode[tableName] ? "Save" : "Edit" }}
-                                            </button>
-                                          <button class="btn btn-light btn-sm font-12 my-2"
-                                            @click="addNewField(tableName, tableIndex)">Add Fields</button>
-
-                                          <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 my-2 ms-2"
-                                            @click="saveNewFields(tableName, tableIndex)">Save</button> -->
-                                                  </div>
-
-                                                </div>
-                                              </div>
-
-
-
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div class="drop-zone-bottom" @dragover.prevent
-                                          @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
-                                          style="background-color: #f0f0f0; border: 1px dashed #ccc; margin: 4px;">
-                                        </div>
-
-                                        <div class="drop-zone" @dragover.prevent
-                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
-                                          style="height: 10px; background-color: transparent" />
-                                        <div class="d-flex justify-content-center align-items-center my-2">
-                                          <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
-                                            @click="
-                                              addField(
-                                                blockIndex,
-                                                sectionIndex,
-                                                rowIndex,
-                                                columnIndex
-                                              )
-                                              ">
-                                            <i class="bi bi-plus fs-5"></i>
-                                            <span>Add Field</span>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                  </div>
-
-                                </section>
-                                <div>
-                                  <div v-for="(table, tableIndex) in section.afterCreated" :key="tableIndex"
-                                    class="childTable dynamicColumn m-0 p-2 ">
-                                    <h5 class="font-13">{{ table.tableName }}</h5>
-                                    <div v-if="editMode[table.tableName]" class=" d-flex align-items-center gap-2">
-                                      <!-- <div class="d-flex align-items-center">
-
-                                        <input class="font-12" v-model="table.description" true-value="true" 
-                                          false-value="fasle" placeholder="Field Name" type="text" />
-                                      </div>
-                                      <div>
-                                        <label class="font-12 m-0 fw-light">Show as
-                                          Blocks</label>
-                                      </div> -->
-                                       <div class="d-flex align-items-center">
-                                                <input v-if="table.showDescription" v-model="table.description"
-                                                  class="form-control font-12 " placeholder="Enter field description" />
-                                                <button class="btn btn-sm text-nowrap font-12"
-                                                  @click="table.showDescription = !table.showDescription">
-                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
-                                                    'Edit Description'
-                                                    : 'Add Description') }}
-                                                </button>
-                                            </div>
-                                    </div>
-
-                                    <table class="table table-bordered rounded-table">
-                                      <thead>
-                                        <tr>
-                                          <th>#</th>
-                                          <th>Label</th>
-                                          <th>Field Type</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr v-for="(field, index) in table.columns" :key="index">
-                                          <td>{{ index + 1 }}</td>
-
-                                          <!-- Label Input -->
-                                          <td v-if="editMode[table.tableName]">
-                                           <input
- v-model="field.label"
-  placeholder="Field Label"
-  class="form-control"
-  @blur="field.label = field.label?.trim(); validateTableField(field, table.tableName, index, table.columns)"
-  :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }"
-/>
-
-<div v-if="fieldErrors[table.tableName]?.[index]" class="text-danger font-11 mt-1">
-  <span v-for="(msg, i) in fieldErrors[table.tableName][index]" :key="i">{{ msg }} <br/></span>
-</div>
-
-                                          </td>
-                                          <td v-else>{{ field.label }}</td>
-
-                                          <!-- Field Type Select -->
-                                          <td v-if="editMode[table.tableName]">
-                                            <div class="d-flex gap-1 align-items-center">
-                                              <select
-                                                v-model="field.fieldtype"
-                                                class="form-select form-select-sm"
-                                                 @change="validateTableField(field, table.tableName, index, table.columns)"
-  :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }"
-                                              >
-                                                <option value="">Select Type</option>
-                                                <option v-for="option in childfield" :key="option.type" :value="option.type">
-                                                  {{ option.label }}
-                                                </option>
-                                              </select>
-
-                                              <button class="btn btn-light btn-sm" @click="afterImmediateEditdeleteRow(blockIndex, sectionIndex, table.tableName, index)">
-                                                <i class="bi bi-x-lg"></i>
-                                              </button>
-                                            </div>
-
-                                            <!-- Options for Select type -->
-                                            <div v-if="field.fieldtype === 'Select'" class="mt-1">
-                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                              <textarea
-                                                id="options"
-                                                placeholder="Enter your Options"
-                                                v-model="field.options"
-                                                class="form-control shadow-none mb-1 font-12"
-                                                @input="validateTableField(field, table.tableName, index,table.columns)"
-                                              ></textarea>
-                                            </div>
-
-                                           <div v-if="fieldErrors[table.tableName]?.[index]" class="text-danger font-11 mt-1">
-  <span v-for="(msg, i) in fieldErrors[table.tableName][index]" :key="i">{{ msg }}<br/></span>
-</div>
-                                          </td>
-                                          <td v-else>{{ field.fieldtype }}</td>
-                                        </tr>
-                                      </tbody>
-
-                                    </table>
-
-                                    <!-- Edit/Add buttons -->
-                                    <div class="mb-2">
-                                      <button class="btn btn-light btn-sm mx-2"
-                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName)">
-                                        {{ editMode[table.tableName] ? 'Save' : 'Edit' }}
-                                      </button>
-                                      <button class="btn btn-light btn-sm" v-if="editMode[table.tableName]"
-                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName)">
-                                        Add More Field
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div>
-                                <div>
-
-                                  <button v-if="blockIndex==0" class="btn btn-light addRow mb-3 mt-4"
-                                    @click="addChildTable(blockIndex, sectionIndex)">
-                                    Add New Table
-                                  </button>
-                                  <div v-for="(table, tableIndex) in section.childTables"
-                                    :key="`table-${blockIndex}-${sectionIndex}-${tableIndex}`" class="child-table">
-                                    <div v-if="table.newTable">
-                                      <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
-                                        <div>
-                                          <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
-                                          <input v-model="table.tableName" placeholder="Table Name"
-                                            @blur="updateFieldname(table)"
-                                            class="border-less-input font-14 p-0 inputHeight" :class="{
-                                              'italic-style': !table.tableName,
-                                              'fw-medium': table.tableName,
-                                            }" />
-                                          <div
-                                            v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.tableName"
-                                            class="text-danger font-12">
-                                            {{ fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].tableName }}
-                                          </div>
-                                          <div v-if="tableExistsMessage" class="text-danger font-12">
-                                            {{ tableExistsMessage }}
-                                          </div>
-                                          <div class=" d-flex align-items-center gap-2">
-                                            <div class="d-flex align-items-center">
-                                                <input v-if="table.showDescription" v-model="table.as_a_block"
-                                                  class="form-control font-12 " placeholder="Enter field description" />
-                                                <button class="btn btn-sm text-nowrap font-12"
-                                                  @click="table.showDescription = !table.showDescription">
-                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
-                                                    'Edit Description'
-                                                    : 'Add Description') }}
-                                                </button>
-                                            </div>
-                                            <!-- <div>
-                                              <label class="font-12 m-0 fw-light">Show as Blocks</label>
-                                            </div> -->
-                                          </div>
-                                        </div>
-                                        <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                          @click="removeChildTable(blockIndex, sectionIndex, tableIndex)">
-                                          <i class="bi bi-trash"></i> Remove Table
-                                        </button>
-                                      </div>
-
-                                      <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex"
-                                        class="dynamicField">
-                                        <div class="px-1 field-border">
-                                          <div class="d-flex justify-content-between">
-                                            <div>
-                                              <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
-                                              <input v-model="field.label" placeholder="Name the field"
-                                              @blur="() => { 
-  updateFieldname(field); 
-  validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, fieldIndex, table.columns); 
-}"
-
-                                                class="border-less-input font-14 p-0 inputHeight" :class="{
-                                                  'italic-style': !field.label,
-                                                  'fw-medium': field.label,
-                                                  'is-invalid': fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.label
-                                                }" />
-                                              <div
-                                                v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.label"
-                                                class="text-danger font-12">
-                                                {{
-                                                  fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].columns[fieldIndex].label
-                                                }}
-                                              </div>
-                                            </div>
-                                            <div class="d-flex align-items-center">
-                                              <!-- <div class=" d-flex align-items-center gap-2">
-                                                <div class="d-flex align-items-center">
-                                                                      <input class="font-12 form-control-sm" v-model="field.description"
-                                                                        placeholder="Description"
-                                                                        type="text" />  
-                                                                    </div>
-                                                <div>
-                                                  <label for="mandatory" class="font-12 m-0 fw-light">Calculate</label>
-                                                </div>
-                                              </div> -->
-                                              <div class=" d-flex my-1">
-
-                                                <input v-if="field.showDescription" v-model="field.description"
-                                                  class="form-control font-12 " placeholder="Enter field description" />
-                                                <button class="btn btn-sm text-nowrap font-12"
-                                                  @click="field.showDescription = !field.showDescription">
-                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
-                                                    'Edit Description'
-                                                    : 'Add Description') }}
-                                                </button>
-                                              </div>
-
-                                              <button class="btn btn-sm trash-btn py-0"
-                                                @click="removeFieldFromTable(blockIndex, sectionIndex, tableIndex, fieldIndex)">
-                                                <i class="bi bi-x-lg"></i>
-                                              </button>
-                                            </div>
-                                          </div>
-
-                                          <select v-model="field.fieldtype" class="form-select font-13 mb-1"
-                                            :class="{ 'is-invalid': fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.fieldtype }">
-                                            <option value="">Select Type</option>
-                                            <option v-for="section in childfield" :key="section.type"
-                                              :value="section.type">
-                                              {{ section.label }}
-                                            </option>
-                                          </select>
-                                          <div v-if="
-                                            [
-                                              'Select'
-                                            ].includes(field.fieldtype)
-                                          ">
-                                            <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                            <textarea id="options" placeholder="Enter your Options"
-                                              v-model="field.options"
-                                              class="form-control shadow-none mb-1 font-12"></textarea>
-                                            <small v-if="
-                                              !field.options ||
-                                              field.options.trim() === ''
-                                            " class="text-danger font-10">
-                                              Options are required for this field type.
-                                            </small>
-                                          </div>
-                                          <div
-                                            v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.fieldtype"
-                                            class="text-danger font-12">
-                                            {{
-                                              fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].columns[fieldIndex].fieldtype
-                                            }}
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <button class="btn btn-light btn-sm addField mx-1"
-                                        @click="addFieldToTable(blockIndex, sectionIndex, tableIndex)">
-                                        <i class="bi bi-plus"></i> Add Field
-                                      </button>
-
-                                      <button class="btn btn-dark btn-sm font-12 mx-1"
-                                        @click="processFields(blockIndex, sectionIndex, tableIndex)">
-                                        Create Table
-                                      </button>
-
-                                      <hr />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                                <button class="btn btn-light border font-12"
-                                  @click="addSection(blockIndex, sectionIndex)">
-                                  <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
-                                </button>
-                              </div>
-                            </div>
-                            <div v-if="
-                              blockIndex === 0
-                            " class="m-2">
-                              <!-- <button
-                                  class="btn btn-light addRow m-2"
-                                  @click="
-                                    addRow(blockIndex, sectionIndex, rowIndex)
-                                  "
-                                >
-                                  <i class="bi bi-plus"></i> Add row in section
-                                </button> -->
-
-
-                            </div>
-                          </div>
+                      <!-- LEFT PANEL: Field Types Library -->
+                      <aside class="frappe-field-library">
+                        <div class="field-library-header">
+                          <h6 class="mb-0 font-13 fw-bold">Add Field</h6>
                         </div>
 
-                        <!-- Add Approval Block button removed - use tabs instead -->
-                      </div>
-                      <!-- End Canvas Inner -->
-                    </div>
-                    <!-- End Zoho Form Canvas -->
-
-                      <!-- Right: Field Properties Panel (Optional - for future enhancement) -->
-                      <aside class="zoho-properties-panel" v-if="selectedFieldForEdit">
-                        <div class="properties-header">
-                          <h6 class="mb-0">Field Properties</h6>
-                          <button class="btn btn-sm btn-link p-0" @click="selectedFieldForEdit = null">
-                            <i class="bi bi-x-lg"></i>
-                          </button>
-                        </div>
-                        <div class="properties-content">
-                          <!-- Field properties will go here -->
-                          <p class="text-muted small">Select a field to edit its properties</p>
+                        <div class="field-library-body">
+                          <!-- Group fields by category -->
+                          <div v-for="category in fieldCategories" :key="category" class="field-category">
+                            <div class="category-title">{{ category }}</div>
+                            <div
+                              v-for="field in getFieldsByCategory(category)"
+                              :key="field.type"
+                              class="field-item"
+                              @click="addFieldToCanvas(field)"
+                              draggable="true"
+                              @dragstart="handleFieldDragStart(field)">
+                              <i :class="field.icon || 'bi-file-text'"></i>
+                              <div class="field-item-info">
+                                <div class="field-item-label">{{ field.label }}</div>
+                                <div class="field-item-desc">{{ field.description }}</div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </aside>
+
+                      <!-- CENTER PANEL: Form Canvas (Field List) -->
+                      <div class="frappe-form-canvas">
+                        <div class="canvas-header">
+                          <h6 class="mb-0 font-13">
+                            {{ currentBuilderTab === 0 ? 'Requestor Fields' : `Approver ${currentBuilderTab} Fields` }}
+                          </h6>
+                          <span class="field-count">{{ getCurrentBlockFieldCount() }} fields</span>
+                        </div>
+
+                        <!-- Fields List for Current Block -->
+                        <div class="fields-list">
+                          <div
+                            v-for="(field, index) in getCurrentBlockFields()"
+                            :key="'field-' + index"
+                            :class="['form-field-item', { 'selected': selectedFieldIndex === index }]"
+                            @click="selectField(index)"
+                            draggable="true"
+                            @dragstart="onFieldDragStart(index)"
+                            @dragover.prevent
+                            @drop="onFieldDrop(index)">
+
+                            <div class="field-header">
+                              <div class="field-label">
+                                {{ field.label || 'Unnamed Field' }}
+                                <span v-if="field.reqd" class="field-required">*</span>
+                              </div>
+                              <div class="field-actions">
+                                <button class="btn btn-sm btn-link p-0 text-secondary" @click.stop="duplicateField(index)" title="Duplicate">
+                                  <i class="bi bi-files"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link p-0 text-danger" @click.stop="deleteField(index)" title="Delete">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            </div>
+
+                            <div class="field-type-badge">
+                              <i :class="getFieldIcon(field.fieldtype)"></i>
+                              {{ field.fieldtype || 'Data' }}
+                            </div>
+
+                            <div v-if="field.options && ['Select', 'Link'].includes(field.fieldtype)" class="field-meta">
+                              <small class="text-muted">{{ field.options }}</small>
+                            </div>
+                          </div>
+
+                          <!-- Add Field Button -->
+                          <div class="add-field-btn" @click="showFieldLibrary = true">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Add Field
+                          </div>
+
+                          <!-- Empty State -->
+                          <div v-if="getCurrentBlockFieldCount() === 0" class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>No fields yet</p>
+                            <small>Click "Add Field" or drag a field type from the left</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- RIGHT PANEL: Field Properties -->
+                      <aside class="frappe-properties-panel">
+                        <div v-if="selectedFieldIndex !== null" class="properties-content">
+                          <div class="properties-header">
+                            <div class="properties-title">
+                              <i class="bi bi-sliders me-2"></i>
+                              Field Properties
+                            </div>
+                            <button class="btn btn-sm btn-link p-0 text-secondary" @click="selectedFieldIndex = null">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          </div>
+
+                          <!-- Basic Properties -->
+                          <div class="property-group">
+                            <div class="property-group-title">Basic</div>
+
+                            <div class="property-field">
+                              <label class="property-label">Label</label>
+                              <input
+                                type="text"
+                                class="property-input"
+                                v-model="getSelectedField().label"
+                                placeholder="Field Label"
+                                @input="updateField">
+                            </div>
+
+                            <div class="property-field">
+                              <label class="property-label">Field Type</label>
+                              <select class="property-input" v-model="getSelectedField().fieldtype" @change="onFieldTypeChange">
+                                <option value="">Select Type</option>
+                                <option v-for="ft in fieldTypes" :key="ft.type" :value="ft.type">
+                                  {{ ft.label }}
+                                </option>
+                              </select>
+                            </div>
+
+                            <div class="property-field">
+                              <label class="property-label">Field Name</label>
+                              <input
+                                type="text"
+                                class="property-input"
+                                v-model="getSelectedField().fieldname"
+                                placeholder="field_name"
+                                @input="updateField">
+                              <small class="property-help-text">Internal field name (lowercase, underscores)</small>
+                            </div>
+                          </div>
+
+                          <!-- Field Options -->
+                          <div class="property-group" v-if="['Select', 'Small Text', 'Table MultiSelect'].includes(getSelectedField().fieldtype)">
+                            <div class="property-group-title">Options</div>
+                            <div class="property-field">
+                              <label class="property-label">Options (one per line)</label>
+                              <textarea
+                                class="property-input"
+                                rows="4"
+                                v-model="getSelectedField().options"
+                                placeholder="Option 1&#10;Option 2&#10;Option 3"
+                                @input="updateField"></textarea>
+                            </div>
+                          </div>
+
+                          <div class="property-group" v-if="getSelectedField().fieldtype === 'Link'">
+                            <div class="property-group-title">Link Settings</div>
+                            <div class="property-field">
+                              <label class="property-label">Link To (DocType)</label>
+                              <input
+                                type="text"
+                                class="property-input"
+                                v-model="getSelectedField().options"
+                                placeholder="Enter DocType name"
+                                @input="updateField">
+                            </div>
+                          </div>
+
+                          <!-- Validation -->
+                          <div class="property-group">
+                            <div class="property-group-title">Validation</div>
+
+                            <div class="property-checkbox">
+                              <input
+                                type="checkbox"
+                                :id="'mandatory-' + selectedFieldIndex"
+                                v-model="getSelectedField().reqd"
+                                :true-value="1"
+                                :false-value="0"
+                                @change="updateField">
+                              <label :for="'mandatory-' + selectedFieldIndex">Mandatory</label>
+                            </div>
+
+                            <div class="property-checkbox">
+                              <input
+                                type="checkbox"
+                                :id="'readonly-' + selectedFieldIndex"
+                                v-model="getSelectedField().read_only"
+                                :true-value="1"
+                                :false-value="0"
+                                @change="updateField">
+                              <label :for="'readonly-' + selectedFieldIndex">Read Only</label>
+                            </div>
+
+                            <div class="property-checkbox">
+                              <input
+                                type="checkbox"
+                                :id="'hidden-' + selectedFieldIndex"
+                                v-model="getSelectedField().hidden"
+                                :true-value="1"
+                                :false-value="0"
+                                @change="updateField">
+                              <label :for="'hidden-' + selectedFieldIndex">Hidden</label>
+                            </div>
+                          </div>
+
+                          <!-- Description -->
+                          <div class="property-group">
+                            <div class="property-group-title">Help</div>
+                            <div class="property-field">
+                              <label class="property-label">Description</label>
+                              <textarea
+                                class="property-input"
+                                rows="3"
+                                v-model="getSelectedField().description"
+                                placeholder="Help text for this field"
+                                @input="updateField"></textarea>
+                            </div>
+                          </div>
+
+                          <!-- Default Value -->
+                          <div class="property-group">
+                            <div class="property-field">
+                              <label class="property-label">Default Value</label>
+                              <input
+                                type="text"
+                                class="property-input"
+                                v-model="getSelectedField().default"
+                                placeholder="Default value"
+                                @input="updateField">
+                            </div>
+                          </div>
+
+                        </div>
+
+                        <!-- No Field Selected State -->
+                        <div v-else class="no-field-selected">
+                          <i class="bi bi-hand-index"></i>
+                          <p>Select a field</p>
+                          <small>Click on a field to edit its properties</small>
+                        </div>
+                      </aside>
+
                     </div>
                     <!-- End Builder Container -->
                   </div>
-                  <!-- End Zoho Form Builder -->
+                  <!-- End Frappe Form Builder -->
 
                   <!-- Step 3: Workflow Setup -->
                   <div v-if="activeStep === 3">
@@ -2129,6 +1310,8 @@ const frappeBuilderRef = ref(null); // Reference to FrappeFormBuilder component
 const currentStep1Tab = ref(0); // Tab index for Step 1
 const currentBuilderTab = ref(0); // Tab index for Step 2 block navigation
 const showFieldLibrary = ref(true); // Toggle field library visibility
+const selectedFieldIndex = ref(null); // Currently selected field for editing
+const draggedFieldIndex = ref(null); // Field being dragged in canvas
 
 // Loading States
 const isLoadingDepartments = ref(false);
@@ -3977,6 +3160,193 @@ const fieldTypes = [
 ];
 const SELECT_ALL = "Select All"; // Special option for "Select All"
 
+// ========================================
+// Frappe Builder Helper Functions
+// ========================================
+
+// Computed: Get unique field categories
+const fieldCategories = computed(() => {
+  const categories = [...new Set(fieldTypes.map(ft => ft.category))];
+  return categories;
+});
+
+// Get fields by category
+const getFieldsByCategory = (category) => {
+  return fieldTypes.filter(ft => ft.category === category);
+};
+
+// Get icon for a field type
+const getFieldIcon = (fieldtype) => {
+  const field = fieldTypes.find(ft => ft.type === fieldtype);
+  return field?.icon || 'bi-file-text';
+};
+
+// Get current block fields
+const getCurrentBlockFields = () => {
+  if (!blockArr.value[currentBuilderTab.value]) return [];
+  return blockArr.value[currentBuilderTab.value].fields || [];
+};
+
+// Get current block field count
+const getCurrentBlockFieldCount = () => {
+  return getCurrentBlockFields().length;
+};
+
+// Get selected field object
+const getSelectedField = () => {
+  if (selectedFieldIndex.value === null) return {};
+  const fields = getCurrentBlockFields();
+  return fields[selectedFieldIndex.value] || {};
+};
+
+// Select a field for editing
+const selectField = (index) => {
+  selectedFieldIndex.value = index;
+};
+
+// Update field (triggered on property change)
+const updateField = () => {
+  // Force reactivity update
+  if (selectedFieldIndex.value !== null) {
+    const currentBlock = blockArr.value[currentBuilderTab.value];
+    if (currentBlock && currentBlock.fields) {
+      // Trigger reactivity
+      currentBlock.fields = [...currentBlock.fields];
+    }
+  }
+};
+
+// Handle field type change
+const onFieldTypeChange = () => {
+  const field = getSelectedField();
+
+  // Clear type-specific properties when changing field type
+  if (!['Select', 'Small Text', 'Table MultiSelect', 'Link'].includes(field.fieldtype)) {
+    field.options = '';
+  }
+
+  updateField();
+};
+
+// Add field to canvas from library
+const addFieldToCanvas = (fieldType) => {
+  const currentBlock = blockArr.value[currentBuilderTab.value];
+  if (!currentBlock) return;
+
+  if (!currentBlock.fields) {
+    currentBlock.fields = [];
+  }
+
+  // Create new field object
+  const newField = {
+    label: fieldType.label,
+    fieldtype: fieldType.type,
+    fieldname: generateFieldName(fieldType.label),
+    reqd: 0,
+    read_only: 0,
+    hidden: 0,
+    options: '',
+    description: '',
+    default: '',
+    idx: currentBlock.fields.length + 1
+  };
+
+  currentBlock.fields.push(newField);
+
+  // Auto-select the newly added field
+  selectedFieldIndex.value = currentBlock.fields.length - 1;
+};
+
+// Generate field name from label
+const generateFieldName = (label) => {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+};
+
+// Duplicate a field
+const duplicateField = (index) => {
+  const currentBlock = blockArr.value[currentBuilderTab.value];
+  if (!currentBlock || !currentBlock.fields) return;
+
+  const originalField = currentBlock.fields[index];
+  const duplicatedField = {
+    ...originalField,
+    label: `${originalField.label} (Copy)`,
+    fieldname: `${originalField.fieldname}_copy_${Date.now()}`,
+    idx: currentBlock.fields.length + 1
+  };
+
+  currentBlock.fields.push(duplicatedField);
+
+  // Select the duplicated field
+  selectedFieldIndex.value = currentBlock.fields.length - 1;
+
+  showSuccess('Field duplicated successfully');
+};
+
+// Delete a field
+const deleteField = (index) => {
+  const currentBlock = blockArr.value[currentBuilderTab.value];
+  if (!currentBlock || !currentBlock.fields) return;
+
+  // Clear selection if deleting selected field
+  if (selectedFieldIndex.value === index) {
+    selectedFieldIndex.value = null;
+  } else if (selectedFieldIndex.value !== null && selectedFieldIndex.value > index) {
+    // Adjust selection if deleting before selected field
+    selectedFieldIndex.value--;
+  }
+
+  currentBlock.fields.splice(index, 1);
+
+  // Re-index fields
+  currentBlock.fields.forEach((field, idx) => {
+    field.idx = idx + 1;
+  });
+
+  showSuccess('Field deleted successfully');
+};
+
+// Drag handlers for field library
+const handleFieldDragStart = (fieldType) => {
+  draggedFieldType.value = fieldType;
+};
+
+// Drag handlers for canvas fields
+const onFieldDragStart = (index) => {
+  draggedFieldIndex.value = index;
+};
+
+const onFieldDrop = (dropIndex) => {
+  if (draggedFieldIndex.value === null) return;
+
+  const currentBlock = blockArr.value[currentBuilderTab.value];
+  if (!currentBlock || !currentBlock.fields) return;
+
+  const dragIndex = draggedFieldIndex.value;
+
+  // Reorder fields
+  const fields = [...currentBlock.fields];
+  const [draggedField] = fields.splice(dragIndex, 1);
+  fields.splice(dropIndex, 0, draggedField);
+
+  // Re-index
+  fields.forEach((field, idx) => {
+    field.idx = idx + 1;
+  });
+
+  currentBlock.fields = fields;
+
+  // Update selection
+  if (selectedFieldIndex.value === dragIndex) {
+    selectedFieldIndex.value = dropIndex;
+  }
+
+  draggedFieldIndex.value = null;
+};
+
 // Computed property to include "Select All" at the top of the dropdown
 const filteredOptions = computed(() => [SELECT_ALL, ...formOptions.value]);
 
@@ -5179,39 +4549,6 @@ const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) 
     columnIndex
   ].fields.splice(fieldIndex + 1, 0, newField);
 };
-// Handle the change of field type to display the correct input
-const onFieldTypeChange = (
-  blockIndex,
-  sectionIndex,
-  rowIndex,
-  columnIndex,
-  fieldIndex
-) => {
-  const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-  blockArr.splice(0, blockArr.length, ...checkFieldType);
-
-  let fieldType =
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-      .fields[fieldIndex].fieldtype;
-  if (
-
-    fieldType !== "Select" ||
-    fieldType !== "radio" ||
-    fieldType !== "multiselect"
-  ) {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].fields[fieldIndex].options = "";
-  }
-  // if (fieldType === "Table") {
-  //     processFields();
-  // }
-  // const field =
-  //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
-  // Handle additional logic for field type change if needed
-
-  // const xyz = extractFieldsWithBreaks(sections)
-};
 
 
 // const hasDuplicates = (array) => new Set(array).size !== array.length;
@@ -5752,11 +5089,6 @@ const handleFieldAddFromLibrary = (frappeFieldType) => {
   showSuccess(`${newField.label} field added successfully`);
 };
 
-// Handle drag start from library
-const handleFieldDragStart = (frappeFieldType) => {
-  console.log('Drag started:', frappeFieldType);
-  draggedFieldType.value = frappeFieldType;
-};
 
 // Handle drag end from library
 const handleFieldDragEnd = () => {
@@ -7289,6 +6621,482 @@ td {
 
 .field-badge i {
   font-size: 14px;
+}
+
+/* ========================================
+   Frappe Form Builder Styles
+   ======================================== */
+
+/* Main Frappe Builder Container */
+.frappe-form-builder {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  background: #f5f7fa;
+}
+
+/* Top Navigation Bar */
+.frappe-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.frappe-nav-bar .nav-left,
+.frappe-nav-bar .nav-center,
+.frappe-nav-bar .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.frappe-nav-bar .btn-group .btn {
+  position: relative;
+}
+
+.frappe-nav-bar .btn-group .btn i.bi-x {
+  margin-left: 0.5rem;
+  font-size: 12px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.frappe-nav-bar .btn-group .btn i.bi-x:hover {
+  opacity: 1;
+  color: #dc2626;
+}
+
+/* Three-Panel Layout Container */
+.frappe-builder-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT PANEL: Field Types Library */
+.frappe-field-library {
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.field-library-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.field-library-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+/* Field Category */
+.field-category {
+  margin-bottom: 0.5rem;
+}
+
+.category-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 0.75rem 1.25rem 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+/* Field Item in Library */
+.field-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.field-item:hover {
+  background-color: #f3f4f6;
+  border-left-color: #3b82f6;
+}
+
+.field-item i {
+  font-size: 16px;
+  color: #6b7280;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.field-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-item-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.field-item-desc {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CENTER PANEL: Form Canvas */
+.frappe-form-canvas {
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.canvas-header h6 {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.field-count {
+  font-size: 12px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+/* Fields List */
+.fields-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Form Field Item in Canvas */
+.form-field-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.form-field-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-field-item.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.field-required {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.field-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.form-field-item:hover .field-actions {
+  opacity: 1;
+}
+
+.field-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.field-type-badge i {
+  font-size: 12px;
+}
+
+.field-meta {
+  margin-top: 0.5rem;
+  font-size: 11px;
+}
+
+/* Add Field Button */
+.add-field-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: white;
+}
+
+.add-field-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #9ca3af;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+}
+
+.empty-state small {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* RIGHT PANEL: Properties Panel */
+.frappe-properties-panel {
+  background: white;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.properties-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.properties-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+}
+
+/* Property Groups */
+.property-group {
+  padding: 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.property-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+}
+
+/* Property Field */
+.property-field {
+  margin-bottom: 1rem;
+}
+
+.property-field:last-child {
+  margin-bottom: 0;
+}
+
+.property-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.property-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  transition: border-color 0.15s;
+}
+
+.property-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.property-help-text {
+  display: block;
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 0.375rem;
+}
+
+/* Property Checkbox */
+.property-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.property-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.property-checkbox label {
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* No Field Selected */
+.no-field-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.no-field-selected i {
+  font-size: 48px;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.no-field-selected p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.no-field-selected small {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Scrollbar Styling for Frappe Builder */
+.field-library-body::-webkit-scrollbar,
+.fields-list::-webkit-scrollbar,
+.properties-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.field-library-body::-webkit-scrollbar-track,
+.fields-list::-webkit-scrollbar-track,
+.properties-content::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.field-library-body::-webkit-scrollbar-thumb,
+.fields-list::-webkit-scrollbar-thumb,
+.properties-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.field-library-body::-webkit-scrollbar-thumb:hover,
+.fields-list::-webkit-scrollbar-thumb:hover,
+.properties-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1400px) {
+  .frappe-builder-container {
+    grid-template-columns: 250px 1fr 300px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .frappe-builder-container {
+    grid-template-columns: 220px 1fr 280px;
+  }
+
+  .field-item-desc {
+    display: none;
+  }
 }
 
 </style>
