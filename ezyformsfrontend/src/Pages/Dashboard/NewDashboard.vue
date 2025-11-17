@@ -183,6 +183,19 @@
       <p>Loading dashboard data...</p>
     </div>
 
+    <!-- No Data State -->
+    <div v-else-if="!hasData" class="no-data-container">
+      <div class="no-data-icon">
+        <i class="pi pi-inbox"></i>
+      </div>
+      <h3>No Data Available</h3>
+      <p>There is no data available for the selected filters. Try adjusting your filter criteria.</p>
+      <button class="btn-primary" @click="resetFilters">
+        <i class="pi pi-refresh"></i>
+        Reset Filters
+      </button>
+    </div>
+
     <!-- Dashboard Content -->
     <div v-else class="dashboard-content">
       <!-- Form Status Overview -->
@@ -708,6 +721,10 @@ export default {
 
         if (response.message && response.message.success) {
           const data = response.message.data;
+
+          console.log('Dashboard API Response:', data);
+
+          // Handle null data from API
           statusOverview.value = data.status_overview || {};
           departmentAnalysis.value = data.department_analysis || [];
           valueTracking.value = data.value_tracking || {};
@@ -720,12 +737,16 @@ export default {
             availableBusinessUnits.value = data.filters.business_units || [];
           }
 
-          // Render charts
-          setTimeout(() => {
-            renderStatusChart();
-            renderDepartmentChart();
-            renderTrendChart();
-          }, 100);
+          // Only render charts if we have data
+          if (hasData.value) {
+            setTimeout(() => {
+              renderStatusChart();
+              renderDepartmentChart();
+              renderTrendChart();
+            }, 100);
+          }
+        } else {
+          console.error('API returned unsuccessful response:', response);
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -762,6 +783,19 @@ export default {
       if (selectedProperty.value) count++;
       if (selectedPeriod.value !== 'weekly') count++;
       return count;
+    });
+
+    const hasData = computed(() => {
+      // Check if we have any data
+      const hasStatusData = statusOverview.value && Object.keys(statusOverview.value).length > 0;
+      const hasDeptData = departmentAnalysis.value && departmentAnalysis.value.length > 0;
+      const hasValueData = valueTracking.value && Object.keys(valueTracking.value).length > 0;
+      const hasTrendData = recurringTrends.value && (
+        (recurringTrends.value.most_frequent && recurringTrends.value.most_frequent.length > 0) ||
+        (recurringTrends.value.trends && recurringTrends.value.trends.length > 0)
+      );
+
+      return hasStatusData || hasDeptData || hasValueData || hasTrendData;
     });
 
     const clearDateRange = () => {
@@ -802,7 +836,7 @@ export default {
     };
 
     const renderStatusChart = () => {
-      if (!statusChart.value) return;
+      if (!statusChart.value || !statusOverview.value) return;
 
       const chart = echarts.init(statusChart.value);
       const statusData = [
@@ -811,6 +845,10 @@ export default {
         { value: statusOverview.value['In Progress'] || 0, name: 'In Progress', itemStyle: { color: '#3b82f6' } },
         { value: statusOverview.value.Cancelled || 0, name: 'Cancelled', itemStyle: { color: '#ef4444' } }
       ];
+
+      // Check if all values are 0
+      const hasData = statusData.some(item => item.value > 0);
+      if (!hasData) return;
 
       let option;
 
@@ -919,7 +957,7 @@ export default {
     };
 
     const renderDepartmentChart = () => {
-      if (!departmentChart.value) return;
+      if (!departmentChart.value || !departmentAnalysis.value || departmentAnalysis.value.length === 0) return;
 
       const chart = echarts.init(departmentChart.value);
       const departments = departmentAnalysis.value.map(d => d.department);
@@ -1136,7 +1174,7 @@ export default {
     };
 
     const renderTrendChart = () => {
-      if (!trendChart.value) return;
+      if (!trendChart.value || !recurringTrends.value || !recurringTrends.value.trends || recurringTrends.value.trends.length === 0) return;
 
       const chart = echarts.init(trendChart.value);
 
@@ -1250,6 +1288,7 @@ export default {
 
     return {
       loading,
+      hasData,
       statusOverview,
       departmentAnalysis,
       valueTracking,
@@ -1654,6 +1693,48 @@ export default {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.no-data-container {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.no-data-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 50%;
+}
+
+.no-data-icon i {
+  font-size: 2.5rem;
+  color: #9ca3af;
+}
+
+.no-data-container h3 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.no-data-container p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 24px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .dashboard-content {
