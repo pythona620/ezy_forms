@@ -322,7 +322,7 @@
 <script>
 import { ref, onMounted, watch } from 'vue';
 import * as echarts from 'echarts';
-import { api_req_data } from '../../shared/services/api_req_data';
+import axiosInstance from '../../shared/services/interceptor';
 import { apiurls } from '../../shared/apiurls';
 
 export default {
@@ -421,13 +421,13 @@ export default {
           period: selectedPeriod.value
         };
 
-        // Call consolidated API
-        const response = await api_req_data(
+        // Call consolidated API using Axios instance
+        const response = await axiosInstance.get(
           '/api/method/ezy_forms.api.v1.new_dashboard.get_consolidated_dashboard',
-          params
+          { params }
         );
 
-        if (response.message.success) {
+        if (response.message && response.message.success) {
           const data = response.message.data;
           statusOverview.value = data.status_overview || {};
           departmentAnalysis.value = data.department_analysis || [];
