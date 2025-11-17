@@ -2,33 +2,46 @@
   <div class="new-dashboard-container">
     <!-- Filters Section -->
     <div class="filters-section card">
-      <div class="filters-header" @click="toggleFilters">
+      <div class="filters-header">
         <div class="filters-title">
-          <i class="pi pi-filter"></i>
-          <h3>Dashboard Filters & Export</h3>
+          <button class="filter-toggle-btn" @click="toggleFilters">
+            <i class="pi pi-filter"></i>
+            <span>Filters</span>
+            <i :class="['pi', filtersExpanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+          </button>
           <span v-if="activeFiltersCount > 0" class="active-count">{{ activeFiltersCount }} active</span>
         </div>
-        <div class="header-actions" @click.stop>
-          <button class="export-btn" @click="toggleExportMenu">
-            <i class="pi pi-download"></i>
-            Export
-            <i class="pi pi-chevron-down"></i>
+        <div class="header-actions">
+          <button class="btn-primary" @click="applyFilters" :disabled="loading">
+            <i class="pi pi-check"></i>
+            <span v-if="loading">Applying...</span>
+            <span v-else>Apply Filters</span>
           </button>
-          <div v-if="showExportMenu" class="export-menu">
-            <button @click="exportData('pdf')">
-              <i class="pi pi-file-pdf"></i>
-              Export as PDF
+          <button class="btn-secondary" @click="resetFilters">
+            <i class="pi pi-refresh"></i>
+            Reset All
+          </button>
+          <div class="export-dropdown">
+            <button class="export-btn" @click="toggleExportMenu">
+              <i class="pi pi-download"></i>
+              Export
+              <i class="pi pi-chevron-down"></i>
             </button>
-            <button @click="exportData('csv')">
-              <i class="pi pi-file"></i>
-              Export as CSV
-            </button>
-            <button @click="exportData('excel')">
-              <i class="pi pi-file-excel"></i>
-              Export as Excel
-            </button>
+            <div v-if="showExportMenu" class="export-menu">
+              <button @click="exportData('pdf')">
+                <i class="pi pi-file-pdf"></i>
+                Export as PDF
+              </button>
+              <button @click="exportData('csv')">
+                <i class="pi pi-file"></i>
+                Export as CSV
+              </button>
+              <button @click="exportData('excel')">
+                <i class="pi pi-file-excel"></i>
+                Export as Excel
+              </button>
+            </div>
           </div>
-          <i :class="['pi', filtersExpanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
         </div>
       </div>
 
@@ -63,13 +76,10 @@
 
       <transition name="filter-expand">
         <div v-show="filtersExpanded" class="filters-content">
-          <div class="filters-grid">
+          <div class="filters-row">
             <!-- Date Range Filter -->
             <div class="filter-item">
-              <label>
-                <i class="pi pi-calendar"></i>
-                Date Range
-              </label>
+              <label>Date Range</label>
               <div class="select-wrapper">
                 <select v-model="selectedDateRange" @change="handleDateRangeChange">
                   <option
@@ -84,29 +94,9 @@
               </div>
             </div>
 
-            <!-- Custom Date Range -->
-            <div v-if="selectedDateRange === 'custom'" class="filter-item">
-              <label>
-                <i class="pi pi-calendar-plus"></i>
-                From Date
-              </label>
-              <input type="date" v-model="customDateFrom" @change="applyFilters" />
-            </div>
-
-            <div v-if="selectedDateRange === 'custom'" class="filter-item">
-              <label>
-                <i class="pi pi-calendar-minus"></i>
-                To Date
-              </label>
-              <input type="date" v-model="customDateTo" @change="applyFilters" />
-            </div>
-
             <!-- Department Filter -->
             <div class="filter-item">
-              <label>
-                <i class="pi pi-building"></i>
-                Department
-              </label>
+              <label>Department</label>
               <div class="select-wrapper">
                 <select v-model="selectedDepartment" @change="applyFilters">
                   <option value="">All Departments</option>
@@ -124,10 +114,7 @@
 
             <!-- Form Type Filter -->
             <div class="filter-item">
-              <label>
-                <i class="pi pi-file"></i>
-                Form Type
-              </label>
+              <label>Form Type</label>
               <div class="select-wrapper">
                 <select v-model="selectedFormType" @change="applyFilters">
                   <option value="">All Forms</option>
@@ -145,10 +132,7 @@
 
             <!-- Business Unit Filter -->
             <div class="filter-item" v-if="availableBusinessUnits.length > 0">
-              <label>
-                <i class="pi pi-briefcase"></i>
-                Business Unit
-              </label>
+              <label>Business Unit</label>
               <div class="select-wrapper">
                 <select v-model="selectedProperty" @change="applyFilters">
                   <option value="">All Business Units</option>
@@ -166,10 +150,7 @@
 
             <!-- Period Filter (for trends) -->
             <div class="filter-item">
-              <label>
-                <i class="pi pi-chart-line"></i>
-                Trend Period
-              </label>
+              <label>Trend Period</label>
               <div class="select-wrapper">
                 <select v-model="selectedPeriod" @change="applyFilters">
                   <option value="daily">Daily</option>
@@ -181,17 +162,16 @@
             </div>
           </div>
 
-          <!-- Apply/Reset Buttons -->
-          <div class="filter-actions">
-            <button class="btn-primary" @click="applyFilters" :disabled="loading">
-              <i class="pi pi-check"></i>
-              <span v-if="loading">Applying...</span>
-              <span v-else>Apply Filters</span>
-            </button>
-            <button class="btn-secondary" @click="resetFilters">
-              <i class="pi pi-refresh"></i>
-              Reset All
-            </button>
+          <!-- Custom Date Range -->
+          <div v-if="selectedDateRange === 'custom'" class="custom-date-row">
+            <div class="filter-item">
+              <label>From Date</label>
+              <input type="date" v-model="customDateFrom" @change="applyFilters" />
+            </div>
+            <div class="filter-item">
+              <label>To Date</label>
+              <input type="date" v-model="customDateTo" @change="applyFilters" />
+            </div>
           </div>
         </div>
       </transition>
@@ -1341,21 +1321,49 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
+  padding: 12px 20px;
   border-bottom: 1px solid #f3f4f6;
 }
 
-.filters-header:hover {
-  background-color: #f9fafb;
+.filters-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.filter-toggle-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #f9fafb;
+}
+
+.filter-toggle-btn i.pi-filter {
+  font-size: 1rem;
+  color: #3b82f6;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.export-dropdown {
   position: relative;
 }
 
@@ -1363,7 +1371,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
@@ -1437,24 +1445,6 @@ export default {
   color: #3b82f6;
 }
 
-.filters-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filters-title i.pi-filter {
-  font-size: 1.2rem;
-  color: #3b82f6;
-}
-
-.filters-title h3 {
-  margin: 0;
-  color: #1f2937;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
 .active-count {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -1512,35 +1502,37 @@ export default {
 }
 
 .filters-content {
-  padding: 20px 24px 24px;
-  background: linear-gradient(to bottom, #fafbfc 0%, #ffffff 100%);
+  padding: 16px 20px;
+  background: #fafbfc;
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+.filters-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.custom-date-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .filter-item {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 180px;
 }
 
 .filter-item label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #374151;
-  font-size: 0.9rem;
-}
-
-.filter-item label i {
-  color: #6b7280;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
 }
 
 .select-wrapper {
@@ -1566,10 +1558,10 @@ export default {
 .filter-item select,
 .filter-item input {
   width: 100%;
-  padding: 11px 14px;
+  padding: 9px 12px;
   border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
   background: white;
   transition: all 0.2s;
   color: #1f2937;
@@ -1587,27 +1579,17 @@ export default {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-
-.filter-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: flex-end;
-  padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
-}
-
 .btn-primary,
 .btn-secondary {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  gap: 6px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
   white-space: nowrap;
 }
@@ -2034,34 +2016,60 @@ export default {
   border-color: #fca5a5;
 }
 
+@media (max-width: 1200px) {
+  .filters-row {
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    min-width: 200px;
+    flex: 1 1 calc(33.333% - 16px);
+  }
+}
+
 @media (max-width: 768px) {
   .new-dashboard-container {
     padding: 12px;
   }
 
   .filters-header {
-    padding: 16px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .filters-title {
+    flex-wrap: wrap;
   }
 
   .header-actions {
-    flex-direction: column;
-    align-items: flex-start;
     width: 100%;
+    justify-content: space-between;
   }
 
-  .export-btn {
-    width: 100%;
-    justify-content: center;
+  .export-btn,
+  .btn-primary,
+  .btn-secondary {
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 
   .export-menu {
-    left: 0;
+    left: auto;
     right: 0;
-    margin: 8px 16px 0;
   }
 
-  .filters-grid {
-    grid-template-columns: 1fr;
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .custom-date-row {
+    flex-direction: column;
+  }
+
+  .filter-item {
+    min-width: 100%;
+    width: 100%;
   }
 
   .stats-grid {
@@ -2097,17 +2105,6 @@ export default {
     width: 48px;
     height: 48px;
     font-size: 1.3rem;
-  }
-
-  .filter-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    justify-content: center;
   }
 
   .data-table th,
