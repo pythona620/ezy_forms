@@ -137,7 +137,7 @@ def get_department_wise_analysis(property=None, date_from=None, date_to=None, de
                 SUM(CASE WHEN wfr.status IN ('Request Raised', 'Request Raised Via QR Code') THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN wfr.status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
             FROM `tabWF Workflow Requests` wfr
-            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.user
+            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.emp_mail_id
             LEFT JOIN `tabEzy Departments` dept ON emp.department = dept.name
             WHERE wfr.docstatus != 2 {where_clause}
             GROUP BY dept.department_name, wfr.doctype_name
@@ -231,7 +231,7 @@ def get_form_value_tracking(property=None, date_from=None, date_to=None, departm
                 wfr.requested_on,
                 dept.department_name as department
             FROM `tabWF Workflow Requests` wfr
-            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.user
+            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.emp_mail_id
             LEFT JOIN `tabEzy Departments` dept ON emp.department = dept.name
             WHERE wfr.docstatus != 2 {where_clause}
             ORDER BY wfr.requested_on DESC
@@ -352,7 +352,7 @@ def get_recurring_form_trends(property=None, date_from=None, date_to=None, depar
                 wfr.doctype_name as form_type,
                 COUNT(*) as count
             FROM `tabWF Workflow Requests` wfr
-            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.user
+            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.emp_mail_id
             WHERE wfr.docstatus != 2 {where_clause}
             GROUP BY period, wfr.doctype_name
             ORDER BY period DESC, count DESC
@@ -368,7 +368,7 @@ def get_recurring_form_trends(property=None, date_from=None, date_to=None, depar
                 COUNT(DISTINCT DATE(wfr.requested_on)) as days_raised,
                 ROUND(COUNT(*) / GREATEST(DATEDIFF(MAX(wfr.requested_on), MIN(wfr.requested_on)), 1), 2) as avg_per_day
             FROM `tabWF Workflow Requests` wfr
-            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.user
+            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.emp_mail_id
             WHERE wfr.docstatus != 2 {where_clause}
             GROUP BY wfr.doctype_name
             ORDER BY total_count DESC
