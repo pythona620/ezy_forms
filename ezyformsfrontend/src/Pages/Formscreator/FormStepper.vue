@@ -3173,6 +3173,10 @@ const extractFieldsFromBlock = (block) => {
   if (!block || !block.sections) return [];
 
   const fields = [];
+
+  // Layout field types that should NOT be displayed in the Frappe UI
+  const layoutFieldTypes = ['Column Break', 'Section Break', 'Heading', 'Button'];
+
   block.sections.forEach(section => {
     if (!section.rows) return;
 
@@ -3183,6 +3187,11 @@ const extractFieldsFromBlock = (block) => {
         if (!column.fields) return;
 
         column.fields.forEach(field => {
+          // Skip layout fields - they shouldn't appear in the Frappe UI
+          if (layoutFieldTypes.includes(field.fieldtype)) {
+            return;
+          }
+
           // Clone the field to avoid reference issues
           fields.push({
             label: field.label || '',
@@ -3235,11 +3244,17 @@ const addFieldToBlock = (block, field) => {
 // Update field in complex structure
 const updateFieldInBlock = (block, flatIndex, updatedField) => {
   let currentIndex = 0;
+  const layoutFieldTypes = ['Column Break', 'Section Break', 'Heading', 'Button'];
 
   for (let section of block.sections || []) {
     for (let row of section.rows || []) {
       for (let column of row.columns || []) {
         for (let i = 0; i < (column.fields || []).length; i++) {
+          // Skip layout fields in counting
+          if (layoutFieldTypes.includes(column.fields[i].fieldtype)) {
+            continue;
+          }
+
           if (currentIndex === flatIndex) {
             // Update the field in place
             Object.assign(column.fields[i], updatedField);
@@ -3257,16 +3272,24 @@ const updateFieldInBlock = (block, flatIndex, updatedField) => {
 // Delete field from complex structure
 const deleteFieldFromBlock = (block, flatIndex) => {
   let currentIndex = 0;
+  const layoutFieldTypes = ['Column Break', 'Section Break', 'Heading', 'Button'];
 
   for (let section of block.sections || []) {
     for (let row of section.rows || []) {
       for (let column of row.columns || []) {
-        if (currentIndex + (column.fields || []).length > flatIndex) {
-          const localIndex = flatIndex - currentIndex;
-          column.fields.splice(localIndex, 1);
-          return true;
+        for (let i = 0; i < (column.fields || []).length; i++) {
+          // Skip layout fields in counting
+          if (layoutFieldTypes.includes(column.fields[i].fieldtype)) {
+            continue;
+          }
+
+          if (currentIndex === flatIndex) {
+            // Delete the field
+            column.fields.splice(i, 1);
+            return true;
+          }
+          currentIndex++;
         }
-        currentIndex += (column.fields || []).length;
       }
     }
   }
@@ -3306,10 +3329,11 @@ const reorderFieldsInBlock = (block, fromIndex, toIndex) => {
 // FRAPPE UI HELPER FUNCTIONS
 // ========================================
 
-// Computed: Get unique field categories
+// Computed: Get unique field categories (excluding Layout for cleaner UI)
 const fieldCategories = computed(() => {
   const categories = [...new Set(fieldTypes.map(ft => ft.category))];
-  return categories;
+  // Filter out Layout category to reduce confusion in simple interface
+  return categories.filter(cat => cat !== 'Layout');
 });
 
 // Get fields by category
