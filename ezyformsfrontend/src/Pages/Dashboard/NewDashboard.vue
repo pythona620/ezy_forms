@@ -1,20 +1,35 @@
 <template>
   <div class="new-dashboard-container">
-    <!-- Header -->
-    <div class="dashboard-header">
-      <h1>Insights Dashboard</h1>
-      <p class="subtitle">Comprehensive analytics and insights for your forms</p>
-    </div>
-
     <!-- Filters Section -->
     <div class="filters-section card">
       <div class="filters-header" @click="toggleFilters">
         <div class="filters-title">
           <i class="pi pi-filter"></i>
-          <h3>Filters</h3>
+          <h3>Dashboard Filters & Export</h3>
           <span v-if="activeFiltersCount > 0" class="active-count">{{ activeFiltersCount }} active</span>
         </div>
-        <i :class="['pi', filtersExpanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+        <div class="header-actions" @click.stop>
+          <button class="export-btn" @click="toggleExportMenu">
+            <i class="pi pi-download"></i>
+            Export
+            <i class="pi pi-chevron-down"></i>
+          </button>
+          <div v-if="showExportMenu" class="export-menu">
+            <button @click="exportData('pdf')">
+              <i class="pi pi-file-pdf"></i>
+              Export as PDF
+            </button>
+            <button @click="exportData('csv')">
+              <i class="pi pi-file"></i>
+              Export as CSV
+            </button>
+            <button @click="exportData('excel')">
+              <i class="pi pi-file-excel"></i>
+              Export as Excel
+            </button>
+          </div>
+          <i :class="['pi', filtersExpanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+        </div>
       </div>
 
       <!-- Active Filters Badges -->
@@ -55,34 +70,35 @@
                 <i class="pi pi-calendar"></i>
                 Date Range
               </label>
-              <div class="date-range-buttons">
-                <button
-                  v-for="range in dateRanges"
-                  :key="range.value"
-                  :class="['range-btn', { active: selectedDateRange === range.value }]"
-                  @click="selectDateRange(range.value)"
-                >
-                  {{ range.label }}
-                </button>
+              <div class="select-wrapper">
+                <select v-model="selectedDateRange" @change="handleDateRangeChange">
+                  <option
+                    v-for="range in dateRanges"
+                    :key="range.value"
+                    :value="range.value"
+                  >
+                    {{ range.label }}
+                  </option>
+                </select>
+                <i class="pi pi-chevron-down select-icon"></i>
               </div>
             </div>
 
             <!-- Custom Date Range -->
-            <div v-if="selectedDateRange === 'custom'" class="filter-item custom-dates">
-              <div class="date-input">
-                <label>
-                  <i class="pi pi-calendar-plus"></i>
-                  From Date
-                </label>
-                <input type="date" v-model="customDateFrom" @change="applyFilters" />
-              </div>
-              <div class="date-input">
-                <label>
-                  <i class="pi pi-calendar-minus"></i>
-                  To Date
-                </label>
-                <input type="date" v-model="customDateTo" @change="applyFilters" />
-              </div>
+            <div v-if="selectedDateRange === 'custom'" class="filter-item">
+              <label>
+                <i class="pi pi-calendar-plus"></i>
+                From Date
+              </label>
+              <input type="date" v-model="customDateFrom" @change="applyFilters" />
+            </div>
+
+            <div v-if="selectedDateRange === 'custom'" class="filter-item">
+              <label>
+                <i class="pi pi-calendar-minus"></i>
+                To Date
+              </label>
+              <input type="date" v-model="customDateTo" @change="applyFilters" />
             </div>
 
             <!-- Department Filter -->
@@ -191,7 +207,18 @@
     <div v-else class="dashboard-content">
       <!-- Form Status Overview -->
       <div class="insight-section">
-        <h2>Form Status Overview</h2>
+        <div class="section-header">
+          <h2>Form Status Overview</h2>
+          <div class="chart-controls">
+            <label>Chart Type:</label>
+            <select v-model="statusChartType" @change="renderStatusChart" class="chart-type-select">
+              <option value="pie">Pie Chart</option>
+              <option value="doughnut">Doughnut Chart</option>
+              <option value="bar">Bar Chart</option>
+              <option value="line">Line Chart</option>
+            </select>
+          </div>
+        </div>
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon completed">
@@ -248,7 +275,18 @@
 
       <!-- Department-Wise Analysis -->
       <div class="insight-section">
-        <h2>Department-Wise Form Analysis</h2>
+        <div class="section-header">
+          <h2>Department-Wise Form Analysis</h2>
+          <div class="chart-controls">
+            <label>Chart Type:</label>
+            <select v-model="departmentChartType" @change="renderDepartmentChart" class="chart-type-select">
+              <option value="bar">Stacked Bar Chart</option>
+              <option value="bar-grouped">Grouped Bar Chart</option>
+              <option value="line">Line Chart</option>
+              <option value="area">Area Chart</option>
+            </select>
+          </div>
+        </div>
         <div class="chart-container">
           <div ref="departmentChart" style="width: 100%; height: 400px"></div>
         </div>
@@ -358,7 +396,17 @@
 
       <!-- Recurring Form Trends -->
       <div class="insight-section">
-        <h2>Recurring Form Trends</h2>
+        <div class="section-header">
+          <h2>Recurring Form Trends</h2>
+          <div class="chart-controls">
+            <label>Chart Type:</label>
+            <select v-model="trendChartType" @change="renderTrendChart" class="chart-type-select">
+              <option value="line">Line Chart</option>
+              <option value="area">Area Chart</option>
+              <option value="bar">Bar Chart</option>
+            </select>
+          </div>
+        </div>
 
         <!-- Most Frequent Forms -->
         <div class="frequent-forms">
@@ -426,6 +474,14 @@ export default {
     const selectedProperty = ref('');
     const selectedPeriod = ref('weekly');
 
+    // Export menu
+    const showExportMenu = ref(false);
+
+    // Chart types
+    const statusChartType = ref('pie');
+    const departmentChartType = ref('bar');
+    const trendChartType = ref('line');
+
     // Chart refs
     const statusChart = ref(null);
     const departmentChart = ref(null);
@@ -479,11 +535,175 @@ export default {
       return { dateFrom, dateTo };
     };
 
-    const selectDateRange = (range) => {
-      selectedDateRange.value = range;
-      if (range !== 'custom') {
+    const handleDateRangeChange = () => {
+      if (selectedDateRange.value !== 'custom') {
         applyFilters();
       }
+    };
+
+    const toggleExportMenu = (event) => {
+      event.stopPropagation();
+      showExportMenu.value = !showExportMenu.value;
+    };
+
+    const exportData = async (format) => {
+      showExportMenu.value = false;
+
+      try {
+        if (format === 'csv') {
+          exportToCSV();
+        } else if (format === 'excel') {
+          exportToExcel();
+        } else if (format === 'pdf') {
+          exportToPDF();
+        }
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('Failed to export data. Please try again.');
+      }
+    };
+
+    const exportToCSV = () => {
+      // Prepare CSV data
+      const csvData = [];
+
+      // Add status overview
+      csvData.push(['Form Status Overview']);
+      csvData.push(['Status', 'Count']);
+      csvData.push(['Completed', statusOverview.value.Completed || 0]);
+      csvData.push(['Pending', statusOverview.value.Pending || 0]);
+      csvData.push(['In Progress', statusOverview.value['In Progress'] || 0]);
+      csvData.push(['Cancelled', statusOverview.value.Cancelled || 0]);
+      csvData.push(['Total', statusOverview.value.Total || 0]);
+      csvData.push([]);
+
+      // Add department analysis
+      csvData.push(['Department-Wise Analysis']);
+      csvData.push(['Department', 'Total Forms', 'Completed', 'Pending', 'In Progress']);
+      departmentAnalysis.value.forEach(dept => {
+        csvData.push([
+          dept.department,
+          dept.total_forms,
+          dept.completed,
+          dept.pending,
+          dept.in_progress
+        ]);
+      });
+
+      // Convert to CSV string
+      const csvContent = csvData.map(row => row.join(',')).join('\n');
+
+      // Download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `dashboard_export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    };
+
+    const exportToExcel = () => {
+      // For Excel export, we'll use the same CSV format but with .xlsx extension
+      // In a real implementation, you would use a library like xlsx or exceljs
+      const csvData = [];
+
+      csvData.push(['Dashboard Export - ' + new Date().toLocaleDateString()]);
+      csvData.push([]);
+
+      // Status overview
+      csvData.push(['Form Status Overview']);
+      csvData.push(['Status', 'Count']);
+      csvData.push(['Completed', statusOverview.value.Completed || 0]);
+      csvData.push(['Pending', statusOverview.value.Pending || 0]);
+      csvData.push(['In Progress', statusOverview.value['In Progress'] || 0]);
+      csvData.push(['Cancelled', statusOverview.value.Cancelled || 0]);
+      csvData.push(['Total', statusOverview.value.Total || 0]);
+      csvData.push([]);
+
+      // Department analysis
+      csvData.push(['Department-Wise Analysis']);
+      csvData.push(['Department', 'Total Forms', 'Completed', 'Pending', 'In Progress']);
+      departmentAnalysis.value.forEach(dept => {
+        csvData.push([
+          dept.department,
+          dept.total_forms,
+          dept.completed,
+          dept.pending,
+          dept.in_progress
+        ]);
+      });
+
+      const csvContent = csvData.map(row => row.join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `dashboard_export_${new Date().toISOString().split('T')[0]}.xls`;
+      link.click();
+    };
+
+    const exportToPDF = () => {
+      // For PDF export, we'll create a simple HTML version
+      // In production, you would use a library like jsPDF or html2pdf
+      const printWindow = window.open('', '_blank');
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Dashboard Export</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+            h2 { color: #374151; margin-top: 30px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+            th { background: #f3f4f6; font-weight: 600; }
+            .stat-card { display: inline-block; padding: 15px; margin: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+            @media print {
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px;">Print / Save as PDF</button>
+          <h1>Dashboard Export - ${new Date().toLocaleDateString()}</h1>
+
+          <h2>Form Status Overview</h2>
+          <div>
+            <div class="stat-card"><strong>Completed:</strong> ${statusOverview.value.Completed || 0}</div>
+            <div class="stat-card"><strong>Pending:</strong> ${statusOverview.value.Pending || 0}</div>
+            <div class="stat-card"><strong>In Progress:</strong> ${statusOverview.value['In Progress'] || 0}</div>
+            <div class="stat-card"><strong>Cancelled:</strong> ${statusOverview.value.Cancelled || 0}</div>
+            <div class="stat-card"><strong>Total:</strong> ${statusOverview.value.Total || 0}</div>
+          </div>
+
+          <h2>Department-Wise Analysis</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Total Forms</th>
+                <th>Completed</th>
+                <th>Pending</th>
+                <th>In Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${departmentAnalysis.value.map(dept => `
+                <tr>
+                  <td>${dept.department}</td>
+                  <td>${dept.total_forms}</td>
+                  <td>${dept.completed}</td>
+                  <td>${dept.pending}</td>
+                  <td>${dept.in_progress}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(printContent);
+      printWindow.document.close();
     };
 
     const loadDashboardData = async () => {
@@ -605,41 +825,115 @@ export default {
       if (!statusChart.value) return;
 
       const chart = echarts.init(statusChart.value);
-      const option = {
-        title: {
-          text: 'Form Status Distribution',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          top: 'middle'
-        },
-        series: [
-          {
-            name: 'Status',
-            type: 'pie',
-            radius: '60%',
-            data: [
-              { value: statusOverview.value.Completed || 0, name: 'Completed', itemStyle: { color: '#10b981' } },
-              { value: statusOverview.value.Pending || 0, name: 'Pending', itemStyle: { color: '#f59e0b' } },
-              { value: statusOverview.value['In Progress'] || 0, name: 'In Progress', itemStyle: { color: '#3b82f6' } },
-              { value: statusOverview.value.Cancelled || 0, name: 'Cancelled', itemStyle: { color: '#ef4444' } }
-            ],
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+      const statusData = [
+        { value: statusOverview.value.Completed || 0, name: 'Completed', itemStyle: { color: '#10b981' } },
+        { value: statusOverview.value.Pending || 0, name: 'Pending', itemStyle: { color: '#f59e0b' } },
+        { value: statusOverview.value['In Progress'] || 0, name: 'In Progress', itemStyle: { color: '#3b82f6' } },
+        { value: statusOverview.value.Cancelled || 0, name: 'Cancelled', itemStyle: { color: '#ef4444' } }
+      ];
+
+      let option;
+
+      if (statusChartType.value === 'pie' || statusChartType.value === 'doughnut') {
+        option = {
+          title: {
+            text: 'Form Status Distribution',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)'
+          },
+          legend: {
+            orient: 'vertical',
+            left: 'left',
+            top: 'middle'
+          },
+          series: [
+            {
+              name: 'Status',
+              type: 'pie',
+              radius: statusChartType.value === 'doughnut' ? ['40%', '70%'] : '60%',
+              data: statusData,
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
               }
             }
-          }
-        ]
-      };
+          ]
+        };
+      } else if (statusChartType.value === 'bar') {
+        option = {
+          title: {
+            text: 'Form Status Distribution',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          xAxis: {
+            type: 'category',
+            data: statusData.map(d => d.name)
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Count',
+              type: 'bar',
+              data: statusData.map(d => ({
+                value: d.value,
+                itemStyle: d.itemStyle
+              })),
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }
+          ]
+        };
+      } else if (statusChartType.value === 'line') {
+        option = {
+          title: {
+            text: 'Form Status Distribution',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          xAxis: {
+            type: 'category',
+            data: statusData.map(d => d.name)
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Count',
+              type: 'line',
+              smooth: true,
+              data: statusData.map(d => d.value),
+              itemStyle: {
+                color: '#3b82f6'
+              },
+              areaStyle: {
+                color: 'rgba(59, 130, 246, 0.1)'
+              }
+            }
+          ]
+        };
+      }
 
       chart.setOption(option);
     };
@@ -649,61 +943,214 @@ export default {
 
       const chart = echarts.init(departmentChart.value);
       const departments = departmentAnalysis.value.map(d => d.department);
-      const totals = departmentAnalysis.value.map(d => d.total_forms);
       const completed = departmentAnalysis.value.map(d => d.completed);
       const pending = departmentAnalysis.value.map(d => d.pending);
       const inProgress = departmentAnalysis.value.map(d => d.in_progress);
 
-      const option = {
-        title: {
-          text: 'Forms by Department',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        legend: {
-          data: ['Completed', 'Pending', 'In Progress'],
-          top: 'bottom'
-        },
-        xAxis: {
-          type: 'category',
-          data: departments,
-          axisLabel: {
-            rotate: 45,
-            interval: 0
-          }
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            name: 'Completed',
-            type: 'bar',
-            stack: 'total',
-            data: completed,
-            itemStyle: { color: '#10b981' }
+      let option;
+
+      if (departmentChartType.value === 'bar') {
+        option = {
+          title: {
+            text: 'Forms by Department',
+            left: 'center'
           },
-          {
-            name: 'Pending',
-            type: 'bar',
-            stack: 'total',
-            data: pending,
-            itemStyle: { color: '#f59e0b' }
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
           },
-          {
-            name: 'In Progress',
-            type: 'bar',
-            stack: 'total',
-            data: inProgress,
-            itemStyle: { color: '#3b82f6' }
-          }
-        ]
-      };
+          legend: {
+            data: ['Completed', 'Pending', 'In Progress'],
+            top: 'bottom'
+          },
+          xAxis: {
+            type: 'category',
+            data: departments,
+            axisLabel: {
+              rotate: 45,
+              interval: 0
+            }
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Completed',
+              type: 'bar',
+              stack: 'total',
+              data: completed,
+              itemStyle: { color: '#10b981' }
+            },
+            {
+              name: 'Pending',
+              type: 'bar',
+              stack: 'total',
+              data: pending,
+              itemStyle: { color: '#f59e0b' }
+            },
+            {
+              name: 'In Progress',
+              type: 'bar',
+              stack: 'total',
+              data: inProgress,
+              itemStyle: { color: '#3b82f6' }
+            }
+          ]
+        };
+      } else if (departmentChartType.value === 'bar-grouped') {
+        option = {
+          title: {
+            text: 'Forms by Department',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          legend: {
+            data: ['Completed', 'Pending', 'In Progress'],
+            top: 'bottom'
+          },
+          xAxis: {
+            type: 'category',
+            data: departments,
+            axisLabel: {
+              rotate: 45,
+              interval: 0
+            }
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Completed',
+              type: 'bar',
+              data: completed,
+              itemStyle: { color: '#10b981' }
+            },
+            {
+              name: 'Pending',
+              type: 'bar',
+              data: pending,
+              itemStyle: { color: '#f59e0b' }
+            },
+            {
+              name: 'In Progress',
+              type: 'bar',
+              data: inProgress,
+              itemStyle: { color: '#3b82f6' }
+            }
+          ]
+        };
+      } else if (departmentChartType.value === 'line') {
+        option = {
+          title: {
+            text: 'Forms by Department',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: ['Completed', 'Pending', 'In Progress'],
+            top: 'bottom'
+          },
+          xAxis: {
+            type: 'category',
+            data: departments,
+            axisLabel: {
+              rotate: 45,
+              interval: 0
+            }
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Completed',
+              type: 'line',
+              smooth: true,
+              data: completed,
+              itemStyle: { color: '#10b981' }
+            },
+            {
+              name: 'Pending',
+              type: 'line',
+              smooth: true,
+              data: pending,
+              itemStyle: { color: '#f59e0b' }
+            },
+            {
+              name: 'In Progress',
+              type: 'line',
+              smooth: true,
+              data: inProgress,
+              itemStyle: { color: '#3b82f6' }
+            }
+          ]
+        };
+      } else if (departmentChartType.value === 'area') {
+        option = {
+          title: {
+            text: 'Forms by Department',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: ['Completed', 'Pending', 'In Progress'],
+            top: 'bottom'
+          },
+          xAxis: {
+            type: 'category',
+            data: departments,
+            axisLabel: {
+              rotate: 45,
+              interval: 0
+            }
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Completed',
+              type: 'line',
+              smooth: true,
+              data: completed,
+              itemStyle: { color: '#10b981' },
+              areaStyle: { color: 'rgba(16, 185, 129, 0.3)' },
+              stack: 'total'
+            },
+            {
+              name: 'Pending',
+              type: 'line',
+              smooth: true,
+              data: pending,
+              itemStyle: { color: '#f59e0b' },
+              areaStyle: { color: 'rgba(245, 158, 11, 0.3)' },
+              stack: 'total'
+            },
+            {
+              name: 'In Progress',
+              type: 'line',
+              smooth: true,
+              data: inProgress,
+              itemStyle: { color: '#3b82f6' },
+              areaStyle: { color: 'rgba(59, 130, 246, 0.3)' },
+              stack: 'total'
+            }
+          ]
+        };
+      }
 
       chart.setOption(option);
     };
@@ -729,14 +1176,35 @@ export default {
       const periods = [...new Set(recurringTrends.value.trends.map(t => t.period))].sort();
 
       // Create series for each form type
-      const series = Object.keys(trendsByType).slice(0, 5).map(formType => ({
+      const baseSeriesConfig = Object.keys(trendsByType).slice(0, 5).map(formType => ({
         name: formType,
-        type: 'line',
         data: periods.map(period => {
           const trend = trendsByType[formType].find(t => t.period === period);
           return trend ? trend.count : 0;
         })
       }));
+
+      let series;
+
+      if (trendChartType.value === 'line') {
+        series = baseSeriesConfig.map(s => ({
+          ...s,
+          type: 'line',
+          smooth: true
+        }));
+      } else if (trendChartType.value === 'area') {
+        series = baseSeriesConfig.map(s => ({
+          ...s,
+          type: 'line',
+          smooth: true,
+          areaStyle: {}
+        }));
+      } else if (trendChartType.value === 'bar') {
+        series = baseSeriesConfig.map(s => ({
+          ...s,
+          type: 'bar'
+        }));
+      }
 
       const option = {
         title: {
@@ -818,10 +1286,16 @@ export default {
       selectedProperty,
       selectedPeriod,
       dateRanges,
+      showExportMenu,
+      statusChartType,
+      departmentChartType,
+      trendChartType,
       statusChart,
       departmentChart,
       trendChart,
-      selectDateRange,
+      handleDateRangeChange,
+      toggleExportMenu,
+      exportData,
       applyFilters,
       resetFilters,
       toggleFilters,
@@ -848,27 +1322,6 @@ export default {
   margin: 0 auto;
 }
 
-.dashboard-header {
-  margin-bottom: 32px;
-  padding: 24px 0;
-  border-bottom: 2px solid #f3f4f6;
-}
-
-.dashboard-header h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #1f2937 0%, #4b5563 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  color: #6b7280;
-  font-size: 1.05rem;
-  font-weight: 400;
-}
 
 .card {
   background: white;
@@ -897,6 +1350,91 @@ export default {
 
 .filters-header:hover {
   background-color: #f9fafb;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.export-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  z-index: 100;
+  min-width: 200px;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.export-menu button:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.export-menu button i {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.export-menu button:hover i {
+  color: #3b82f6;
 }
 
 .filters-title {
@@ -1049,54 +1587,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.date-range-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.range-btn {
-  padding: 9px 18px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #4b5563;
-}
-
-.range-btn:hover {
-  background: #f9fafb;
-  border-color: #3b82f6;
-  color: #3b82f6;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
-}
-
-.range-btn.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
-}
-
-.custom-dates {
-  grid-column: span 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.date-input {
-  display: flex;
-  flex-direction: column;
-}
 
 .filter-actions {
   display: flex;
@@ -1227,6 +1717,58 @@ export default {
   font-weight: 600;
   color: #374151;
   margin: 24px 0 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-controls label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.chart-type-select {
+  padding: 8px 32px 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.chart-type-select:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chart-type-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .stats-grid {
@@ -1497,25 +2039,28 @@ export default {
     padding: 12px;
   }
 
-  .dashboard-header {
-    margin-bottom: 20px;
-    padding: 16px 0;
+  .filters-header {
+    padding: 16px;
   }
 
-  .dashboard-header h1 {
-    font-size: 1.75rem;
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
   }
 
-  .subtitle {
-    font-size: 0.95rem;
+  .export-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .export-menu {
+    left: 0;
+    right: 0;
+    margin: 8px 16px 0;
   }
 
   .filters-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .custom-dates {
-    grid-column: span 1;
     grid-template-columns: 1fr;
   }
 
@@ -1525,6 +2070,19 @@ export default {
 
   .insight-section {
     padding: 20px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-controls {
+    width: 100%;
+  }
+
+  .chart-type-select {
+    flex: 1;
   }
 
   .insight-section h2 {
