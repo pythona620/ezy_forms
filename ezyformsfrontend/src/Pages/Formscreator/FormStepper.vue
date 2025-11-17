@@ -3164,6 +3164,148 @@ const SELECT_ALL = "Select All"; // Special option for "Select All"
 // Frappe Builder Helper Functions
 // ========================================
 
+// ========================================
+// ADAPTER FUNCTIONS: Bridge between complex structure and simple Frappe UI
+// ========================================
+
+// Extract all fields from complex structure (sections/rows/columns/fields) into flat array
+const extractFieldsFromBlock = (block) => {
+  if (!block || !block.sections) return [];
+
+  const fields = [];
+  block.sections.forEach(section => {
+    if (!section.rows) return;
+
+    section.rows.forEach(row => {
+      if (!row.columns) return;
+
+      row.columns.forEach(column => {
+        if (!column.fields) return;
+
+        column.fields.forEach(field => {
+          // Clone the field to avoid reference issues
+          fields.push({
+            label: field.label || '',
+            fieldtype: field.fieldtype || '',
+            fieldname: field.fieldname || '',
+            options: field.options || '',
+            reqd: field.reqd || 0,
+            read_only: field.read_only || 0,
+            hidden: field.hidden || 0,
+            description: field.description || '',
+            default: field.default || '',
+            value: field.value || ''
+          });
+        });
+      });
+    });
+  });
+
+  return fields;
+};
+
+// Add field to complex structure (puts field in first section, first row, first column)
+const addFieldToBlock = (block, field) => {
+  // Ensure structure exists
+  if (!block.sections || block.sections.length === 0) {
+    block.sections = [{
+      label: '',
+      rows: []
+    }];
+  }
+
+  if (!block.sections[0].rows || block.sections[0].rows.length === 0) {
+    block.sections[0].rows = [{
+      label: '',
+      columns: []
+    }];
+  }
+
+  if (!block.sections[0].rows[0].columns || block.sections[0].rows[0].columns.length === 0) {
+    block.sections[0].rows[0].columns = [{
+      label: '',
+      fields: []
+    }];
+  }
+
+  // Add field to first column
+  block.sections[0].rows[0].columns[0].fields.push(field);
+};
+
+// Update field in complex structure
+const updateFieldInBlock = (block, flatIndex, updatedField) => {
+  let currentIndex = 0;
+
+  for (let section of block.sections || []) {
+    for (let row of section.rows || []) {
+      for (let column of row.columns || []) {
+        for (let i = 0; i < (column.fields || []).length; i++) {
+          if (currentIndex === flatIndex) {
+            // Update the field in place
+            Object.assign(column.fields[i], updatedField);
+            return true;
+          }
+          currentIndex++;
+        }
+      }
+    }
+  }
+
+  return false;
+};
+
+// Delete field from complex structure
+const deleteFieldFromBlock = (block, flatIndex) => {
+  let currentIndex = 0;
+
+  for (let section of block.sections || []) {
+    for (let row of section.rows || []) {
+      for (let column of row.columns || []) {
+        if (currentIndex + (column.fields || []).length > flatIndex) {
+          const localIndex = flatIndex - currentIndex;
+          column.fields.splice(localIndex, 1);
+          return true;
+        }
+        currentIndex += (column.fields || []).length;
+      }
+    }
+  }
+
+  return false;
+};
+
+// Reorder fields in complex structure
+const reorderFieldsInBlock = (block, fromIndex, toIndex) => {
+  // Extract all fields
+  const allFields = extractFieldsFromBlock(block);
+
+  // Reorder
+  const [movedField] = allFields.splice(fromIndex, 1);
+  allFields.splice(toIndex, 0, movedField);
+
+  // Clear all fields from structure
+  for (let section of block.sections || []) {
+    for (let row of section.rows || []) {
+      for (let column of row.columns || []) {
+        column.fields = [];
+      }
+    }
+  }
+
+  // Add all fields back in new order
+  allFields.forEach(field => {
+    if (block.sections && block.sections[0] && block.sections[0].rows &&
+        block.sections[0].rows[0] && block.sections[0].rows[0].columns &&
+        block.sections[0].rows[0].columns[0]) {
+      block.sections[0].rows[0].columns[0].fields.push(field);
+    }
+  });
+};
+
+// ========================================
+// FRAPPE UI HELPER FUNCTIONS
+// ========================================
+
 // Computed: Get unique field categories
 const fieldCategories = computed(() => {
   const categories = [...new Set(fieldTypes.map(ft => ft.category))];
@@ -3181,10 +3323,11 @@ const getFieldIcon = (fieldtype) => {
   return field?.icon || 'bi-file-text';
 };
 
-// Get current block fields
+// Get current block fields (extracts from complex structure)
 const getCurrentBlockFields = () => {
-  if (!blockArr.value[currentBuilderTab.value]) return [];
-  return blockArr.value[currentBuilderTab.value].fields || [];
+  const block = blockArr[currentBuilderTab.value];
+  if (!block) return [];
+  return extractFieldsFromBlock(block);
 };
 
 // Get current block field count
@@ -3206,14 +3349,19 @@ const selectField = (index) => {
 
 // Update field (triggered on property change)
 const updateField = () => {
+  if (selectedFieldIndex.value === null) return;
+
+  const currentBlock = blockArr[currentBuilderTab.value];
+  if (!currentBlock) return;
+
+  // Get the updated field from the UI
+  const updatedField = getSelectedField();
+
+  // Update the complex structure
+  updateFieldInBlock(currentBlock, selectedFieldIndex.value, updatedField);
+
   // Force reactivity update
-  if (selectedFieldIndex.value !== null) {
-    const currentBlock = blockArr.value[currentBuilderTab.value];
-    if (currentBlock && currentBlock.fields) {
-      // Trigger reactivity
-      currentBlock.fields = [...currentBlock.fields];
-    }
-  }
+  blockArr.splice(currentBuilderTab.value, 1, {...currentBlock});
 };
 
 // Handle field type change
@@ -3230,12 +3378,8 @@ const onFieldTypeChange = () => {
 
 // Add field to canvas from library
 const addFieldToCanvas = (fieldType) => {
-  const currentBlock = blockArr.value[currentBuilderTab.value];
+  const currentBlock = blockArr[currentBuilderTab.value];
   if (!currentBlock) return;
-
-  if (!currentBlock.fields) {
-    currentBlock.fields = [];
-  }
 
   // Create new field object
   const newField = {
@@ -3248,13 +3392,20 @@ const addFieldToCanvas = (fieldType) => {
     options: '',
     description: '',
     default: '',
-    idx: currentBlock.fields.length + 1
+    value: ''
   };
 
-  currentBlock.fields.push(newField);
+  // Add to complex structure
+  addFieldToBlock(currentBlock, newField);
+
+  // Force reactivity update
+  blockArr.splice(currentBuilderTab.value, 1, {...currentBlock});
 
   // Auto-select the newly added field
-  selectedFieldIndex.value = currentBlock.fields.length - 1;
+  const allFields = extractFieldsFromBlock(currentBlock);
+  selectedFieldIndex.value = allFields.length - 1;
+
+  showSuccess(`${fieldType.label} field added successfully`);
 };
 
 // Generate field name from label
@@ -3267,29 +3418,39 @@ const generateFieldName = (label) => {
 
 // Duplicate a field
 const duplicateField = (index) => {
-  const currentBlock = blockArr.value[currentBuilderTab.value];
-  if (!currentBlock || !currentBlock.fields) return;
+  const currentBlock = blockArr[currentBuilderTab.value];
+  if (!currentBlock) return;
 
-  const originalField = currentBlock.fields[index];
+  const allFields = extractFieldsFromBlock(currentBlock);
+  if (index < 0 || index >= allFields.length) return;
+
+  const originalField = allFields[index];
   const duplicatedField = {
     ...originalField,
     label: `${originalField.label} (Copy)`,
-    fieldname: `${originalField.fieldname}_copy_${Date.now()}`,
-    idx: currentBlock.fields.length + 1
+    fieldname: `${originalField.fieldname || generateFieldName(originalField.label)}_copy_${Date.now()}`
   };
 
-  currentBlock.fields.push(duplicatedField);
+  // Add duplicated field to complex structure
+  addFieldToBlock(currentBlock, duplicatedField);
+
+  // Force reactivity update
+  blockArr.splice(currentBuilderTab.value, 1, {...currentBlock});
 
   // Select the duplicated field
-  selectedFieldIndex.value = currentBlock.fields.length - 1;
+  const updatedFields = extractFieldsFromBlock(currentBlock);
+  selectedFieldIndex.value = updatedFields.length - 1;
 
   showSuccess('Field duplicated successfully');
 };
 
 // Delete a field
 const deleteField = (index) => {
-  const currentBlock = blockArr.value[currentBuilderTab.value];
-  if (!currentBlock || !currentBlock.fields) return;
+  const currentBlock = blockArr[currentBuilderTab.value];
+  if (!currentBlock) return;
+
+  const allFields = extractFieldsFromBlock(currentBlock);
+  if (index < 0 || index >= allFields.length) return;
 
   // Clear selection if deleting selected field
   if (selectedFieldIndex.value === index) {
@@ -3299,12 +3460,11 @@ const deleteField = (index) => {
     selectedFieldIndex.value--;
   }
 
-  currentBlock.fields.splice(index, 1);
+  // Delete from complex structure
+  deleteFieldFromBlock(currentBlock, index);
 
-  // Re-index fields
-  currentBlock.fields.forEach((field, idx) => {
-    field.idx = idx + 1;
-  });
+  // Force reactivity update
+  blockArr.splice(currentBuilderTab.value, 1, {...currentBlock});
 
   showSuccess('Field deleted successfully');
 };
@@ -3322,22 +3482,16 @@ const onFieldDragStart = (index) => {
 const onFieldDrop = (dropIndex) => {
   if (draggedFieldIndex.value === null) return;
 
-  const currentBlock = blockArr.value[currentBuilderTab.value];
-  if (!currentBlock || !currentBlock.fields) return;
+  const currentBlock = blockArr[currentBuilderTab.value];
+  if (!currentBlock) return;
 
   const dragIndex = draggedFieldIndex.value;
 
-  // Reorder fields
-  const fields = [...currentBlock.fields];
-  const [draggedField] = fields.splice(dragIndex, 1);
-  fields.splice(dropIndex, 0, draggedField);
+  // Reorder fields in complex structure
+  reorderFieldsInBlock(currentBlock, dragIndex, dropIndex);
 
-  // Re-index
-  fields.forEach((field, idx) => {
-    field.idx = idx + 1;
-  });
-
-  currentBlock.fields = fields;
+  // Force reactivity update
+  blockArr.splice(currentBuilderTab.value, 1, {...currentBlock});
 
   // Update selection
   if (selectedFieldIndex.value === dragIndex) {
