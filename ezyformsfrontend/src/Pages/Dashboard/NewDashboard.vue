@@ -8,99 +8,177 @@
 
     <!-- Filters Section -->
     <div class="filters-section card">
-      <h3>Filters</h3>
-      <div class="filters-grid">
-        <!-- Date Range Filter -->
-        <div class="filter-item">
-          <label>Date Range</label>
-          <div class="date-range-buttons">
-            <button
-              v-for="range in dateRanges"
-              :key="range.value"
-              :class="['range-btn', { active: selectedDateRange === range.value }]"
-              @click="selectDateRange(range.value)"
-            >
-              {{ range.label }}
+      <div class="filters-header" @click="toggleFilters">
+        <div class="filters-title">
+          <i class="pi pi-filter"></i>
+          <h3>Filters</h3>
+          <span v-if="activeFiltersCount > 0" class="active-count">{{ activeFiltersCount }} active</span>
+        </div>
+        <i :class="['pi', filtersExpanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+      </div>
+
+      <!-- Active Filters Badges -->
+      <div v-if="activeFiltersCount > 0 && !filtersExpanded" class="active-filters-preview">
+        <span v-if="selectedDateRange !== 'last30days'" class="filter-badge">
+          <i class="pi pi-calendar"></i>
+          {{ dateRanges.find(r => r.value === selectedDateRange)?.label || 'Custom Date' }}
+          <i class="pi pi-times" @click.stop="clearDateRange"></i>
+        </span>
+        <span v-if="selectedDepartment" class="filter-badge">
+          <i class="pi pi-building"></i>
+          {{ getDepartmentLabel(selectedDepartment) }}
+          <i class="pi pi-times" @click.stop="clearDepartment"></i>
+        </span>
+        <span v-if="selectedFormType" class="filter-badge">
+          <i class="pi pi-file"></i>
+          {{ selectedFormType }}
+          <i class="pi pi-times" @click.stop="clearFormType"></i>
+        </span>
+        <span v-if="selectedProperty" class="filter-badge">
+          <i class="pi pi-briefcase"></i>
+          {{ getBusinessUnitLabel(selectedProperty) }}
+          <i class="pi pi-times" @click.stop="clearProperty"></i>
+        </span>
+        <span v-if="selectedPeriod !== 'weekly'" class="filter-badge">
+          <i class="pi pi-chart-line"></i>
+          {{ selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1) }}
+          <i class="pi pi-times" @click.stop="clearPeriod"></i>
+        </span>
+      </div>
+
+      <transition name="filter-expand">
+        <div v-show="filtersExpanded" class="filters-content">
+          <div class="filters-grid">
+            <!-- Date Range Filter -->
+            <div class="filter-item">
+              <label>
+                <i class="pi pi-calendar"></i>
+                Date Range
+              </label>
+              <div class="date-range-buttons">
+                <button
+                  v-for="range in dateRanges"
+                  :key="range.value"
+                  :class="['range-btn', { active: selectedDateRange === range.value }]"
+                  @click="selectDateRange(range.value)"
+                >
+                  {{ range.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Date Range -->
+            <div v-if="selectedDateRange === 'custom'" class="filter-item custom-dates">
+              <div class="date-input">
+                <label>
+                  <i class="pi pi-calendar-plus"></i>
+                  From Date
+                </label>
+                <input type="date" v-model="customDateFrom" @change="applyFilters" />
+              </div>
+              <div class="date-input">
+                <label>
+                  <i class="pi pi-calendar-minus"></i>
+                  To Date
+                </label>
+                <input type="date" v-model="customDateTo" @change="applyFilters" />
+              </div>
+            </div>
+
+            <!-- Department Filter -->
+            <div class="filter-item">
+              <label>
+                <i class="pi pi-building"></i>
+                Department
+              </label>
+              <div class="select-wrapper">
+                <select v-model="selectedDepartment" @change="applyFilters">
+                  <option value="">All Departments</option>
+                  <option
+                    v-for="dept in availableDepartments"
+                    :key="dept.name"
+                    :value="dept.name"
+                  >
+                    {{ dept.department_name }}
+                  </option>
+                </select>
+                <i class="pi pi-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <!-- Form Type Filter -->
+            <div class="filter-item">
+              <label>
+                <i class="pi pi-file"></i>
+                Form Type
+              </label>
+              <div class="select-wrapper">
+                <select v-model="selectedFormType" @change="applyFilters">
+                  <option value="">All Forms</option>
+                  <option
+                    v-for="form in availableFormTypes"
+                    :key="form.form_type"
+                    :value="form.form_type"
+                  >
+                    {{ form.form_type }}
+                  </option>
+                </select>
+                <i class="pi pi-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <!-- Business Unit Filter -->
+            <div class="filter-item" v-if="availableBusinessUnits.length > 0">
+              <label>
+                <i class="pi pi-briefcase"></i>
+                Business Unit
+              </label>
+              <div class="select-wrapper">
+                <select v-model="selectedProperty" @change="applyFilters">
+                  <option value="">All Business Units</option>
+                  <option
+                    v-for="unit in availableBusinessUnits"
+                    :key="unit.name"
+                    :value="unit.name"
+                  >
+                    {{ unit.label }}
+                  </option>
+                </select>
+                <i class="pi pi-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <!-- Period Filter (for trends) -->
+            <div class="filter-item">
+              <label>
+                <i class="pi pi-chart-line"></i>
+                Trend Period
+              </label>
+              <div class="select-wrapper">
+                <select v-model="selectedPeriod" @change="applyFilters">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+                <i class="pi pi-chevron-down select-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Apply/Reset Buttons -->
+          <div class="filter-actions">
+            <button class="btn-primary" @click="applyFilters" :disabled="loading">
+              <i class="pi pi-check"></i>
+              <span v-if="loading">Applying...</span>
+              <span v-else>Apply Filters</span>
+            </button>
+            <button class="btn-secondary" @click="resetFilters">
+              <i class="pi pi-refresh"></i>
+              Reset All
             </button>
           </div>
         </div>
-
-        <!-- Custom Date Range -->
-        <div v-if="selectedDateRange === 'custom'" class="filter-item custom-dates">
-          <div class="date-input">
-            <label>From Date</label>
-            <input type="date" v-model="customDateFrom" @change="applyFilters" />
-          </div>
-          <div class="date-input">
-            <label>To Date</label>
-            <input type="date" v-model="customDateTo" @change="applyFilters" />
-          </div>
-        </div>
-
-        <!-- Department Filter -->
-        <div class="filter-item">
-          <label>Department</label>
-          <select v-model="selectedDepartment" @change="applyFilters">
-            <option value="">All Departments</option>
-            <option
-              v-for="dept in availableDepartments"
-              :key="dept.name"
-              :value="dept.name"
-            >
-              {{ dept.department_name }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Form Type Filter -->
-        <div class="filter-item">
-          <label>Form Type</label>
-          <select v-model="selectedFormType" @change="applyFilters">
-            <option value="">All Forms</option>
-            <option
-              v-for="form in availableFormTypes"
-              :key="form.form_type"
-              :value="form.form_type"
-            >
-              {{ form.form_type }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Business Unit Filter -->
-        <div class="filter-item" v-if="availableBusinessUnits.length > 0">
-          <label>Business Unit</label>
-          <select v-model="selectedProperty" @change="applyFilters">
-            <option value="">All Business Units</option>
-            <option
-              v-for="unit in availableBusinessUnits"
-              :key="unit.name"
-              :value="unit.name"
-            >
-              {{ unit.label }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Period Filter (for trends) -->
-        <div class="filter-item">
-          <label>Trend Period</label>
-          <select v-model="selectedPeriod" @change="applyFilters">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
-
-        <!-- Apply/Reset Buttons -->
-        <div class="filter-actions">
-          <button class="btn-primary" @click="applyFilters" :disabled="loading">
-            <span v-if="loading">Loading...</span>
-            <span v-else>Apply Filters</span>
-          </button>
-          <button class="btn-secondary" @click="resetFilters">Reset</button>
-        </div>
-      </div>
+      </transition>
     </div>
 
     <!-- Loading State -->
@@ -320,7 +398,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import * as echarts from 'echarts';
 import axiosInstance from '../../shared/services/interceptor';
 import { apiurls } from '../../shared/apiurls';
@@ -339,6 +417,7 @@ export default {
     const availableBusinessUnits = ref([]);
 
     // Filter states
+    const filtersExpanded = ref(true);
     const selectedDateRange = ref('last30days');
     const customDateFrom = ref('');
     const customDateTo = ref('');
@@ -468,6 +547,58 @@ export default {
       selectedProperty.value = '';
       selectedPeriod.value = 'weekly';
       applyFilters();
+    };
+
+    // Filter UI methods
+    const toggleFilters = () => {
+      filtersExpanded.value = !filtersExpanded.value;
+    };
+
+    const activeFiltersCount = computed(() => {
+      let count = 0;
+      if (selectedDateRange.value !== 'last30days') count++;
+      if (selectedDepartment.value) count++;
+      if (selectedFormType.value) count++;
+      if (selectedProperty.value) count++;
+      if (selectedPeriod.value !== 'weekly') count++;
+      return count;
+    });
+
+    const clearDateRange = () => {
+      selectedDateRange.value = 'last30days';
+      customDateFrom.value = '';
+      customDateTo.value = '';
+      applyFilters();
+    };
+
+    const clearDepartment = () => {
+      selectedDepartment.value = '';
+      applyFilters();
+    };
+
+    const clearFormType = () => {
+      selectedFormType.value = '';
+      applyFilters();
+    };
+
+    const clearProperty = () => {
+      selectedProperty.value = '';
+      applyFilters();
+    };
+
+    const clearPeriod = () => {
+      selectedPeriod.value = 'weekly';
+      applyFilters();
+    };
+
+    const getDepartmentLabel = (name) => {
+      const dept = availableDepartments.value.find(d => d.name === name);
+      return dept ? dept.department_name : name;
+    };
+
+    const getBusinessUnitLabel = (name) => {
+      const unit = availableBusinessUnits.value.find(u => u.name === name);
+      return unit ? unit.label : name;
     };
 
     const renderStatusChart = () => {
@@ -678,6 +809,7 @@ export default {
       availableDepartments,
       availableFormTypes,
       availableBusinessUnits,
+      filtersExpanded,
       selectedDateRange,
       customDateFrom,
       customDateTo,
@@ -692,6 +824,15 @@ export default {
       selectDateRange,
       applyFilters,
       resetFilters,
+      toggleFilters,
+      activeFiltersCount,
+      clearDateRange,
+      clearDepartment,
+      clearFormType,
+      clearProperty,
+      clearPeriod,
+      getDepartmentLabel,
+      getBusinessUnitLabel,
       formatCurrency,
       formatDate,
       getStatusClass
@@ -708,37 +849,140 @@ export default {
 }
 
 .dashboard-header {
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  padding: 24px 0;
+  border-bottom: 2px solid #f3f4f6;
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
-  color: #1f2937;
+  font-size: 2.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f2937 0%, #4b5563 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 8px;
 }
 
 .subtitle {
   color: #6b7280;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 400;
 }
 
 .card {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
-.filters-section h3 {
-  margin-bottom: 20px;
+.filters-section {
+  transition: all 0.3s ease;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.filters-header:hover {
+  background-color: #f9fafb;
+}
+
+.filters-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filters-title i.pi-filter {
+  font-size: 1.2rem;
+  color: #3b82f6;
+}
+
+.filters-title h3 {
+  margin: 0;
   color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.active-count {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.active-filters-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 24px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filter-badge i.pi-times {
+  cursor: pointer;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  padding: 2px;
+}
+
+.filter-badge i.pi-times:hover {
+  opacity: 1;
+  color: #ef4444;
+}
+
+.filter-expand-enter-active,
+.filter-expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 1000px;
+  overflow: hidden;
+}
+
+.filter-expand-enter-from,
+.filter-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.filters-content {
+  padding: 20px 24px 24px;
+  background: linear-gradient(to bottom, #fafbfc 0%, #ffffff 100%);
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
+  margin-bottom: 24px;
 }
 
 .filter-item {
@@ -747,17 +991,62 @@ export default {
 }
 
 .filter-item label {
-  font-weight: 500;
-  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 10px;
   color: #374151;
+  font-size: 0.9rem;
+}
+
+.filter-item label i {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  appearance: none;
+  padding-right: 40px;
+}
+
+.select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+  font-size: 0.85rem;
 }
 
 .filter-item select,
 .filter-item input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
   font-size: 0.95rem;
+  background: white;
+  transition: all 0.2s;
+  color: #1f2937;
+}
+
+.filter-item select:hover,
+.filter-item input:hover {
+  border-color: #d1d5db;
+}
+
+.filter-item select:focus,
+.filter-item input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .date-range-buttons {
@@ -767,22 +1056,30 @@ export default {
 }
 
 .range-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
+  padding: 9px 18px;
+  border: 2px solid #e5e7eb;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
 }
 
 .range-btn:hover {
-  background: #f3f4f6;
+  background: #f9fafb;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .range-btn.active {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
 }
 
 .custom-dates {
@@ -790,45 +1087,82 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.date-input {
+  display: flex;
+  flex-direction: column;
 }
 
 .filter-actions {
   display: flex;
-  gap: 10px;
-  align-items: flex-end;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
 }
 
 .btn-primary,
 .btn-secondary {
-  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
-  background: #f3f4f6;
+  background: white;
   color: #374151;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loading-container {
@@ -856,84 +1190,148 @@ export default {
 
 .insight-section {
   background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.3s ease;
+}
+
+.insight-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .insight-section h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: #1f2937;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #e5e7eb;
+  position: relative;
+}
+
+.insight-section h2::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .insight-section h3 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #374151;
-  margin: 20px 0 15px;
+  margin: 24px 0 16px;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  padding: 24px;
+  background: linear-gradient(135deg, #fafbfc 0%, #f9fafb 100%);
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-card.total {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.stat-card.total:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  transform: translateY(-3px);
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  margin-right: 15px;
-  font-size: 1.5rem;
+  border-radius: 14px;
+  margin-right: 16px;
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .stat-icon.completed {
-  background: #d1fae5;
-  color: #10b981;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #059669;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.15);
 }
 
 .stat-icon.pending {
-  background: #fef3c7;
-  color: #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.15);
 }
 
 .stat-icon.in-progress {
-  background: #dbeafe;
-  color: #3b82f6;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
 }
 
 .stat-icon.cancelled {
-  background: #fee2e2;
-  color: #ef4444;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.15);
 }
 
 .stat-icon.amount {
-  background: #e0e7ff;
-  color: #6366f1;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #4f46e5;
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.15);
 }
 
 .stat-card.total .stat-icon {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stat-info {
@@ -962,12 +1360,18 @@ export default {
 }
 
 .chart-container {
-  margin: 30px 0;
+  margin: 32px 0;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
 }
 
 .data-table {
-  margin-top: 20px;
+  margin-top: 24px;
   overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
 }
 
 .data-table table {
@@ -977,19 +1381,32 @@ export default {
 
 .data-table th,
 .data-table td {
-  padding: 12px;
+  padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .data-table th {
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   font-weight: 600;
   color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e7eb;
 }
 
-.data-table tr:hover {
+.data-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.data-table tbody tr:hover {
   background: #f9fafb;
+  transform: scale(1.005);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .data-table .completed {
@@ -1020,43 +1437,79 @@ export default {
 
 .form-type-badge {
   display: inline-block;
-  padding: 4px 8px;
-  background: #e0e7ff;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
   color: #3730a3;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
   margin-right: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  border: 1px solid #c7d2fe;
+  transition: all 0.2s ease;
+}
+
+.form-type-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(55, 48, 163, 0.15);
 }
 
 .status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-badge.completed {
-  background: #d1fae5;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
   color: #065f46;
+  border-color: #6ee7b7;
 }
 
 .status-badge.pending {
-  background: #fef3c7;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   color: #92400e;
+  border-color: #fcd34d;
 }
 
 .status-badge.in-progress {
-  background: #dbeafe;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #1e40af;
+  border-color: #93c5fd;
 }
 
 .status-badge.cancelled {
-  background: #fee2e2;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
   color: #991b1b;
+  border-color: #fca5a5;
 }
 
 @media (max-width: 768px) {
+  .new-dashboard-container {
+    padding: 12px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 20px;
+    padding: 16px 0;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+
   .filters-grid {
     grid-template-columns: 1fr;
   }
@@ -1070,8 +1523,39 @@ export default {
     grid-template-columns: 1fr;
   }
 
-  .dashboard-header h1 {
-    font-size: 1.5rem;
+  .insight-section {
+    padding: 20px;
+  }
+
+  .insight-section h2 {
+    font-size: 1.35rem;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
   }
 }
 </style>
