@@ -14,7 +14,7 @@ def pick_view_only_reportee():
     present_user = frappe.session.user
 
     designation = frappe.db.get_value("Ezy Employee", present_user, "designation")
- 
+    deligation = frappe.get_all("Deligation",present_user)
     if not designation:
         return f"No Designation For the Employee:- {present_user}"
  
