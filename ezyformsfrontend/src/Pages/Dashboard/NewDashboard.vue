@@ -838,6 +838,12 @@ export default {
     const renderStatusChart = () => {
       if (!statusChart.value || !statusOverview.value) return;
 
+      // Dispose existing chart instance if it exists
+      const existingChart = echarts.getInstanceByDom(statusChart.value);
+      if (existingChart) {
+        existingChart.dispose();
+      }
+
       const chart = echarts.init(statusChart.value);
       const statusData = [
         { value: statusOverview.value.Completed || 0, name: 'Completed', itemStyle: { color: '#10b981' } },
@@ -958,6 +964,12 @@ export default {
 
     const renderDepartmentChart = () => {
       if (!departmentChart.value || !departmentAnalysis.value || departmentAnalysis.value.length === 0) return;
+
+      // Dispose existing chart instance if it exists
+      const existingChart = echarts.getInstanceByDom(departmentChart.value);
+      if (existingChart) {
+        existingChart.dispose();
+      }
 
       const chart = echarts.init(departmentChart.value);
       const departments = departmentAnalysis.value.map(d => d.department);
@@ -1175,6 +1187,12 @@ export default {
 
     const renderTrendChart = () => {
       if (!trendChart.value || !recurringTrends.value || !recurringTrends.value.trends || recurringTrends.value.trends.length === 0) return;
+
+      // Dispose existing chart instance if it exists
+      const existingChart = echarts.getInstanceByDom(trendChart.value);
+      if (existingChart) {
+        existingChart.dispose();
+      }
 
       const chart = echarts.init(trendChart.value);
 

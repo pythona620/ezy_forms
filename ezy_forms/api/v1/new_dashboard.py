@@ -59,7 +59,7 @@ def get_form_status_overview(property=None, date_from=None, date_to=None, depart
                 END as status,
                 COUNT(*) as count
             FROM `tabWF Workflow Requests` wfr
-            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.user
+            LEFT JOIN `tabEzy Employee` emp ON wfr.requested_by = emp.emp_mail_id
             WHERE wfr.docstatus != 2 {where_clause}
             GROUP BY status
         """
