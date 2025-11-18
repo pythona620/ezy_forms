@@ -142,7 +142,13 @@ export const apis = {
   // Form Insights APIs
   getAvailableForms: domain + `/method/ezy_forms.api.v1.form_insights.get_available_forms`,
   getFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.get_form_insights`,
-  exportFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.export_form_insights`
+  exportFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.export_form_insights`,
+
+  // Dashboard Builder APIs
+  saveDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.save_dashboard`,
+  getSavedDashboards: domain + `/method/ezy_forms.api.v1.dashboard_builder.get_saved_dashboards`,
+  getDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.get_dashboard`,
+  deleteDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.delete_dashboard`
 };
 
 // export const tokens = {
