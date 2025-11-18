@@ -224,25 +224,6 @@
         />
       </div>
 
-      <!-- Load Existing Workflow -->
-      <div class="col-md-6" v-if="filterObj.has_workflow === 'Yes'">
-        <label>Load Existing Workflow <span class="fw-normal font-11 text-secondary">(optional)</span></label>
-        <Multiselect
-          @open="fetchWFRoadMaps"
-          :options="wfRoadMapOptions"
-          v-model="selectedWFRoadMap"
-          placeholder="Select workflow roadmap"
-          :multiple="false"
-          class="font-11 multiselect"
-          :searchable="true"
-          label="display_name"
-          track-by="roadmap_title"
-          @select="handleWFRoadMapSelect"
-          openDirection="bottom"
-        />
-        <small class="text-muted" style="font-size:12px"> Note: Auto-populates requestor and approver configurations from existing workflow. </small>
-      </div>
-
       <!-- Form Submit Response -->
       <div class="col-md-6" v-if="filterObj.as_web_view===1">
       <label>Form Submit Response <span class="fw-normal font-11 text-secondary">(optional)</span></label>
@@ -1787,11 +1768,6 @@ const OnRejection = ref('');
 const approval_required=ref('');
 const approver_can_edit=ref('');
 const wrkAfterGetData = ref([]);
-
-// Workflow loading state variables
-const wfRoadMapOptions = ref([]);
-const selectedWFRoadMap = ref(null);
-const isLoadingWorkflows = ref(false);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 const fieldErrors = reactive({});
@@ -3842,9 +3818,8 @@ function clearForm() {
   filterObj.value.form_category = ''
   filterObj.value.accessible_departments = []
 
-  // Clear workflow selection
-  selectedWFRoadMap.value = null
-  departments.value = []
+
+
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
@@ -4869,158 +4844,6 @@ async function saveFormData(type) {
 }
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
-
-// ===== WORKFLOW LOADING FUNCTIONALITY =====
-
-// Fetch available WF Road Maps
-const fetchWFRoadMaps = async () => {
-  if (wfRoadMapOptions.value.length > 0) {
-    return; // Already fetched
-  }
-
-  try {
-    isLoadingWorkflows.value = true;
-    const queryParams = {
-      doctype: 'WF Roadmap',
-      fields: JSON.stringify(['name', 'roadmap_title', 'document_type', 'workflow_levels', 'property', 'cluster_name']),
-      filters: JSON.stringify([])
-    };
-
-    const response = await axiosInstance.get(apis.GetDoctypeData, { params: queryParams });
-
-    if (response?.message?.data) {
-      wfRoadMapOptions.value = response.message.data.map(roadmap => ({
-        roadmap_title: roadmap.name,
-        display_name: `${roadmap.roadmap_title} (${roadmap.document_type})`,
-        document_type: roadmap.document_type,
-        workflow_levels: roadmap.workflow_levels,
-        property: roadmap.property,
-        cluster_name: roadmap.cluster_name
-      }));
-      console.log('Fetched WF Road Maps:', wfRoadMapOptions.value);
-    }
-  } catch (error) {
-    console.error('Error fetching WF Road Maps:', error);
-    showError('Failed to fetch workflow road maps');
-  } finally {
-    isLoadingWorkflows.value = false;
-  }
-};
-
-// Handle WF Road Map selection
-const handleWFRoadMapSelect = async (selectedRoadMap) => {
-  try {
-    console.log("Selected WF Road Map:", selectedRoadMap);
-
-    // Fetch workflow roadmap data
-    const response = await axiosInstance.get(
-      `${apis.resource}${doctypes.wfRoadmap}/${selectedRoadMap.roadmap_title}`
-    );
-
-    const roadmapData = response?.data?.data || response?.data || {};
-    console.log("WF Road Map Data:", roadmapData);
-
-    // Calculate required number of blocks
-    const requestorCount = 1; // Always one requestor block
-    const approverLevelGroups = {};
-    if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
-      roadmapData.wf_level_setup.forEach((level) => {
-        if (!approverLevelGroups[level.level]) {
-          approverLevelGroups[level.level] = [];
-        }
-        approverLevelGroups[level.level].push(level);
-      });
-    }
-    const approverCount = Object.keys(approverLevelGroups).length;
-    const requiredBlocks = requestorCount + approverCount;
-
-    console.log(`Required blocks: ${requiredBlocks} (1 requestor + ${approverCount} approver levels)`);
-
-    // Clear existing workflow setup
-    workflowSetup.length = 0;
-
-    // Ensure we have the right number of blocks
-    while (blockArr.length > requiredBlocks) {
-      blockArr.pop();
-    }
-
-    while (blockArr.length < requiredBlocks) {
-      addBlock();
-    }
-
-    console.log(`Block adjustment complete: ${blockArr.length} blocks`);
-
-    let currentBlockIndex = 0;
-
-    // Setup Requestor Block (always at index 0)
-    if (roadmapData.wf_requestors && roadmapData.wf_requestors.length > 0) {
-      console.log(`Loaded ${roadmapData.wf_requestors.length} requestor role(s)`);
-
-      // Populate workflowSetup array for all requestor roles
-      roadmapData.wf_requestors.forEach((req) => {
-        workflowSetup.push({
-          type: 'requestor',
-          roles: [req.requestor],
-          auto_approval: req.auto_approval || 0,
-          columns_allowed: req.columns_allowed || '',
-          fields: [],
-          idx: 0 // Requestor is always block 0
-        });
-      });
-    } else {
-      console.warn("No Requestors found in roadmap, creating default requestor setup");
-    }
-    currentBlockIndex = 1; // Move to approver blocks
-
-    // Setup Approver Blocks based on levels
-    if (roadmapData.wf_level_setup && roadmapData.wf_level_setup.length > 0) {
-      console.log(`Loaded ${roadmapData.wf_level_setup.length} approver level(s)`);
-
-      // Create a block for each unique level
-      const sortedLevels = Object.keys(approverLevelGroups).sort((a, b) => parseInt(a) - parseInt(b));
-      sortedLevels.forEach((lvl) => {
-        const approversForLevel = approverLevelGroups[lvl];
-        const approverBlockIndex = currentBlockIndex;
-
-        console.log(`Level ${lvl} → Block Index ${approverBlockIndex}, Roles: ${approversForLevel.length}`);
-
-        // Add each role at this level to workflowSetup with the same block index
-        approversForLevel.forEach((levelData) => {
-          workflowSetup.push({
-            type: 'approver',
-            level: parseInt(lvl),
-            roles: [levelData.role],
-            approval_required: levelData.mandatory ? 1 : 0,
-            approver_can_edit: 0,
-            view_only_reportee: levelData.view_only_reportee || 0,
-            all_approvals_required: levelData.all_approvals_required || 0,
-            requester_as_a_approver: levelData.requester_as_a_approver || 0,
-            on_rejection: levelData.on_rejection || 0,
-            columns_allowed: levelData.columns_allowed || '',
-            fields: [],
-            idx: approverBlockIndex
-          });
-        });
-
-        currentBlockIndex++;
-      });
-    } else {
-      console.warn("No approver levels found in roadmap");
-    }
-
-    console.log("Final blockArr length:", blockArr.length);
-    console.log("Final workflowSetup:", workflowSetup);
-
-    const requestorRoles = roadmapData.wf_requestors ? roadmapData.wf_requestors.length : 0;
-    const approverRoles = roadmapData.wf_level_setup ? roadmapData.wf_level_setup.length : 0;
-    showSuccess(`Workflow loaded successfully! ${requestorRoles} requestor role(s), ${approverRoles} approver role(s) across ${blockArr.length} blocks.`);
-
-  } catch (error) {
-    console.error("Error in handleWFRoadMapSelect:", error);
-    showError("Failed to load workflow. Please try again.");
-  }
-};
-
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 

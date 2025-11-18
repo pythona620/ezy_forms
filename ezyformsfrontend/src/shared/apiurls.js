@@ -137,7 +137,12 @@ export const apis = {
   getFormValueTracking: domain + `/method/ezy_forms.api.v1.new_dashboard.get_form_value_tracking`,
   getRecurringFormTrends: domain + `/method/ezy_forms.api.v1.new_dashboard.get_recurring_form_trends`,
   getDashboardFilters: domain + `/method/ezy_forms.api.v1.new_dashboard.get_dashboard_filters`,
-  getConsolidatedDashboard: domain + `/method/ezy_forms.api.v1.new_dashboard.get_consolidated_dashboard`
+  getConsolidatedDashboard: domain + `/method/ezy_forms.api.v1.new_dashboard.get_consolidated_dashboard`,
+
+  // Form Insights APIs
+  getAvailableForms: domain + `/method/ezy_forms.api.v1.form_insights.get_available_forms`,
+  getFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.get_form_insights`,
+  exportFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.export_form_insights`
 };
 
 // export const tokens = {
