@@ -144,11 +144,34 @@ export const apis = {
   getFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.get_form_insights`,
   exportFormInsights: domain + `/method/ezy_forms.api.v1.form_insights.export_form_insights`,
 
-  // Dashboard Builder APIs
+  // Dashboard Builder APIs (Legacy)
   saveDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.save_dashboard`,
   getSavedDashboards: domain + `/method/ezy_forms.api.v1.dashboard_builder.get_saved_dashboards`,
   getDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.get_dashboard`,
-  deleteDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.delete_dashboard`
+  deleteDashboard: domain + `/method/ezy_forms.api.v1.dashboard_builder.delete_dashboard`,
+
+  // Advanced Insights APIs
+  // Forms Management
+  getFormsList: domain + `/method/ezy_forms.api.v1.insights_forms.get_forms_list`,
+  getFormFields: domain + `/method/ezy_forms.api.v1.insights_forms.get_form_fields`,
+  getFormRecords: domain + `/method/ezy_forms.api.v1.insights_forms.get_form_records`,
+  getFieldValues: domain + `/method/ezy_forms.api.v1.insights_forms.get_field_values`,
+
+  // Widget Data
+  getWidgetData: domain + `/method/ezy_forms.api.v1.widget_data.get_widget_data`,
+  getAggregatedData: domain + `/method/ezy_forms.api.v1.widget_data.get_aggregated_data`,
+  getKPIData: domain + `/method/ezy_forms.api.v1.widget_data.get_kpi_data`,
+  getTimeSeriesData: domain + `/method/ezy_forms.api.v1.widget_data.get_time_series_data`,
+
+  // Dashboard Configuration
+  saveDashboardConfig: domain + `/method/ezy_forms.api.v1.dashboard_config.save_dashboard_config`,
+  getDashboardConfigs: domain + `/method/ezy_forms.api.v1.dashboard_config.get_dashboard_configs`,
+  getDashboardConfig: domain + `/method/ezy_forms.api.v1.dashboard_config.get_dashboard_config`,
+  updateDashboardLayout: domain + `/method/ezy_forms.api.v1.dashboard_config.update_dashboard_layout`,
+  deleteDashboardConfig: domain + `/method/ezy_forms.api.v1.dashboard_config.delete_dashboard_config`,
+  exportDashboardJSON: domain + `/method/ezy_forms.api.v1.dashboard_config.export_dashboard_json`,
+  importDashboardJSON: domain + `/method/ezy_forms.api.v1.dashboard_config.import_dashboard_json`,
+  duplicateDashboard: domain + `/method/ezy_forms.api.v1.dashboard_config.duplicate_dashboard`
 };
 
 // export const tokens = {
